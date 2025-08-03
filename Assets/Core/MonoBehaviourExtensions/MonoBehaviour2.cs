@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using GameControllers.Models;
-using GameControllers.Services;
 using UnityEngine;
 using UtilityClasses;
-using Zenject;
 
 namespace UnityEngine
 {
-    public abstract class MonoBehaviour2 : MonoBehaviour
+    public abstract class MonoObject : MonoBehaviour
     {
 
         private IList<Action> onDeathCallbacks = new List<Action>();
@@ -35,16 +32,6 @@ namespace UnityEngine
 
         }
 
-        public virtual void OnDrag(DragEventModel dragEvent)
-        {
-
-        }
-
-        public virtual void OnDragEnd(DragEventModel dragEvent)
-        {
-
-        }
-
         public void BeforeDestroy(Action callback)
         {
             this.onDeathCallbacks.Add(callback);
@@ -53,13 +40,6 @@ namespace UnityEngine
         protected virtual void BeforeDeath()
         {
 
-        }
-
-        public void SetMultiTilePosition(Vector3 localPosition)
-        {
-            SpriteRenderer sr = this.GetComponent<SpriteRenderer>();
-            this.transform.position = localPosition + new Vector3(sr.bounds.size.x / 2, sr.bounds.size.y / 2)
-            - new Vector3(IEnvironmentService.TILE_WIDTH_PIXELS / 2, IEnvironmentService.TILE_WIDTH_PIXELS / 2);
         }
 
         protected void UpdateBoxColliderToFitChildren()
@@ -111,21 +91,9 @@ namespace UnityEngine
             Destroy(gameObject);
         }
 
-        protected T GetService<T>(IList<IBaseService> _services) where T : IBaseService
+        protected IServiceType Inject<IServiceType>()
         {
-            T returnService = default(T);
-            try
-            {
-                returnService = (T)_services.Find(service =>
-                {
-                    return typeof(T).IsAssignableFrom(service.GetType());
-                });
-            }
-            catch (System.Exception)
-            {
-                Debug.LogException(new System.Exception("Service type does not exist in the provided service list. Attemped type: " + typeof(T).ToString()));
-            }
-            return returnService;
+            return ServiceContainer.Instance.Resolve<IServiceType>();
         }
     }
 }
