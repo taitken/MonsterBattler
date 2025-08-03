@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Monster : MonoObject
 {
@@ -13,6 +11,6 @@ public class Monster : MonoObject
 
     void Start()
     {
-        testService.log();
+        testService.Log();
     }
 }

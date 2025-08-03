@@ -9,6 +9,7 @@ public class App : MonoBehaviour
         // Singletons
 
         // Scoped
-        diContainer.RegisterAsTransient<ITestService, TestService>();
+        diContainer.RegisterAsScoped<ITestService, TestService>();
+        diContainer.RegisterAsSingleton<ILoggerService, LoggerService>();
     }
 }

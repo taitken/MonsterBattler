@@ -3,12 +3,15 @@ using UnityEngine;
 
 public class TestService : ITestService
 {
-    public TestService()
+    ILoggerService _loggerService;
+    public TestService(ILoggerService loggerService)
     {
-        Debug.Log("Test Service Initialised");
+        _loggerService = loggerService;
+        _loggerService.Log("Test Service Initialised");
     }
-    public void log()
+
+    public void Log()
     {
-        Console.WriteLine("test");
+        _loggerService.Log("Test Service Log Method Called");
     }
 }
