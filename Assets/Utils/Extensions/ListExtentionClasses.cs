@@ -136,15 +136,6 @@ namespace System.Collections.Generic
             }
         }
 
-        public static void DestroyAll<t1>(this IList<t1> list) where t1 : MonoObject
-        {
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                list[i].Destroy();
-                list.RemoveAt(i);
-            }
-        }
-
 
         public static Vector3Int ConvertToVector3Int(this Vector3 vec3)
         {
