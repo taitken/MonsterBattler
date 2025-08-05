@@ -1,0 +1,20 @@
+{
+    "asset": "df941209bafca344cbed587e2a209a90",
+    "fileName": "01986e2a-c171-72da-9462-dbb270d4c89b.png",
+    "prompt": "Monster sprite, similar to sully from monsters inc",
+    "negativePrompt": "No objects other than the monster",
+    "model": "b91fcf71-f4cf-43cb-ba1e-1f22a1296e46",
+    "modelName": "8-bit Pixel",
+    "customSeed": -1,
+    "w3CTraceId": "2fd5eae5ca02ff5624ad798aa0bb1483",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

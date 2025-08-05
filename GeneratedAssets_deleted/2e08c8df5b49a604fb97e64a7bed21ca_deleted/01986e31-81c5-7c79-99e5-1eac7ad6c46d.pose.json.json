@@ -1,0 +1,11 @@
+{
+    "asset": "2e08c8df5b49a604fb97e64a7bed21ca",
+    "fileName": "01986e31-81c5-7c79-99e5-1eac7ad6c46d.pose.json",
+    "prompt": "Generate additional frames for an idle animation for Monster4 based on its existing sprite.",
+    "negativePrompt": "",
+    "model": "a9c27ca4-3ec9-43e8-96cd-ee891aba64c5",
+    "modelName": "Text to Motion",
+    "customSeed": 538845036,
+    "w3CTraceId": "76c6305b1628e109faee88339ac09952",
+    "isTrimmed": false
+}

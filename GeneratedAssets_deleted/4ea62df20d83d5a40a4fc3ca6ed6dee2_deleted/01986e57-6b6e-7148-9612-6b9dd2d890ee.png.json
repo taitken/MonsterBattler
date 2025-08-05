@@ -1,0 +1,20 @@
+{
+    "asset": "4ea62df20d83d5a40a4fc3ca6ed6dee2",
+    "fileName": "01986e57-6b6e-7148-9612-6b9dd2d890ee.png",
+    "prompt": "I want you to create a cute derpy monster that will exist in a monster battling game. The monster should be vibrant.\r\nPlease generate just a single monster facing the camera. \r\nI will provide the following characteristics to help design the creature:\r\n- Reference Object': An object or objects that the creature should take the form of. \r\n- Color Scheme: You should use colours listed in 'Color Scheme' as the primary colours for the creature. If the color scheme contains greens, then the creature should be coloured mostly green. Different colours can be on the creature, but not feature predominantly.\r\n- Personality: This characteristic should inform the feel of the creature you are creating.\r\n\r\nThe creature I want you to create has the following characteristics:\nColor Scheme: Mossy green, brown bark, and neon lime highlights\n\nReference Object: Thorny vine plant\n\nPersonality: Grumpy and stubborn\n",
+    "negativePrompt": "The monster should not be holding any objects (eg. a book) or be wearing any clothing.",
+    "model": "b91fcf71-f4cf-43cb-ba1e-1f22a1296e46",
+    "modelName": "8-bit Pixel",
+    "customSeed": -1,
+    "w3CTraceId": "af2e62e9ae7ee552072324fbd4c7eb91",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

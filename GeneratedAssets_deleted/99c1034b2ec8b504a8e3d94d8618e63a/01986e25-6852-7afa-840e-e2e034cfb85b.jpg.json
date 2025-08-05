@@ -1,0 +1,20 @@
+{
+    "asset": "99c1034b2ec8b504a8e3d94d8618e63a",
+    "fileName": "01986e25-6852-7afa-840e-e2e034cfb85b.jpg",
+    "prompt": "Monster sprite that uses a green/dark green pallete. The monster should be grass type themed, and on all fours. The design should incorporate leaves",
+    "negativePrompt": "No objects other than the monster",
+    "model": "267fe822-f888-4722-a29c-829c0a457c3d",
+    "modelName": "Action Plastic",
+    "customSeed": -1,
+    "w3CTraceId": "00b0d71ad85ad4b73dd5acb5b4697119",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

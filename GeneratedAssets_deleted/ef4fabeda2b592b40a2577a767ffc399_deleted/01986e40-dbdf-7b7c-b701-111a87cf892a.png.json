@@ -1,0 +1,20 @@
+{
+    "asset": "ef4fabeda2b592b40a2577a767ffc399",
+    "fileName": "01986e40-dbdf-7b7c-b701-111a87cf892a.png",
+    "prompt": "I want you to create a cute derpy monster that will exist in a monster battling game. The game is 2d and uses a pixel art style. The monster should be vibrant and have a distinct personality (eg. Angry, sad, bashful etc). \n\nPlease generate just a single monster facing the camera.\n\nThe creature I want you to create has the following characteristics:\n\nColor Scheme: Fiery orange, charcoal black, and glowing amber\n\nReference Object: A flame and a housecat\n\nPersonality: Short-tempered and overconfident\n\nAttack Type: Tail whips of fire, explosive pounces, heat bursts",
+    "negativePrompt": "The monster should not have any objects (eg. Not wearing clothes or holding something)",
+    "model": "b91fcf71-f4cf-43cb-ba1e-1f22a1296e46",
+    "modelName": "8-bit Pixel",
+    "customSeed": -1,
+    "w3CTraceId": "1c2ac627debd20176a8048d8f074aab9",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

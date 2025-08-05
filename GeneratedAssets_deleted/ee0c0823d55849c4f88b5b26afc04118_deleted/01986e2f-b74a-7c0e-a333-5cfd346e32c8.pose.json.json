@@ -1,0 +1,11 @@
+{
+    "asset": "ee0c0823d55849c4f88b5b26afc04118",
+    "fileName": "01986e2f-b74a-7c0e-a333-5cfd346e32c8.pose.json",
+    "prompt": "idle animation for Monster4",
+    "negativePrompt": "",
+    "model": "a9c27ca4-3ec9-43e8-96cd-ee891aba64c5",
+    "modelName": "Text to Motion",
+    "customSeed": 591574126,
+    "w3CTraceId": "7cb6b954d6cee2b07b45dadd33e68a1c",
+    "isTrimmed": false
+}

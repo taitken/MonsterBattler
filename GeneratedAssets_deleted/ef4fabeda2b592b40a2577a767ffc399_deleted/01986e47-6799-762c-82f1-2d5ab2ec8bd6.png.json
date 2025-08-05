@@ -1,0 +1,20 @@
+{
+    "asset": "ef4fabeda2b592b40a2577a767ffc399",
+    "fileName": "01986e47-6799-762c-82f1-2d5ab2ec8bd6.png",
+    "prompt": "I want you to create a cute derpy monster that will exist in a monster battling game. The game is 2d and uses a pixel art style. The monster should be vibrant and have a distinct personality (eg. Angry, sad, bashful etc). \r\n\r\nPlease generate just a single monster facing the camera.\r\n\r\nThe creature I want you to create has the following characteristics:\n\nName: Blazetail Embercat\nColor Scheme: Fiery orange, charcoal black, and glowing amber\n\nReference Object: A flame and a housecat\n\nPersonality: Short-tempered and overconfident\n\nAttack Type: Tail whips of fire, explosive pounces, heat bursts",
+    "negativePrompt": "The monster should not have any objects (eg. Not wearing clothes or holding something)",
+    "model": "b91fcf71-f4cf-43cb-ba1e-1f22a1296e46",
+    "modelName": "8-bit Pixel",
+    "customSeed": -1,
+    "w3CTraceId": "c4459316e827e92ebf3a81e65e20545f",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}
