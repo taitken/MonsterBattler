@@ -1,6 +1,6 @@
 using System;
 
-public interface ITestService : IBaseService
+public interface ITestService
 {
     void Log();
 }

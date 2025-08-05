@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MonsterView : MonoObject<MonsterModel>
+public class MonsterView : MonoObject<MonsterEntity>
 {
-    [SerializeField] private HealthBar healthBar;
+    [SerializeField] private HealthBarUi healthBar;
     private Vector3 originalPosition;
     private SpriteRenderer spriteRenderer;
     private ITestService testService;
+    private ICombatTextFactory combatTextFactory;
     private Color WHITE = Color.white;
     private Color BLUE = Color.Lerp(Color.white, Color.blue, 0.5f);
     private Color RED = Color.Lerp(Color.white, Color.red, 0.5f);
@@ -20,6 +21,7 @@ public class MonsterView : MonoObject<MonsterModel>
         testService = Inject<ITestService>();
         originalPosition = transform.position;
         spriteRenderer = GetComponent<SpriteRenderer>();
+        combatTextFactory = Inject<ICombatTextFactory>();
     }
 
     protected override void OnModelBound()
@@ -55,6 +57,11 @@ public class MonsterView : MonoObject<MonsterModel>
         spriteRenderer.color = WHITE;
     }
 
+    private void ShowDamage(int amount)
+    {
+        combatTextFactory.Spawn(RED, $"{amount}", transform.position + new Vector3(0, 1f, 0));
+    }
+
     private async Task MoveTo(Vector3 target, float duration)
     {
         float elapsed = 0f;
@@ -70,23 +77,32 @@ public class MonsterView : MonoObject<MonsterModel>
         transform.position = target;
     }
 
-    private async void UpdateHealthVisuals()
+    private async void UpdateHealthVisuals(int amount = 0)
     {
         Debug.Log($"Updating health visuals for {model.definition.monsterName}: {model.CurrentHealth}/{model.definition.maxHealth}. Previous: {healthBar.currentHealth}");
-        if (healthBar.currentHealth > model.CurrentHealth)
+        
+        ShowDamage(amount);
+
+        if (amount > 0)
         {
             await FlashColor(RED);
         }
-        if (healthBar.currentHealth < model.CurrentHealth)
+        if (amount < 0)
         {
             await FlashColor(GREEN);
         }
-        healthBar.SetHealth(model.CurrentHealth, model.definition.maxHealth);
+        healthBar.SetHealth(model.CurrentHealth, model.MaxHealth);
     }
 
     private void OnDied()
     {
         Debug.Log($"{model.definition.monsterName} has fainted!");
         gameObject.SetActive(false); // simple visual feedback
+    }
+
+    protected override void BeforeDeath()
+    {
+        model.OnHealthChanged -= UpdateHealthVisuals;
+        model.OnDied -= OnDied;
     }
 }

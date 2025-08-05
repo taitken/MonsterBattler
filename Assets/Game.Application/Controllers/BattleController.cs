@@ -5,12 +5,17 @@ using System.Linq;
 
 public class BattleController : MonoBehaviour
 {
-    [SerializeField] private MonsterFactory monsterFactory;
     [SerializeField] private Transform playerSpawn;
     [SerializeField] private Transform enemySpawn;
     private EventQueue eventQueue = new();
-    private List<MonsterModel> playerMonsters = new();
-    private List<MonsterModel> enemyMonsters = new();
+    private IMonsterFactory monsterFactory;
+    private List<MonsterEntity> playerMonsters = new();
+    private List<MonsterEntity> enemyMonsters = new();
+
+    private void Awake()
+    {
+        monsterFactory = ServiceContainer.Instance.Resolve<IMonsterFactory>();
+    }
 
     private async void Start()
     {
@@ -63,14 +68,14 @@ public class BattleController : MonoBehaviour
         return new BattleResult(outcome, turnCount, surviving);
     }
 
-    private bool HasAlive(List<MonsterModel> team) => team.Any(m => !m.IsDead);
+    private bool HasAlive(List<MonsterEntity> team) => team.Any(m => !m.IsDead);
 
-    private List<MonsterModel> GetAliveMonsters(List<MonsterModel> monsters)
+    private List<MonsterEntity> GetAliveMonsters(List<MonsterEntity> monsters)
     {
         return monsters.Where(m => !m.IsDead).ToList();
     }
 
-    private async Task RunTurn(List<MonsterModel> attackers, List<MonsterModel> targets, string teamName)
+    private async Task RunTurn(List<MonsterEntity> attackers, List<MonsterEntity> targets, string teamName)
     {
         Debug.Log($"{teamName} turn");
         foreach (var attacker in GetAliveMonsters(attackers))
@@ -88,7 +93,7 @@ public class BattleController : MonoBehaviour
         await eventQueue.ProcessAll();
     }
 
-    private void EnqueueAttack(MonsterModel attacker, MonsterModel target)
+    private void EnqueueAttack(MonsterEntity attacker, MonsterEntity target)
     {
         eventQueue.Enqueue(async () =>
         {
@@ -103,7 +108,7 @@ public class BattleController : MonoBehaviour
         });
     }
 
-    private MonsterModel ChooseRandomTarget(List<MonsterModel> potentialTargets)
+    private MonsterEntity ChooseRandomTarget(List<MonsterEntity> potentialTargets)
     {
         var aliveTargets = GetAliveMonsters(potentialTargets);
         if (aliveTargets.Count == 0) return null;
