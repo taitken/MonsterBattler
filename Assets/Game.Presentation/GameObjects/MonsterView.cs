@@ -13,6 +13,7 @@ public class MonsterView : MonoObject<MonsterEntity>
     private Color WHITE = Color.white;
     private Color BLUE = Color.Lerp(Color.white, Color.blue, 0.5f);
     private Color RED = Color.Lerp(Color.white, Color.red, 0.5f);
+    private string RED_HEX = "#B22222";
     private Color GREEN = Color.Lerp(Color.white, Color.green, 0.5f);
 
     void Awake()
@@ -29,7 +30,7 @@ public class MonsterView : MonoObject<MonsterEntity>
         spriteRenderer.sprite = Resources.Load<Sprite>($"Monsters/Sprites/{model.definition.type}");
         model.OnHealthChanged += UpdateHealthVisuals;
         model.OnDied += OnDied;
-        UpdateHealthVisuals();
+        healthBar.SetHealth(model.CurrentHealth, model.MaxHealth);
     }
 
     public async Task PlayAttackAnimation()
@@ -38,7 +39,7 @@ public class MonsterView : MonoObject<MonsterEntity>
         await FlashColor(BLUE, 0.2f);
 
         // Move forward slightly
-        Vector3 attackPosition = originalPosition + new Vector3(0.5f, 0, 0);
+        Vector3 attackPosition = originalPosition + (model.definition.attackDirection == AttackDirection.Right ? new Vector3(0.5f, 0, 0) : new Vector3(-0.5f, 0, 0));
         await MoveTo(attackPosition, 0.1f);
 
         // Return to original position
@@ -59,7 +60,8 @@ public class MonsterView : MonoObject<MonsterEntity>
 
     private void ShowDamage(int amount)
     {
-        combatTextFactory.Spawn(RED, $"{amount}", transform.position + new Vector3(0, 1f, 0));
+        ColorUtility.TryParseHtmlString(RED_HEX, out Color redDamageColor);
+        combatTextFactory.Spawn(redDamageColor, $"{amount}", transform.position + new Vector3(0, 1f, 0));
     }
 
     private async Task MoveTo(Vector3 target, float duration)
@@ -77,12 +79,11 @@ public class MonsterView : MonoObject<MonsterEntity>
         transform.position = target;
     }
 
-    private async void UpdateHealthVisuals(int amount = 0)
+    private async void UpdateHealthVisuals(int amount)
     {
         Debug.Log($"Updating health visuals for {model.definition.monsterName}: {model.CurrentHealth}/{model.definition.maxHealth}. Previous: {healthBar.currentHealth}");
-        
-        ShowDamage(amount);
 
+        ShowDamage((int)amount);
         if (amount > 0)
         {
             await FlashColor(RED);

@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 4349734142231313107}
   - component: {fileID: 1020596640232886562}
   m_Layer: 0
-  m_Name: CombatText
+  m_Name: CombatTextUi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

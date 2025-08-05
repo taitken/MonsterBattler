@@ -16,3 +16,4 @@ MonoBehaviour:
   maxHealth: 90
   attackDamage: 3
   type: 2
+  attackDirection: 1

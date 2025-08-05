@@ -7,5 +7,6 @@ public class MonsterDefinition : ScriptableObject
     public int maxHealth;
     public int attackDamage;
     public MonsterType type;
+    public AttackDirection attackDirection;
     
 }

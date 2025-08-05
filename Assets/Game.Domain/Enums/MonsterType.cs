@@ -4,5 +4,8 @@ public enum MonsterType
     Cryoot,
     Daybloom,
     Flimboon,
-    Kraggan
+    Kraggan,
+    Ranger,
+    Mage,
+    Knight
 }

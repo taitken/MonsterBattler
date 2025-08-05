@@ -27,11 +27,12 @@ public class BattleController : MonoBehaviour
     private void SetupMonsters()
     {
         playerMonsters.Add(monsterFactory.Spawn(MonsterType.Goald, playerSpawn).model);
-        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Daybloom, playerSpawn.position + new Vector3(-5f, 0f, 0f)).model);
-        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Flimboon, playerSpawn.position + new Vector3(5f, 0f, 0f)).model);
+        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Daybloom, playerSpawn.position + new Vector3(-2.5f, -1f, 0f)).model);
+        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Flimboon, playerSpawn.position + new Vector3(2.0f, -1f, 0f)).model);
 
-        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Cryoot, enemySpawn).model);
-        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Kraggan, enemySpawn.position + new Vector3(5f, 0f, 0f)).model);
+        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Knight, enemySpawn).model);
+        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Mage, enemySpawn.position + new Vector3(2.5f, -1f, 0f)).model);
+        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Ranger, enemySpawn.position + new Vector3(-2.0f, -1f, 0f)).model);
     }
 
     private async Task<BattleResult> RunBattleLoop()
