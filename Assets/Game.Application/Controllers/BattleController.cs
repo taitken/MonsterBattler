@@ -31,8 +31,8 @@ public class BattleController : MonoBehaviour
         playerMonsters.Add(monsterFactory.Spawn(MonsterType.Flimboon, playerSpawn.position + new Vector3(2.0f, -1f, 0f)).model);
 
         enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Knight, enemySpawn).model);
-        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Mage, enemySpawn.position + new Vector3(2.5f, -1f, 0f)).model);
-        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Ranger, enemySpawn.position + new Vector3(-2.0f, -1f, 0f)).model);
+        //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Mage, enemySpawn.position + new Vector3(2.5f, -1f, 0f)).model);
+        //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Ranger, enemySpawn.position + new Vector3(-2.0f, -1f, 0f)).model);
     }
 
     private async Task<BattleResult> RunBattleLoop()
@@ -40,7 +40,7 @@ public class BattleController : MonoBehaviour
         Debug.Log("Start battle loop");
         int turnCount = 0;
         // Main battle loop
-        await Task.Delay(1000); // Initial delay before battle starts
+        await Task.Delay(500); // Initial delay before battle starts
         while (HasAlive(playerMonsters) && HasAlive(enemyMonsters))
         {
             turnCount++;
@@ -105,7 +105,7 @@ public class BattleController : MonoBehaviour
             }   
             Debug.Log($"{attacker.definition.monsterName} attacks {target.definition.monsterName}!");
             target.TakeDamage(attacker.definition.attackDamage);
-            await Task.Delay(1000); 
+            await Task.Delay(500); 
         });
     }
 

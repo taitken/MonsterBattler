@@ -36,17 +36,17 @@ public class MonsterView : MonoObject<MonsterEntity>
     public async Task PlayAttackAnimation()
     {
         // Highlight orange
-        await FlashColor(BLUE, 0.2f);
+        FlashColor(BLUE, 0.2f);
 
         // Move forward slightly
-        Vector3 attackPosition = originalPosition + (model.definition.attackDirection == AttackDirection.Right ? new Vector3(0.5f, 0, 0) : new Vector3(-0.5f, 0, 0));
-        await MoveTo(attackPosition, 0.1f);
+        Vector3 attackPosition = originalPosition + (model.definition.attackDirection == AttackDirection.Right ? new Vector3(0.3f, 0, 0) : new Vector3(-0.3f, 0, 0));
+        await MoveTo(attackPosition, 0.04f);
 
         // Return to original position
-        await MoveTo(originalPosition, 0.2f);
+        await MoveTo(originalPosition, 0.1f);
     }
 
-    private async Task FlashColor(Color color, float duration = 0.2f)
+    private async void FlashColor(Color color, float duration = 0.1f)
     {
         float elapsed = 0f;
         spriteRenderer.color = color;
@@ -79,18 +79,18 @@ public class MonsterView : MonoObject<MonsterEntity>
         transform.position = target;
     }
 
-    private async void UpdateHealthVisuals(int amount)
+    private void UpdateHealthVisuals(int amount)
     {
         Debug.Log($"Updating health visuals for {model.definition.monsterName}: {model.CurrentHealth}/{model.definition.maxHealth}. Previous: {healthBar.currentHealth}");
 
         ShowDamage((int)amount);
         if (amount > 0)
         {
-            await FlashColor(RED);
+            FlashColor(RED);
         }
         if (amount < 0)
         {
-            await FlashColor(GREEN);
+            FlashColor(GREEN);
         }
         healthBar.SetHealth(model.CurrentHealth, model.MaxHealth);
     }
