@@ -2,19 +2,23 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Application.IFactories;
+using Game.Domain.Entities;
+using Game.Core;
 
 public class BattleController : MonoBehaviour
 {
     [SerializeField] private Transform playerSpawn;
     [SerializeField] private Transform enemySpawn;
-    private EventQueue eventQueue = new();
-    private IMonsterFactory monsterFactory;
+    private IEventQueueService eventQueue;
+    private IMonsterSpawner monsterFactory;
     private List<MonsterEntity> playerMonsters = new();
     private List<MonsterEntity> enemyMonsters = new();
 
     private void Awake()
     {
-        monsterFactory = ServiceContainer.Instance.Resolve<IMonsterFactory>();
+        eventQueue = ServiceLocator.Get<IEventQueueService>();
+        monsterFactory = ServiceLocator.Get<IMonsterSpawner>();
     }
 
     private async void Start()
@@ -26,11 +30,11 @@ public class BattleController : MonoBehaviour
 
     private void SetupMonsters()
     {
-        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Goald, playerSpawn).model);
-        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Daybloom, playerSpawn.position + new Vector3(-2.5f, -1f, 0f)).model);
-        playerMonsters.Add(monsterFactory.Spawn(MonsterType.Flimboon, playerSpawn.position + new Vector3(2.0f, -1f, 0f)).model);
+        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Goald, playerSpawn).model);
+        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Daybloom, playerSpawn.position + new Vector3(-2.5f, -1f, 0f)).model);
+        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Flimboon, playerSpawn.position + new Vector3(2.0f, -1f, 0f)).model);
 
-        enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Knight, enemySpawn).model);
+        enemyMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Knight, enemySpawn).model);
         //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Mage, enemySpawn.position + new Vector3(2.5f, -1f, 0f)).model);
         //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Ranger, enemySpawn.position + new Vector3(-2.0f, -1f, 0f)).model);
     }

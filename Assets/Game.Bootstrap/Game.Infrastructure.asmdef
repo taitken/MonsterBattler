@@ -1,0 +1,19 @@
+{
+    "name": "Game.Infrastructure",
+    "references": [
+        "Game.Core",
+        "Game.Application",
+        "Game.Domain",
+        "Game.Presentation",
+        "Game.Infrastructure"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,33 +1,35 @@
 using System;
 using UnityEngine;
 
-public abstract class MonoObject<ModelType> : MonoBehaviour, IMonoObject where ModelType : BaseObjectModel
+namespace Game.Infrastructure
 {
-    public ModelType model;
-
-    public virtual void Bind(ModelType model)
+    public abstract class MonoObject<ModelType> : MonoBehaviour, IMonoObject where ModelType : BaseObjectModel
     {
-        this.model = model;
-        model.SetView(this);
-        OnModelBound();
-    }
+        public ModelType model;
 
-    public BaseObjectModel GetModel() => model;
+        public virtual void Bind(ModelType model)
+        {
+            this.model = model;
+            OnModelBound();
+        }
 
-    public MonoBehaviour AsMonoBehaviour() => this;
+        public BaseObjectModel GetModel() => model;
 
-    protected abstract void OnModelBound();
+        public MonoBehaviour AsMonoBehaviour() => this;
 
-    protected virtual void BeforeDeath() { }
+        protected abstract void OnModelBound();
 
-    public void Destroy()
-    {
-        this.BeforeDeath();
-        Destroy(gameObject);
-    }
+        protected virtual void BeforeDeath() { }
 
-    protected static IServiceType Inject<IServiceType>()
-    {
-        return ServiceContainer.Instance.Resolve<IServiceType>();
+        public void Destroy()
+        {
+            this.BeforeDeath();
+            Destroy(gameObject);
+        }
+
+        protected static IServiceType Inject<IServiceType>()
+        {
+            return ServiceContainer.Instance.Resolve<IServiceType>();
+        }
     }
 }
