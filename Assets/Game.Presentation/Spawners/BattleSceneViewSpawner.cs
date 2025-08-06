@@ -3,6 +3,7 @@ using Assets.Game.Presentation.GameObjects;
 using Game.Application.Events.Battle;
 using Game.Core;
 using Game.Core.Events;
+using Game.Domain.Enums;
 using UnityEngine;
 
 namespace Game.Presentation.Spawners
@@ -27,10 +28,9 @@ namespace Game.Presentation.Spawners
         private void OnMonsterSpawned(MonsterSpawnedEvent evt)
         {
             var spawnPosition = DetermineMonsterSpawnPoint(evt);
-            var monsterView = _factory.Create(evt.Monster, spawnPosition);
+            var monsterView = _factory.Create(evt.Monster, evt.Team, spawnPosition);
             var team = GetMonstersByTeam(evt.Team);
             team.Add(monsterView);
-            monsterView.Bind(evt.Monster);
         }
 
         private Vector3 DetermineMonsterSpawnPoint(MonsterSpawnedEvent evt)

@@ -1,11 +1,14 @@
-public enum MonsterType
+namespace Game.Domain.Enums
 {
-    Goald,
-    Cryoot,
-    Daybloom,
-    Flimboon,
-    Kraggan,
-    Ranger,
-    Mage,
-    Knight
+    public enum MonsterType
+    {
+        Goald,
+        Cryoot,
+        Daybloom,
+        Flimboon,
+        Kraggan,
+        Ranger,
+        Mage,
+        Knight
+    }
 }

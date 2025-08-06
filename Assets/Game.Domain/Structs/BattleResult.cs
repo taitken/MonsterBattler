@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Domain.Entities;
+using Game.Domain.Enums;
 
 namespace Game.Domain.Structs
 {

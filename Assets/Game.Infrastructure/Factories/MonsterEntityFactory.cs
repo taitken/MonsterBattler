@@ -1,6 +1,8 @@
 using Game.Application.IFactories;
 using Game.Core.Logger;
 using Game.Domain.Entities;
+using Game.Domain.Enums;
+using Game.Infrastructure.ScriptableObjects;
 using UnityEngine;
 
 namespace Game.Infrastructure.Spawning

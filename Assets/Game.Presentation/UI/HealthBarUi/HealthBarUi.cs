@@ -1,15 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
-
-public class HealthBarUi : MonoBehaviour
+namespace Game.Presentation.UI.Combat
 {
-    [SerializeField] private Image fillImage;
-    public int currentHealth { get; set; }
-
-    public void SetHealth(int _currentHealth, int maxHealth)
+    public class HealthBarUi : MonoBehaviour
     {
-        this.currentHealth = _currentHealth;
-        var percentage = (float)currentHealth / maxHealth;
-        fillImage.fillAmount = Mathf.Clamp01(percentage);
+        [SerializeField] private Image fillImage;
+        public int currentHealth { get; set; }
+
+        public void SetHealth(int _currentHealth, int maxHealth)
+        {
+            this.currentHealth = _currentHealth;
+            var percentage = (float)currentHealth / maxHealth;
+            fillImage.fillAmount = Mathf.Clamp01(percentage);
+        }
     }
 }

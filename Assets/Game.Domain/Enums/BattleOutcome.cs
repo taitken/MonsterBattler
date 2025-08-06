@@ -1,6 +1,9 @@
-public enum BattleOutcome
+namespace Game.Domain.Enums
 {
-    PlayerVictory,
-    EnemyVictory,
-    Draw
+    public enum BattleOutcome
+    {
+        PlayerVictory,
+        EnemyVictory,
+        Draw
+    }
 }

@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using Assets.Game.Presentation.UiObjects;
 using Game.Domain.Entities;
+using Game.Domain.Enums;
 using Game.Presentation;
+using Game.Presentation.UI.Combat;
 using UnityEngine;
 
 namespace Assets.Game.Presentation.GameObjects
@@ -28,6 +30,7 @@ namespace Assets.Game.Presentation.GameObjects
 
         protected override void OnModelBound()
         {
+            Debug.Log("Binding Monster");
             spriteRenderer.sprite = Resources.Load<Sprite>($"Monsters/Sprites/{model.Type}");
             model.OnHealthChanged += UpdateHealthVisuals;
             model.OnAttack += PlayAttackAnimation;

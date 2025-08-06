@@ -1,5 +1,6 @@
 using Game.Core.Events;
 using Game.Domain.Entities;
+using Game.Domain.Enums;
 
 namespace Game.Application.Events.Battle
 {

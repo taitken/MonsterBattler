@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Game.Core;
 
-namespace Game.Core
+namespace Game.Infrastructure.Services
 {
     public class ServiceContainer : IServiceContainer
     {

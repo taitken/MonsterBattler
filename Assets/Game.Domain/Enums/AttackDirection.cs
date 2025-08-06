@@ -1,5 +1,8 @@
-public enum AttackDirection
+namespace Game.Domain.Enums
 {
-    Left,
-    Right
+    public enum AttackDirection
+    {
+        Left,
+        Right
+    }
 }

@@ -1,4 +1,5 @@
 using System;
+using Game.Domain.Enums;
 using Game.Domain.Structs;
 
 namespace Game.Domain.Entities

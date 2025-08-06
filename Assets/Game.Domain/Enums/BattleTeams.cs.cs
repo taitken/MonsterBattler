@@ -1,5 +1,8 @@
-public enum BattleTeam
+namespace Game.Domain.Enums
 {
-    Player,
-    Enemy
+    public enum BattleTeam
+    {
+        Player,
+        Enemy
+    }
 }
