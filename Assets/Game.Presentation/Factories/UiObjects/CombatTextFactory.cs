@@ -11,7 +11,7 @@ namespace Assets.Game.Presentation.UiObjects
             _combatTextPrefab = prefab;
             _combatTextContainer = container;
         }
-        public CombatTextUi Spawn(Color color, string text, Vector3 worldPosition)
+        public CombatTextUi Create(Color color, string text, Vector3 worldPosition)
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
 
@@ -21,6 +21,11 @@ namespace Assets.Game.Presentation.UiObjects
                 null, // ← Use `null` for Screen Space - Overlay!
                 out Vector2 anchoredPos
             )) return null;
+
+            anchoredPos += new Vector2(
+                Random.Range(-80f, 80f), // pixels
+                Random.Range(-15f, 15f)
+            );
 
             var instance = Object.Instantiate(_combatTextPrefab, _combatTextContainer);
             var rectTransform = instance.GetComponent<RectTransform>();

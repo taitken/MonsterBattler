@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
+using Assets.Game.Presentation.UiObjects;
 using Game.Domain.Entities;
-using Game.Infrastructure;
+using Game.Presentation;
 using UnityEngine;
 
 namespace Assets.Game.Presentation.GameObjects
@@ -10,7 +11,6 @@ namespace Assets.Game.Presentation.GameObjects
         [SerializeField] private HealthBarUi healthBar;
         private Vector3 originalPosition;
         private SpriteRenderer spriteRenderer;
-        private ITestService testService;
         private ICombatTextFactory combatTextFactory;
         private Color WHITE = Color.white;
         private Color BLUE = Color.Lerp(Color.white, Color.blue, 0.5f);
@@ -21,7 +21,6 @@ namespace Assets.Game.Presentation.GameObjects
         void Awake()
         {
             Debug.Log("Monster awake");
-            testService = Inject<ITestService>();
             originalPosition = transform.position;
             spriteRenderer = GetComponent<SpriteRenderer>();
             combatTextFactory = Inject<ICombatTextFactory>();
@@ -31,11 +30,12 @@ namespace Assets.Game.Presentation.GameObjects
         {
             spriteRenderer.sprite = Resources.Load<Sprite>($"Monsters/Sprites/{model.Type}");
             model.OnHealthChanged += UpdateHealthVisuals;
+            model.OnAttack += PlayAttackAnimation;
             model.OnDied += OnDied;
             healthBar.SetHealth(model.CurrentHealth, model.MaxHealth);
         }
 
-        public async Task PlayAttackAnimation()
+        public async void PlayAttackAnimation()
         {
             // Highlight orange
             FlashColor(BLUE, 0.2f);
@@ -63,7 +63,7 @@ namespace Assets.Game.Presentation.GameObjects
         private void ShowDamage(int amount)
         {
             ColorUtility.TryParseHtmlString(RED_HEX, out Color redDamageColor);
-            combatTextFactory.Spawn(redDamageColor, $"{amount}", transform.position + new Vector3(0, 1f, 0));
+            combatTextFactory.Create(redDamageColor, $"{amount}", transform.position + new Vector3(0, 1f, 0));
         }
 
         private async Task MoveTo(Vector3 target, float duration)
@@ -85,7 +85,7 @@ namespace Assets.Game.Presentation.GameObjects
         {
             Debug.Log($"Updating health visuals for {model.MonsterName}: {model.CurrentHealth}/{model.MaxHealth}. Previous: {healthBar.currentHealth}");
 
-            ShowDamage((int)amount);
+            ShowDamage(amount);
             if (amount > 0)
             {
                 FlashColor(RED);
@@ -106,6 +106,7 @@ namespace Assets.Game.Presentation.GameObjects
         protected override void BeforeDeath()
         {
             model.OnHealthChanged -= UpdateHealthVisuals;
+            model.OnAttack -= PlayAttackAnimation;
             model.OnDied -= OnDied;
         }
     }

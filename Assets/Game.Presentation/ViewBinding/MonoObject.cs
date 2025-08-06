@@ -1,7 +1,9 @@
-using System;
+
+using Game.Core;
+using Game.Domain;
 using UnityEngine;
 
-namespace Game.Infrastructure
+namespace Game.Presentation
 {
     public abstract class MonoObject<ModelType> : MonoBehaviour, IMonoObject where ModelType : BaseObjectModel
     {
@@ -29,7 +31,7 @@ namespace Game.Infrastructure
 
         protected static IServiceType Inject<IServiceType>()
         {
-            return ServiceContainer.Instance.Resolve<IServiceType>();
+            return ServiceLocator.Get<IServiceType>();
         }
     }
 }

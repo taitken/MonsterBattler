@@ -1,6 +1,6 @@
-using TMPro;
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class CombatTextUi : MonoBehaviour
 {
@@ -36,7 +36,7 @@ public class CombatTextUi : MonoBehaviour
         // Smoothly float up and fade out
         while (elapsed < duration)
         {
-            float t = elapsed / duration /2 + 0.5f; 
+            float t = elapsed / duration / 2 + 0.5f;
             transform.position = Vector3.Lerp(startPos, endPos, t);
             cg.alpha = Mathf.Lerp(1, 0, t);
             elapsed += Time.deltaTime;

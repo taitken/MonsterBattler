@@ -1,13 +1,19 @@
 
 using Assets.Game.Presentation.GameObjects;
 using Assets.Game.Presentation.UiObjects;
+using Game.Application.IFactories;
 using Game.Core;
+using Game.Core.Events;
+using Game.Core.Logger;
+using Game.Core.Randomness;
+using Game.Infrastructure.Randomness;
+using Game.Infrastructure.Services;
+using Game.Infrastructure.Spawning;
 using UnityEngine;
 namespace Game.Bootstrap
 {
     public class App : MonoBehaviour
     {
-        private IServiceContainer _services;
         [SerializeField] private GameObject monsterPrefab;
         [SerializeField] private GameObject combatTextPrefab;
         [SerializeField] private GameObject sharedCanvasPrefab;
@@ -19,9 +25,10 @@ namespace Game.Bootstrap
 
             // Services
             _services.RegisterAsSingleton<ILoggerService, LoggerService>();
+            _services.RegisterAsSingleton<IEventQueueService, EventQueueService>();
+            _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
 
-            _services.RegisterAsScoped<IEventQueueService, EventQueueService>();
-            _services.RegisterAsScoped<ITestService, TestService>();
+            _services.RegisterAsTransient<IRandomService, UnityRandomService>();
 
             // Factories
             _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));

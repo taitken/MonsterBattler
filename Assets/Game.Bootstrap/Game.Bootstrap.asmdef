@@ -1,5 +1,5 @@
 {
-    "name": "Game.Infrastructure",
+    "name": "Game.Bootstrap",
     "references": [
         "Game.Core",
         "Game.Application",

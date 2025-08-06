@@ -1,20 +1,24 @@
 using System;
+using Game.Core.Logger;
 using UnityEngine;
 
-public class LoggerService : ILoggerService
+namespace Game.Infrastructure.Services
 {
-    public void Log(string message)
+    public class LoggerService : ILoggerService
     {
-        Debug.Log(message);
-    }
+        public void Log(string message)
+        {
+            Debug.Log(message);
+        }
 
-    public void LogWarning(string message)
-    {
-        Debug.LogWarning(message);
-    }
+        public void LogWarning(string message)
+        {
+            Debug.LogWarning(message);
+        }
 
-    public void LogError(string message)
-    {
-        Debug.LogError(message);
+        public void LogError(string message)
+        {
+            Debug.LogError(message);
+        }
     }
 }

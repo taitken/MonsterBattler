@@ -1,9 +1,11 @@
 {
     "name": "Game.Presentation",
+    "rootNamespace": "",
     "references": [
         "Game.Core",
         "Game.Application",
-        "Game.Domain"
+        "Game.Domain",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

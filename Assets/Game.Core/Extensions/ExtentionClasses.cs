@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 
-namespace Extensions
+namespace Game.Core.Extensions
 {
     public static class ExtenionClasses
     {

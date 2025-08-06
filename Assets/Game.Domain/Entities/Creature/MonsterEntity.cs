@@ -1,4 +1,5 @@
 using System;
+using Game.Domain.Structs;
 
 namespace Game.Domain.Entities
 {
@@ -11,6 +12,7 @@ namespace Game.Domain.Entities
         public string MonsterName { get; private set; }
         public AttackDirection AttackDirection { get; private set; }
         public event Action<int> OnHealthChanged;
+        public event Action OnAttack;
         public event Action OnDied;
 
         public MonsterEntity(
@@ -36,6 +38,12 @@ namespace Game.Domain.Entities
 
             if (CurrentHealth <= 0)
                 OnDied?.Invoke();
+        }
+
+        public void Attack(MonsterEntity target)
+        {
+            OnAttack?.Invoke();
+            target.TakeDamage(AttackDamage);
         }
 
         public bool IsDead => CurrentHealth <= 0;

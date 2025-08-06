@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UtilityClasses
+namespace Game.Core.UtilityClasses
 {
 
     public class Obseravable<t1>

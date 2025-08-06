@@ -11,7 +11,7 @@ namespace Assets.Game.Presentation.GameObjects
             monsterPrefab = _monsterPrefab;
         }
 
-        public MonsterView Spawn(MonsterEntity model, Vector3 spawnPoint)
+        public MonsterView Create(MonsterEntity model, Vector3 spawnPoint)
         {
             var obj = Object.Instantiate(monsterPrefab, spawnPoint, Quaternion.identity);
             var monster = obj.GetComponent<MonsterView>();
@@ -19,7 +19,7 @@ namespace Assets.Game.Presentation.GameObjects
             return monster;
         }
 
-        public MonsterView Spawn(MonsterEntity model, Transform spawnPoint)
+        public MonsterView Create(MonsterEntity model, Transform spawnPoint)
         {
             var obj = Object.Instantiate(monsterPrefab, spawnPoint.position, Quaternion.identity);
             var monster = obj.GetComponent<MonsterView>();

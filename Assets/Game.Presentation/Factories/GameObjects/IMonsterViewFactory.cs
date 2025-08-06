@@ -4,7 +4,7 @@ namespace Assets.Game.Presentation.GameObjects
 {
     public interface IMonsterViewFactory
     {
-        MonsterView Spawn(MonsterEntity model, Vector3 spawnPoint);
-        MonsterView Spawn(MonsterEntity model, Transform spawnPoint);
+        MonsterView Create(MonsterEntity model, Vector3 spawnPoint);
+        MonsterView Create(MonsterEntity model, Transform spawnPoint);
     }
 }

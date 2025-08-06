@@ -1,22 +1,44 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Game.Core.Events;
 
-public class EventQueueService : IEventQueueService
+namespace Game.Infrastructure.Services
 {
-    private readonly Queue<Func<Task>> queue = new();
-
-    public void Enqueue(Func<Task> action)
+    public class EventQueueService : IEventQueueService
     {
-        queue.Enqueue(action);
-    }
+        private readonly Dictionary<Type, List<Delegate>> _subscribers = new();
 
-    public async Task ProcessAll()
-    {
-        while (queue.Count > 0)
+        public void Publish<TEvent>(TEvent evt)
         {
-            var action = queue.Dequeue();
-            await action();
+            var type = typeof(TEvent);
+            if (_subscribers.TryGetValue(type, out var handlers))
+            {
+                foreach (var handler in handlers)
+                {
+                    ((Action<TEvent>)handler).Invoke(evt);
+                }
+            }
+        }
+
+        public void Subscribe<TEvent>(Action<TEvent> handler)
+        {
+            var type = typeof(TEvent);
+            if (!_subscribers.TryGetValue(type, out var handlers))
+            {
+                handlers = new List<Delegate>();
+                _subscribers[type] = handlers;
+            }
+
+            handlers.Add(handler);
+        }
+
+        public void Unsubscribe<TEvent>(Action<TEvent> handler)
+        {
+            var type = typeof(TEvent);
+            if (_subscribers.TryGetValue(type, out var handlers))
+            {
+                handlers.Remove(handler);
+            }
         }
     }
 }

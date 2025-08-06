@@ -1,6 +1,6 @@
-using UnityEngine;
+using System;
 
-namespace System
+namespace Game.Domain
 {
     public abstract class BaseObjectModel : BaseModel
     {

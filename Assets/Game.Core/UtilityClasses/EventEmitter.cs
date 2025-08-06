@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace UtilityClasses
+namespace Game.Core.UtilityClasses
 {
     public class EventEmitter<t1>
     {
-        private IList<Action<t1>> actionsOnEmit;
+        private List<Action<t1>> actionsOnEmit;
         public EventEmitter()
         {
             this.actionsOnEmit = new List<Action<t1>>();
@@ -26,7 +26,7 @@ namespace UtilityClasses
 
     public class EventEmitter
     {
-        private IList<Action> actionsOnEmit;
+        private List<Action> actionsOnEmit;
         public EventEmitter()
         {
             this.actionsOnEmit = new List<Action>();

@@ -1,27 +1,31 @@
-using UnityEngine;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using Game.Application.IFactories;
 using Game.Domain.Entities;
 using Game.Core;
+using Game.Domain.Structs;
+using Game.Core.Events;
+using Game.Application.Events.Battle;
+using Game.Core.Logger;
+using Game.Core.Randomness;
 
-public class BattleController : MonoBehaviour
+public class BattleController
 {
-    [SerializeField] private Transform playerSpawn;
-    [SerializeField] private Transform enemySpawn;
-    private IEventQueueService eventQueue;
-    private IMonsterSpawner monsterFactory;
-    private List<MonsterEntity> playerMonsters = new();
-    private List<MonsterEntity> enemyMonsters = new();
+    private IEventQueueService _eventQueueService;
+    private IMonsterEntityFactory _monsterFactory;
+    private ILoggerService _loggerService;
+    private List<MonsterEntity> _playerMonsters = new();
+    private List<MonsterEntity> _enemyMonsters = new();
 
-    private void Awake()
+    public BattleController()
     {
-        eventQueue = ServiceLocator.Get<IEventQueueService>();
-        monsterFactory = ServiceLocator.Get<IMonsterSpawner>();
+        _eventQueueService = ServiceLocator.Get<IEventQueueService>();
+        _monsterFactory = ServiceLocator.Get<IMonsterEntityFactory>();
+        _loggerService = ServiceLocator.Get<ILoggerService>();
     }
 
-    private async void Start()
+    public async void StartBattle()
     {
         SetupMonsters();
         BattleResult result = await RunBattleLoop();
@@ -30,45 +34,55 @@ public class BattleController : MonoBehaviour
 
     private void SetupMonsters()
     {
-        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Goald, playerSpawn).model);
-        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Daybloom, playerSpawn.position + new Vector3(-2.5f, -1f, 0f)).model);
-        playerMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Flimboon, playerSpawn.position + new Vector3(2.0f, -1f, 0f)).model);
+        CreateMonster(MonsterType.Goald, BattleTeam.Player);
+        CreateMonster(MonsterType.Kraggan, BattleTeam.Player);
+        CreateMonster(MonsterType.Flimboon, BattleTeam.Player);
 
-        enemyMonsters.Add(monsterFactory.SpawnMonster(MonsterType.Knight, enemySpawn).model);
-        //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Mage, enemySpawn.position + new Vector3(2.5f, -1f, 0f)).model);
-        //enemyMonsters.Add(monsterFactory.Spawn(MonsterType.Ranger, enemySpawn.position + new Vector3(-2.0f, -1f, 0f)).model);
+        CreateMonster(MonsterType.Knight, BattleTeam.Enemy);
+    }
+
+    private void CreateMonster(MonsterType type, BattleTeam team)
+    {
+        var monster = _monsterFactory.Create(type);
+        GetMonstersByTeam(team).Add(monster);
+        _eventQueueService.Publish(new MonsterSpawnedEvent(monster, team));
+    }
+
+    private List<MonsterEntity> GetMonstersByTeam(BattleTeam team)
+    {
+        return team == BattleTeam.Player ? _playerMonsters : _enemyMonsters;
     }
 
     private async Task<BattleResult> RunBattleLoop()
     {
-        Debug.Log("Start battle loop");
+        _loggerService.Log("Start battle loop");
         int turnCount = 0;
         // Main battle loop
         await Task.Delay(500); // Initial delay before battle starts
-        while (HasAlive(playerMonsters) && HasAlive(enemyMonsters))
+        while (HasAlive(_playerMonsters) && HasAlive(_enemyMonsters))
         {
             turnCount++;
-            await RunTurn(playerMonsters, enemyMonsters, "Player");
-            if (!HasAlive(enemyMonsters))
+            await RunTurn(_playerMonsters, _enemyMonsters, "Player");
+            if (!HasAlive(_enemyMonsters))
             {
-                Debug.Log("All enemy monsters defeated!");
+                _loggerService.Log("All enemy monsters defeated!");
                 break;
             }
 
-            await RunTurn(enemyMonsters, playerMonsters, "Enemy");
+            await RunTurn(_enemyMonsters, _playerMonsters, "Enemy");
         }
 
-        var surviving = HasAlive(playerMonsters)
-            ? GetAliveMonsters(playerMonsters)
-            : GetAliveMonsters(enemyMonsters);
+        var surviving = HasAlive(_playerMonsters)
+            ? GetAliveMonsters(_playerMonsters)
+            : GetAliveMonsters(_enemyMonsters);
 
-        var outcome = !HasAlive(playerMonsters) && !HasAlive(enemyMonsters)
+        var outcome = !HasAlive(_playerMonsters) && !HasAlive(_enemyMonsters)
             ? BattleOutcome.Draw
-            : HasAlive(playerMonsters)
+            : HasAlive(_playerMonsters)
                 ? BattleOutcome.PlayerVictory
                 : BattleOutcome.EnemyVictory;
 
-        Debug.Log($"Battle over! Outcome: {outcome}");
+        _loggerService.Log($"Battle over! Outcome: {outcome}");
 
         return new BattleResult(outcome, turnCount, surviving);
     }
@@ -82,48 +96,38 @@ public class BattleController : MonoBehaviour
 
     private async Task RunTurn(List<MonsterEntity> attackers, List<MonsterEntity> targets, string teamName)
     {
-        Debug.Log($"{teamName} turn");
+        _loggerService.Log($"{teamName} turn");
         foreach (var attacker in GetAliveMonsters(attackers))
         {
             var target = ChooseRandomTarget(targets);
             if (target == null)
             {
-                Debug.Log($"{attacker.definition.monsterName} has no targets left!");
+                _loggerService.Log($"{attacker.MonsterName} has no targets left!");
                 continue;
             }
-            EnqueueAttack(attacker, target);
-            Debug.Log($"Player: {attacker.definition.monsterName} vs Enemy: {target.definition.monsterName}");
+            await Attack(attacker, target);
+            _loggerService.Log($"Player: {attacker.MonsterName} vs Enemy: {target.MonsterName}");
         }
-
-        await eventQueue.ProcessAll();
     }
 
-    private void EnqueueAttack(MonsterEntity attacker, MonsterEntity target)
+    private async Task Attack(MonsterEntity attacker, MonsterEntity target)
     {
-        eventQueue.Enqueue(async () =>
-        {
-            var view = attacker.GetView<MonsterView>();
-            if(view != null)
-            {
-                await view.PlayAttackAnimation();
-            }   
-            Debug.Log($"{attacker.definition.monsterName} attacks {target.definition.monsterName}!");
-            target.TakeDamage(attacker.definition.attackDamage);
-            await Task.Delay(500); 
-        });
+        attacker.Attack(target);
+        await Task.Delay(500);
     }
 
     private MonsterEntity ChooseRandomTarget(List<MonsterEntity> potentialTargets)
     {
+        var _randomService = ServiceLocator.Get<IRandomService>();
         var aliveTargets = GetAliveMonsters(potentialTargets);
         if (aliveTargets.Count == 0) return null;
 
-        int index = Random.Range(0, aliveTargets.Count); // Use Unity's Random for determinism in editor
+        int index = _randomService.Range(0, aliveTargets.Count); // Use Unity's Random for determinism in editor
         return aliveTargets[index];
     }
 
     private void HandleBattleResult(BattleResult result)
     {
-        Debug.Log($"Winner: {result.Outcome}, Turns: {result.TurnCount}");
+        _loggerService.Log($"Winner: {result.Outcome}, Turns: {result.TurnCount}");
     }
 }

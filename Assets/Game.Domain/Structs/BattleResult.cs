@@ -1,15 +1,19 @@
 using System.Collections.Generic;
+using Game.Domain.Entities;
 
-public struct BattleResult
+namespace Game.Domain.Structs
 {
-    public BattleOutcome Outcome;
-    public int TurnCount;
-    public List<MonsterEntity> SurvivingMonsters;
-
-    public BattleResult(BattleOutcome outcome, int turnCount, List<MonsterEntity> survivingMonsters)
+    public struct BattleResult
     {
-        Outcome = outcome;
-        TurnCount = turnCount;
-        SurvivingMonsters = survivingMonsters;
+        public BattleOutcome Outcome;
+        public int TurnCount;
+        public List<MonsterEntity> SurvivingMonsters;
+
+        public BattleResult(BattleOutcome outcome, int turnCount, List<MonsterEntity> survivingMonsters)
+        {
+            Outcome = outcome;
+            TurnCount = turnCount;
+            SurvivingMonsters = survivingMonsters;
+        }
     }
 }

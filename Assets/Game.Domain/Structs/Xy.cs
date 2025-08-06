@@ -1,11 +1,14 @@
-public struct Xy
+namespace Game.Domain.Structs
 {
-    public float X;
-    public float Y;
-
-    public Xy(float x, float y)
+    public struct Xy
     {
-        X = x;
-        Y = y;
+        public float X;
+        public float Y;
+
+        public Xy(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
     }
 }

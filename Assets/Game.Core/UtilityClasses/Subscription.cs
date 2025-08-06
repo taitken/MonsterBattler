@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace UtilityClasses {
+namespace Game.Core.UtilityClasses
+{
     public class Subscription{
         private Action unsubscribeCallback;
 
