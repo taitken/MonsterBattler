@@ -1,10 +1,9 @@
-using Game.Core.Events;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 
-namespace Game.Application.Events.Battle
+namespace Game.Application.Messaging.Events
 {
-    public readonly struct MonsterSpawnedEvent : IEvent
+    public readonly struct MonsterSpawnedEvent : IDomainEvent
     {
         public MonsterSpawnedEvent(MonsterEntity monster, BattleTeam team)
         {

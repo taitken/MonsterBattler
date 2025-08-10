@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Assets.Game.Presentation.GameObjects;
-using Game.Application.Events.Battle;
+using Game.Application.Messaging;
+using Game.Application.Messaging.Events;
 using Game.Core;
-using Game.Core.Events;
 using Game.Domain.Enums;
 using UnityEngine;
 
@@ -12,7 +13,8 @@ namespace Game.Presentation.Spawners
     {
         [SerializeField] private Transform playerSpawn;
         [SerializeField] private Transform enemySpawn;
-        private IEventQueueService _eventQueueService;
+        private IEventBus _eventQueueService;
+        private IDisposable _monsterEventSubscription;
         private IMonsterViewFactory _factory;
         private List<MonsterView> playerMonsters = new();
         private List<MonsterView> enemyMonsters = new();
@@ -20,13 +22,14 @@ namespace Game.Presentation.Spawners
 
         void Awake()
         {
-            _eventQueueService = ServiceLocator.Get<IEventQueueService>();
+            _eventQueueService = ServiceLocator.Get<IEventBus>();
             _factory = ServiceLocator.Get<IMonsterViewFactory>();
-            _eventQueueService.Subscribe<MonsterSpawnedEvent>(OnMonsterSpawned);
+            _monsterEventSubscription = _eventQueueService.Subscribe<MonsterSpawnedEvent>(OnMonsterSpawned);
         }
 
         private void OnMonsterSpawned(MonsterSpawnedEvent evt)
         {
+            Debug.Log($"Monster spawned: {evt.Monster.Type} on team {evt.Team}");
             var spawnPosition = DetermineMonsterSpawnPoint(evt);
             var monsterView = _factory.Create(evt.Monster, evt.Team, spawnPosition);
             var team = GetMonstersByTeam(evt.Team);
@@ -62,7 +65,7 @@ namespace Game.Presentation.Spawners
 
         void OnDestroy()
         {
-            _eventQueueService.Unsubscribe<MonsterSpawnedEvent>(OnMonsterSpawned);
+            _monsterEventSubscription?.Dispose();
         }
     }
 }

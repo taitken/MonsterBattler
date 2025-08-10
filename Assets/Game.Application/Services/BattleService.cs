@@ -5,18 +5,18 @@ using Game.Application.IFactories;
 using Game.Domain.Entities;
 using Game.Core;
 using Game.Domain.Structs;
-using Game.Core.Events;
-using Game.Application.Events.Battle;
 using Game.Core.Logger;
 using Game.Core.Randomness;
 using Game.Application.Interfaces;
 using Game.Domain.Enums;
+using Game.Application.Messaging;
+using Game.Application.Messaging.Events;
 
 namespace Game.Application.Services
 {
     public class BattleService : IBattleService
     {
-        private IEventQueueService _eventQueueService;
+        private IEventBus _eventBus;
         private IMonsterEntityFactory _monsterFactory;
         private ILoggerService _loggerService;
         private List<MonsterEntity> _playerMonsters = new();
@@ -24,7 +24,7 @@ namespace Game.Application.Services
 
         public BattleService()
         {
-            _eventQueueService = ServiceLocator.Get<IEventQueueService>();
+            _eventBus = ServiceLocator.Get<IEventBus>();
             _monsterFactory = ServiceLocator.Get<IMonsterEntityFactory>();
             _loggerService = ServiceLocator.Get<ILoggerService>();
         }
@@ -49,7 +49,7 @@ namespace Game.Application.Services
         {
             var monster = _monsterFactory.Create(type);
             GetTeamMonsters(team).Add(monster);
-            _eventQueueService.Publish(new MonsterSpawnedEvent(monster, team));
+            _eventBus.Publish(new MonsterSpawnedEvent(monster, team));
         }
 
         private List<MonsterEntity> GetTeamMonsters(BattleTeam team)

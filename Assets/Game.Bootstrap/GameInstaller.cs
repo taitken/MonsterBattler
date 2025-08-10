@@ -3,9 +3,9 @@ using Assets.Game.Presentation.GameObjects;
 using Assets.Game.Presentation.UiObjects;
 using Game.Application.IFactories;
 using Game.Application.Interfaces;
+using Game.Application.Messaging;
 using Game.Application.Services;
 using Game.Core;
-using Game.Core.Events;
 using Game.Core.Logger;
 using Game.Core.Randomness;
 using Game.Infrastructure.Randomness;
@@ -27,7 +27,7 @@ namespace Game.Bootstrap
 
             // Services
             _services.RegisterAsSingleton<ILoggerService, LoggerService>();
-            _services.RegisterAsSingleton<IEventQueueService, EventQueueService>();
+            _services.RegisterAsSingleton<IEventBus, EventBus>();
             _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
 
             _services.RegisterAsScoped<IBattleService, BattleService>();
