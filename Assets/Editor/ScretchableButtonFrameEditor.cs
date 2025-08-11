@@ -2,9 +2,9 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Game.Presentation.UI.Combat.Editor
+namespace Game.Presentation.UI.ButtonUI.Editor
 {
-    [CustomEditor(typeof(StretchableButtonFrame))]
+    [CustomEditor(typeof(ButtonUI))]
     [CanEditMultipleObjects]
     public class StretchableButtonFrameEditor : UnityEditor.Editor
     {
@@ -19,7 +19,7 @@ namespace Game.Presentation.UI.Combat.Editor
                 {
                     foreach (var t in targets)
                     {
-                        var frame = t as StretchableButtonFrame;
+                        var frame = t as ButtonUI;
                         if (frame == null) continue;
 
                         Undo.RegisterFullObjectHierarchyUndo(frame.gameObject, "Rebuild Stretchable Button Frame");

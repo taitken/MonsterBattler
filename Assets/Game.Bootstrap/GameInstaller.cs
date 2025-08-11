@@ -19,6 +19,7 @@ namespace Game.Bootstrap
         [SerializeField] private GameObject monsterPrefab;
         [SerializeField] private GameObject combatTextPrefab;
         [SerializeField] private GameObject sharedCanvasPrefab;
+        private EventBusRunner _eventRunner;
 
         void Awake()
         {
@@ -37,6 +38,12 @@ namespace Game.Bootstrap
             // Factories
             _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
             _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab, sharedCanvasPrefab.GetComponent<RectTransform>()));
+            _eventRunner = new EventBusRunner();
+        }
+
+        void Update()
+        {
+            _eventRunner.Run();
         }
     }
 }

@@ -2,21 +2,26 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
+using Game.Application.Messaging;
+using Game.Core;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace Game.Presentation.UI.Combat
+namespace Game.Presentation.UI.ButtonUI
 {
-    [ExecuteAlways]
-    [RequireComponent(typeof(RectTransform))]
-    public class StretchableButtonFrame : MonoBehaviour
+    [AddComponentMenu("UI/Button UI (with events)")]
+    [RequireComponent(typeof(RectTransform))] // CHANGED: remove root Button requirement
+    [DisallowMultipleComponent]
+    public class ButtonUI : MonoBehaviour
     {
         [Header("Sprites")]
         public Sprite cornerSprite;
         public Sprite horizontalSprite;
         public Sprite verticalSprite;
+        public ButtonLabel gamelabelPrefab; 
 
         [Header("Frame Settings")]
         public float cornerSize = 16f;
@@ -29,34 +34,40 @@ namespace Game.Presentation.UI.Combat
         [Header("Runtime Settings")]
         public string inputText = "Click Me";
 
+        [Header("Button Config")]
+        [SubclassOf(typeof(ICommand))]
+        public SystemTypeReference commandType;
+
+        // refs
+        private ButtonLabel _currentLabel; 
+        private IEventBus _eventBus;
         private Image _backgroundImage;
         private RectTransform _rect;
-        private Button _button;
-        private TextMeshProUGUI _label;
+        private Button _clickButton; // CHANGED: the actual button we click (child)
 
-        // edit-mode safe rebuild flag
         private bool _needsRebuild;
 
         private void Awake()
         {
             _rect = GetComponent<RectTransform>();
-            _label = GetComponentInChildren<TextMeshProUGUI>();
+            _eventBus = ServiceLocator.Get<IEventBus>();
+        }
+
+        private void Start()
+        {
+            // CHANGED: ensure a rebuild happens at play start after hierarchy is live
+            DoRebuild();
             SetText(inputText);
-            _button = GetComponent<Button>();
-            if (UnityEngine.Application.isPlaying && _button != null)
-                _button.onClick.AddListener(OnClickFeedback);
         }
 
         private void OnEnable()
         {
-            _rect = _rect ?? GetComponent<RectTransform>();
             RequestRebuild();
         }
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            // Only schedule in edit mode; avoids recursive rebuild during property changes
             if (!UnityEngine.Application.isPlaying)
                 RequestRebuild();
         }
@@ -64,16 +75,12 @@ namespace Game.Presentation.UI.Combat
 
         private void OnRectTransformDimensionsChange()
         {
-            // If user scales the object in editor, rebuild layout
             if (!UnityEngine.Application.isPlaying)
                 RequestRebuild();
         }
 
         [ContextMenu("Force Rebuild Frame")]
-        public void RebuildNow()
-        {
-            DoRebuild();
-        }
+        public void RebuildNow() => DoRebuild();
 
         private void RequestRebuild()
         {
@@ -83,7 +90,6 @@ namespace Game.Presentation.UI.Combat
 #if UNITY_EDITOR
             if (!UnityEngine.Application.isPlaying)
             {
-                // Batch multiple inspector changes into one rebuild tick
                 EditorApplication.delayCall -= TryDoDelayedRebuild;
                 EditorApplication.delayCall += TryDoDelayedRebuild;
             }
@@ -97,15 +103,9 @@ namespace Game.Presentation.UI.Combat
 #if UNITY_EDITOR
         private void TryDoDelayedRebuild()
         {
-            if (this == null) return; // component removed
-            if (!isActiveAndEnabled) return;
-
-            // Don’t run on prefab assets in the Project window
-            if (!UnityEngine.Application.isPlaying && PrefabUtility.IsPartOfPrefabAsset(gameObject))
-                return;
-
-            if (_needsRebuild)
-                DoRebuild();
+            if (this == null || !isActiveAndEnabled) return;
+            if (!UnityEngine.Application.isPlaying && PrefabUtility.IsPartOfPrefabAsset(gameObject)) return;
+            if (_needsRebuild) DoRebuild();
         }
 #endif
 
@@ -113,55 +113,69 @@ namespace Game.Presentation.UI.Combat
         {
             _needsRebuild = false;
 
-            _rect = _rect ?? GetComponent<RectTransform>();
+            _rect ??= GetComponent<RectTransform>();
             if (_rect == null) return;
 
-            ClearChildren();
+            // CHANGED: only clear previous frame container, not all children (preserves label)
+            ClearOldFrameOnly();
 
-            // Create inner container sized to the button
-            var frameRoot = GetOrCreateFrameRoot();
+            var frameRoot = CreateFrameRoot();
             frameRoot.sizeDelta = new Vector2(buttonWidth, buttonHeight);
             frameRoot.anchoredPosition = Vector2.zero;
 
-            AddBackground(frameRoot, new Color(0.849f, 0.849f, 0.849f, 1f)); // nice full color fill
+            AddBackground(frameRoot, new Color(0.39f, 0.11f, 0.11f, 1f)); // sets _backgroundImage & _clickButton
             BuildFrame(frameRoot);
+            EnsureLabel(frameRoot); // CHANGED: make sure label exists & is on top
             SnapChildrenToPixels(frameRoot);
         }
 
         public void SetText(string text)
         {
-            if (_label == null)
+            if (gamelabelPrefab == null)
             {
                 Debug.LogWarning("ButtonUI: No label assigned.");
                 return;
             }
 
-            _label.text = text;
+            // scale against the visible background size if available
+            float h = _backgroundImage ? ((RectTransform)_backgroundImage.transform).rect.height : _rect.rect.height;
+            float w = _backgroundImage ? ((RectTransform)_backgroundImage.transform).rect.width  : _rect.rect.width;
 
-            // Example scaling: font size is 40% of button height
-            float fontSizeByHeight = _rect.rect.height * 0.3f;
-
-            float fontSizeByWidth = _rect.rect.width * 0.15f;
-
-            _label.fontSize = Mathf.Min(fontSizeByHeight, fontSizeByWidth);
+            float fontSizeByHeight = h * 0.30f;
+            float fontSizeByWidth  = w * 0.15f;
+            var fontSize = Mathf.Min(fontSizeByHeight, fontSizeByWidth);
+            gamelabelPrefab.SetText(text, fontSize);
         }
 
         private void OnClickFeedback()
         {
-            Debug.Log("Button clicked: " + gameObject.name);
-            if (!UnityEngine.Application.isPlaying) return; // no coroutines in edit mode
-            if (_backgroundImage == null) return;
+            if (!UnityEngine.Application.isPlaying) return;
+            Debug.Log("ButtonUI: Clicked!");
+            if (_backgroundImage != null)
+            {
+                StopAllCoroutines();
+                StartCoroutine(FlashColor(_backgroundImage, Color.white, 0.15f));
+            }
 
-            StopAllCoroutines();
-            StartCoroutine(FlashColor(_backgroundImage, Color.white, 0.15f));
+            var type = commandType?.Type;
+            if (type == null) return;
+
+            // guard: only classes OR structs with default ctor
+            if (!type.IsValueType && type.GetConstructor(Type.EmptyTypes) == null)
+            {
+                Debug.LogError($"Selected command '{type.FullName}' has no parameterless constructor.");
+                return;
+            }
+
+            _eventBus?.Publish((ICommand)Activator.CreateInstance(type));
         }
 
         private IEnumerator FlashColor(Image img, Color flashColor, float duration)
         {
-            Color originalColor = img.color;
+            var original = img.color;
             img.color = flashColor;
             yield return new WaitForSeconds(duration);
-            img.color = originalColor;
+            img.color = original;
         }
 
         private void BuildFrame(RectTransform frameRoot)
@@ -172,24 +186,18 @@ namespace Game.Presentation.UI.Combat
             float w = buttonWidth;
             float h = buttonHeight;
 
-            // Preserve corner aspect, scale by cornerSize and borderScale
             float cornerAspect = cornerSprite.rect.width / cornerSprite.rect.height;
             Vector2 cornerSizeVec = new Vector2(
                 cornerSize * cornerAspect * borderScale,
                 cornerSize * borderScale
             );
 
-            // Thickness derived from sprite pixels, scaled to corner height
             float hThickness = GetHorizontalThickness() * borderScale;
             float vThickness = GetVerticalThickness() * borderScale;
 
-            // Inward offsets for horizontal bars (unit space)
             Vector2 topOffset = new Vector2(0, -3f) * borderScale;
             Vector2 bottomOffset = new Vector2(0, 3f) * borderScale;
 
-            // --- Draw order: sides first, corners last (corners on top) ---
-
-            // Horizontal edges
             CreateImage("Top", horizontalSprite, new Vector2(0.5f, 1), new Vector2(0.5f, 1),
                 new Vector2(w - 2 * cornerSizeVec.x, hThickness),
                 Vector3.zero, frameRoot, topOffset);
@@ -198,7 +206,6 @@ namespace Game.Presentation.UI.Combat
                 new Vector2(w - 2 * cornerSizeVec.x, hThickness),
                 new Vector3(180, 0, 0), frameRoot, bottomOffset);
 
-            // Vertical edges
             CreateImage("Left", verticalSprite, new Vector2(0, 0.5f), new Vector2(0, 0.5f),
                 new Vector2(vThickness, h - 2 * cornerSizeVec.y),
                 Vector3.zero, frameRoot);
@@ -207,7 +214,6 @@ namespace Game.Presentation.UI.Combat
                 new Vector2(vThickness, h - 2 * cornerSizeVec.y),
                 new Vector3(0, 180, 0), frameRoot);
 
-            // Corners (pivot corrections)
             CreateImage("TopLeft", cornerSprite, new Vector2(0, 1), new Vector2(0, 1),
                 cornerSizeVec, Vector3.zero, frameRoot);
 
@@ -241,41 +247,84 @@ namespace Game.Presentation.UI.Combat
             return cornerSize * (barPx / Mathf.Max(1f, cornerPx));
         }
 
-        private RectTransform GetOrCreateFrameRoot()
-        {
-            var existing = transform.Find("FrameRoot");
-#if UNITY_EDITOR
-            if (existing != null) DestroyImmediate(existing.gameObject);
-#else
-            if (existing != null) Destroy(existing.gameObject);
-#endif
-            GameObject go = new GameObject("FrameRoot", typeof(RectTransform));
-            go.transform.SetParent(transform, false);
+        // --- helpers ---
 
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
+        private RectTransform CreateFrameRoot()
+        {
+            var go = new GameObject("FrameRoot", typeof(RectTransform));
+            go.transform.SetParent(transform, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.localScale = Vector3.one;
             return rt;
         }
 
-        private void CreateImage(
-            string name,
-            Sprite sprite,
-            Vector2 anchor,
-            Vector2 pivot,
-            Vector2 size,
-            Vector3 rotation,
-            Transform parent,
-            Vector2? offset = null)
+        private void AddBackground(RectTransform parent, Color bgColor)
+        {
+            var vPadding = 10f * borderScale;
+            var hPadding = 18f * borderScale;
+
+            var go = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            go.transform.SetAsFirstSibling();
+
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(buttonWidth - hPadding, buttonHeight - vPadding);
+            rt.anchoredPosition = Vector2.zero;
+
+            var img = go.GetComponent<Image>();
+            img.color = bgColor;
+            img.raycastTarget = true;
+            _backgroundImage = img;
+
+            _clickButton = go.GetComponent<Button>();
+            _clickButton.targetGraphic = img;
+
+            // CHANGED: wire listener here, not in Awake
+            _clickButton.onClick.RemoveAllListeners();
+            _clickButton.onClick.AddListener(OnClickFeedback);
+        }
+
+        private void EnsureLabel(RectTransform parent)
+        {
+            // Reuse existing label if it still exists; otherwise create one
+            if (_currentLabel == null)
+            {
+                _currentLabel = GetComponentInChildren<ButtonLabel>(includeInactive: true);
+            }
+
+            if (_currentLabel == null)
+            {
+                var go = Instantiate(gamelabelPrefab, parent, false);
+                go.transform.SetParent(parent, false);
+
+                var rt = (RectTransform)go.transform;
+                rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = Vector2.zero;
+                _currentLabel = go;
+            }
+            else
+            {
+                // Ensure it’s under the new frame and centered
+                var rt = (RectTransform)gamelabelPrefab.transform;
+                rt.SetParent(parent, false);
+                rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = Vector2.zero;
+            }
+
+            // keep label on top
+            gamelabelPrefab.transform.SetAsLastSibling();
+        }
+
+        private void CreateImage(string name, Sprite sprite, Vector2 anchor, Vector2 pivot, Vector2 size, Vector3 rotation, Transform parent, Vector2? offset = null)
         {
             if (sprite == null) return;
 
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.transform.SetParent(parent, false);
 
-            var rt = go.GetComponent<RectTransform>();
+            var rt = (RectTransform)go.transform;
             rt.anchorMin = anchor;
             rt.anchorMax = anchor;
             rt.pivot = pivot;
@@ -292,34 +341,6 @@ namespace Game.Presentation.UI.Combat
             go.transform.localEulerAngles = rotation;
         }
 
-        private void AddBackground(RectTransform parent, Color bgColor)
-        {
-            var vPadding = 10f * borderScale;
-            var hPadding = 18f * borderScale;
-
-            GameObject go = new GameObject("Background", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            go.transform.SetParent(parent, false);
-            go.transform.SetAsFirstSibling();
-
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(buttonWidth - hPadding, buttonHeight - vPadding);
-            rt.anchoredPosition = Vector2.zero;
-
-            var img = go.GetComponent<Image>();
-            img.color = bgColor;
-            img.raycastTarget = true;
-
-            var btn = go.GetComponent<Button>();
-            btn.targetGraphic = img;                 // ensure button has a target graphic
-            btn.onClick.RemoveListener(OnClickFeedback);
-            btn.onClick.AddListener(OnClickFeedback); // hook up click here
-
-            _backgroundImage = img;
-        }
-
         private void SnapChildrenToPixels(Transform parent)
         {
             foreach (RectTransform rt in parent)
@@ -329,14 +350,15 @@ namespace Game.Presentation.UI.Combat
             }
         }
 
-        private void ClearChildren()
+        private void ClearOldFrameOnly()
         {
 #if UNITY_EDITOR
-            for (int i = transform.childCount - 1; i >= 0; i--)
-                DestroyImmediate(transform.GetChild(i).gameObject);
+            // Only delete the previous frame container; keep other children (e.g., author-added label)
+            var fr = transform.Find("FrameRoot");
+            if (fr != null) DestroyImmediate(fr.gameObject);
 #else
-            foreach (Transform child in transform)
-                Destroy(child.gameObject);
+            var fr = transform.Find("FrameRoot");
+            if (fr != null) Destroy(fr.gameObject);
 #endif
         }
     }

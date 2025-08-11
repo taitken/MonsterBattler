@@ -1,3 +1,6 @@
+using Game.Application.Messaging;
+using Game.Core;
+using Game.Presentation.Messaging;
 using UnityEngine;
 
 namespace Game.Presentation.UI.BackgroundUi
@@ -11,6 +14,12 @@ namespace Game.Presentation.UI.BackgroundUi
         void Start()
         {
             ScaleToCamera(Camera.main);
+            var bus = ServiceLocator.Get<IEventBus>();
+                Debug.Log("Subbing to StartGameCommand in BackgroundUi");
+            bus.Subscribe<StartGameCommand>(cmd =>
+            {
+                Debug.Log("STARTING GAME FROM BACKGROUND UI");
+            });
         }
 
         public void ScaleToCamera(Camera cam)
