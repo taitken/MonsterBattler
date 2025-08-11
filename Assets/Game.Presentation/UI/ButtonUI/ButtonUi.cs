@@ -167,7 +167,7 @@ namespace Game.Presentation.UI.ButtonUI
                 return;
             }
 
-            _eventBus?.Publish((ICommand)Activator.CreateInstance(type));
+            _eventBus?.Publish((dynamic)Activator.CreateInstance(type));
         }
 
         private IEnumerator FlashColor(Image img, Color flashColor, float duration)
