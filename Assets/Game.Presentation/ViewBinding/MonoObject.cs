@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Presentation
 {
-    public abstract class MonoObject<ModelType> : MonoBehaviour, IMonoObject where ModelType : BaseObjectModel
+    public abstract class MonoObject<ModelType> : MonoBehaviour, IMonoObject where ModelType : BaseEntity
     {
         public ModelType model;
 
@@ -15,7 +15,7 @@ namespace Game.Presentation
             OnModelBound();
         }
 
-        public BaseObjectModel GetModel() => model;
+        public BaseEntity GetModel() => model;
 
         public MonoBehaviour AsMonoBehaviour() => this;
 
@@ -27,11 +27,6 @@ namespace Game.Presentation
         {
             this.BeforeDeath();
             Destroy(gameObject);
-        }
-
-        protected static IServiceType Inject<IServiceType>()
-        {
-            return ServiceLocator.Get<IServiceType>();
         }
     }
 }

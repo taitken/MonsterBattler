@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Assets.Game.Presentation.UiObjects;
+using Game.Core;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 using Game.Presentation;
@@ -25,7 +26,7 @@ namespace Assets.Game.Presentation.GameObjects
             Debug.Log("Monster awake");
             originalPosition = transform.position;
             spriteRenderer = GetComponent<SpriteRenderer>();
-            combatTextFactory = Inject<ICombatTextFactory>();
+            combatTextFactory = ServiceLocator.Get<ICombatTextFactory>();;
         }
 
         protected override void OnModelBound()

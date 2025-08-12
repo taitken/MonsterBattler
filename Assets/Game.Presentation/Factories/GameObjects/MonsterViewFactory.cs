@@ -1,8 +1,9 @@
+using Assets.Game.Presentation.GameObjects;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 using UnityEngine;
 
-namespace Assets.Game.Presentation.GameObjects
+namespace Game.Presentation.GameObjects.Factories
 {
     public class MonsterViewFactory : IMonsterViewFactory
     {

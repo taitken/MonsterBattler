@@ -1,5 +1,4 @@
 
-using Assets.Game.Presentation.GameObjects;
 using Assets.Game.Presentation.UiObjects;
 using Game.Application.IFactories;
 using Game.Application.Interfaces;
@@ -11,12 +10,15 @@ using Game.Core.Randomness;
 using Game.Infrastructure.Randomness;
 using Game.Infrastructure.Services;
 using Game.Infrastructure.Spawning;
+using Game.Presentation.GameObjects.Factories;
 using UnityEngine;
+
 namespace Game.Bootstrap
 {
     public class App : MonoBehaviour
     {
         [SerializeField] private GameObject monsterPrefab;
+        [SerializeField] private GameObject roomPrefab;
         [SerializeField] private GameObject combatTextPrefab;
         [SerializeField] private GameObject sharedCanvasPrefab;
         private EventBusRunner _eventRunner;
@@ -30,12 +32,15 @@ namespace Game.Bootstrap
             _services.RegisterAsSingleton<ILoggerService, LoggerService>();
             _services.RegisterAsSingleton<IEventBus, EventBus>();
             _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
+            _services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
 
             _services.RegisterAsScoped<IBattleService, BattleService>();
 
             _services.RegisterAsTransient<IRandomService, UnityRandomService>();
+            _services.RegisterAsTransient<IFadeController, FadeController>();
 
             // Factories
+            _services.RegisterAsSingleton<IRoomFactory>(() => new RoomFactory(roomPrefab));
             _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
             _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab, sharedCanvasPrefab.GetComponent<RectTransform>()));
             _eventRunner = new EventBusRunner();

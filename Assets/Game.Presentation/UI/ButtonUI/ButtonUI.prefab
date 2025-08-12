@@ -320,9 +320,7 @@ MonoBehaviour:
   buttonWidth: 200
   buttonHeight: 100
   inputText: Click Me
-  commandType:
-    assemblyQualifiedName: Game.Presentation.Messaging.StartGameCommand, Game.Presentation,
-      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  messages: []
 --- !u!222 &-1038170590066598086
 CanvasRenderer:
   m_ObjectHideFlags: 0

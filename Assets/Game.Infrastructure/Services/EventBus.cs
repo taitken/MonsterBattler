@@ -5,6 +5,7 @@ using Game.Domain.Messaging;
 using Game.Applcation.HelperClasses;
 using Game.Core;
 using Game.Infrastructure.Messaging;
+using UnityEngine;
 
 namespace Game.Infrastructure.Services
 {
@@ -66,6 +67,7 @@ namespace Game.Infrastructure.Services
 
         public IDisposable Subscribe<T>(Action<T> handler, Topic? topic = null) where T : IMessage
         {
+            Debug.Log($"Subscribing to message type: {typeof(T).Name} with topic: {topic.ToString() ?? "default"}");
             var resolved = topic ?? BusDefaults.ResolveTopic(typeof(T));
             return SubscribeInternal<T>(resolved, o => handler((T)o));
         }

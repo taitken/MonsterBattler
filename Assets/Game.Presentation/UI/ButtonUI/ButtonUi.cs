@@ -1,10 +1,11 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using System;
 using Game.Application.Messaging;
 using Game.Core;
+using Game.Presentation.Helpers;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,7 +14,6 @@ using UnityEditor;
 namespace Game.Presentation.UI.ButtonUI
 {
     [AddComponentMenu("UI/Button UI (with events)")]
-    [RequireComponent(typeof(RectTransform))] // CHANGED: remove root Button requirement
     [DisallowMultipleComponent]
     public class ButtonUI : MonoBehaviour
     {
@@ -21,7 +21,7 @@ namespace Game.Presentation.UI.ButtonUI
         public Sprite cornerSprite;
         public Sprite horizontalSprite;
         public Sprite verticalSprite;
-        public ButtonLabel gamelabelPrefab; 
+        public ButtonLabel gamelabelPrefab;
 
         [Header("Frame Settings")]
         public float cornerSize = 16f;
@@ -36,10 +36,10 @@ namespace Game.Presentation.UI.ButtonUI
 
         [Header("Button Config")]
         [SubclassOf(typeof(ICommand))]
-        public SystemTypeReference commandType;
+        public CommandEntry[] messages;
 
         // refs
-        private ButtonLabel _currentLabel; 
+        private ButtonLabel _currentLabel;
         private IEventBus _eventBus;
         private Image _backgroundImage;
         private RectTransform _rect;
@@ -139,10 +139,10 @@ namespace Game.Presentation.UI.ButtonUI
 
             // scale against the visible background size if available
             float h = _backgroundImage ? ((RectTransform)_backgroundImage.transform).rect.height : _rect.rect.height;
-            float w = _backgroundImage ? ((RectTransform)_backgroundImage.transform).rect.width  : _rect.rect.width;
+            float w = _backgroundImage ? ((RectTransform)_backgroundImage.transform).rect.width : _rect.rect.width;
 
             float fontSizeByHeight = h * 0.30f;
-            float fontSizeByWidth  = w * 0.15f;
+            float fontSizeByWidth = w * 0.15f;
             var fontSize = Mathf.Min(fontSizeByHeight, fontSizeByWidth);
             gamelabelPrefab.SetText(text, fontSize);
         }
@@ -150,24 +150,21 @@ namespace Game.Presentation.UI.ButtonUI
         private void OnClickFeedback()
         {
             if (!UnityEngine.Application.isPlaying) return;
-            Debug.Log("ButtonUI: Clicked!");
             if (_backgroundImage != null)
             {
                 StopAllCoroutines();
-                StartCoroutine(FlashColor(_backgroundImage, Color.white, 0.15f));
+                StartCoroutine(FlashColor(_backgroundImage, Color.red, 0.15f));
             }
 
-            var type = commandType?.Type;
-            if (type == null) return;
-
-            // guard: only classes OR structs with default ctor
-            if (!type.IsValueType && type.GetConstructor(Type.EmptyTypes) == null)
+            foreach (var message in messages)
             {
-                Debug.LogError($"Selected command '{type.FullName}' has no parameterless constructor.");
-                return;
-            }
+                Debug.Log("ButtonUI: Clicked!");
+                var commandAsset = (ICommandAsset)message.commandAsset;
+                if (commandAsset == null) return;
+                Debug.Log($"ButtonUI: Publishing command {commandAsset.GetType().Name}");
 
-            _eventBus?.Publish((dynamic)Activator.CreateInstance(type));
+                _eventBus?.Publish((dynamic)commandAsset.Create());
+            }
         }
 
         private IEnumerator FlashColor(Image img, Color flashColor, float duration)

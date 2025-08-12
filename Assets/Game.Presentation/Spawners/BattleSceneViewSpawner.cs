@@ -5,6 +5,7 @@ using Game.Application.Messaging;
 using Game.Application.Messaging.Events;
 using Game.Core;
 using Game.Domain.Enums;
+using Game.Presentation.GameObjects.Factories;
 using UnityEngine;
 
 namespace Game.Presentation.Spawners

@@ -8,7 +8,7 @@ namespace Game.Presentation
     /// </summary>
     public interface IMonoObject
     {
-        BaseObjectModel GetModel();
+        BaseEntity GetModel();
         MonoBehaviour AsMonoBehaviour();
     }
 }

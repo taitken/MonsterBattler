@@ -1,10 +1,9 @@
 using System;
 using Game.Domain.Enums;
-using Game.Domain.Structs;
 
 namespace Game.Domain.Entities
 {
-    public class MonsterEntity : BaseObjectModel
+    public class MonsterEntity : BaseEntity
     {
         public int CurrentHealth { get; private set; }
         public int MaxHealth { get; private set; }
