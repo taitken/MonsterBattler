@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Game.Presentation.GameObjects;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events;
+using Game.Application.Messaging.Events.Spawning;
 using Game.Core;
 using Game.Domain.Enums;
 using Game.Presentation.GameObjects.Factories;

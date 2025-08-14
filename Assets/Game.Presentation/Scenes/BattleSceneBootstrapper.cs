@@ -1,3 +1,4 @@
+using System.Threading;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Core.Logger;
@@ -20,8 +21,9 @@ namespace Assets.Game.Presentation.Scenes
         }
         void Start()
         {
+            var ct = new CancellationToken();
             _loggerService.Log("BattleSceneBootstrapper started");
-            _battleService.RunBattleAsync();
+            _battleService.RunBattleAsync(ct);
             _loggerService.Log("BattleSceneBootstrapper finished starting battle");
         }
     }

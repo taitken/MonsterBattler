@@ -12,7 +12,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
         private IRoomFactory _roomFactory;
         void Awake()
         {
-            Debug.Log("Monster awake");
+            Debug.Log("Overworld Created");
             originalPosition = transform.position;
             _spriteRenderer = GetComponent<SpriteRenderer>();
             _roomFactory = ServiceLocator.Get<IRoomFactory>();

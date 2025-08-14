@@ -11,6 +11,7 @@ using Game.Infrastructure.Randomness;
 using Game.Infrastructure.Services;
 using Game.Infrastructure.Spawning;
 using Game.Presentation.GameObjects.Factories;
+using Game.Presentation.Services;
 using UnityEngine;
 
 namespace Game.Bootstrap
@@ -25,6 +26,7 @@ namespace Game.Bootstrap
 
         void Awake()
         {
+            DontDestroyOnLoad(gameObject);
             var _services = new ServiceContainer();
             ServiceLocator.Set(_services);
 
@@ -32,6 +34,9 @@ namespace Game.Bootstrap
             _services.RegisterAsSingleton<ILoggerService, LoggerService>();
             _services.RegisterAsSingleton<IEventBus, EventBus>();
             _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
+            _services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
+            _services.RegisterAsSingleton<IInteractionBarrier, InteractionBarrier>();
+            
             _services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
 
             _services.RegisterAsScoped<IBattleService, BattleService>();

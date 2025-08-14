@@ -6,6 +6,7 @@ using Game.Applcation.HelperClasses;
 using Game.Core;
 using Game.Infrastructure.Messaging;
 using UnityEngine;
+using Game.Core.Logger;
 
 namespace Game.Infrastructure.Services
 {
@@ -19,9 +20,16 @@ namespace Game.Infrastructure.Services
 
         // Simple priority queue for queued/visual sequencing (lower number = higher priority)
         private readonly SortedList<int, Queue<Action>> _queued = new();
+        private readonly ILoggerService _logger;
+
+        public EventBus(ILoggerService logger)
+        {
+            _logger = logger;
+        }
 
         public void Publish<T>(T message, PublishOptions? options = null) where T : IMessage
         {
+            _logger.Log($"Publishing message type: {typeof(T).Name} with topic: {options?.Topic.ToString() ?? "default"}");
             var t = typeof(T);
             var topic = options?.Topic ?? BusDefaults.ResolveTopic(t);
             var dispatch = options?.Dispatch ?? BusDefaults.ResolveDefaultDispatch(t);

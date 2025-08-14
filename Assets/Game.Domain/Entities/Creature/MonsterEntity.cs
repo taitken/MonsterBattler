@@ -5,7 +5,7 @@ namespace Game.Domain.Entities
 {
     public class MonsterEntity : BaseEntity
     {
-        public int CurrentHealth { get; private set; }
+        public int CurrentHP { get; private set; }
         public int MaxHealth { get; private set; }
         public int AttackDamage { get; private set; }
         public MonsterType Type { get; private set; }
@@ -23,7 +23,7 @@ namespace Game.Domain.Entities
             AttackDirection attackDirection
         )
         {
-            CurrentHealth = maxHealth;
+            CurrentHP = maxHealth;
             MaxHealth = maxHealth;
             AttackDamage = attackDamage;
             Type = type;
@@ -33,10 +33,10 @@ namespace Game.Domain.Entities
 
         public void TakeDamage(int amount)
         {
-            CurrentHealth = Math.Max(0, CurrentHealth - amount);
+            CurrentHP = Math.Max(0, CurrentHP - amount);
             OnHealthChanged?.Invoke(amount);
 
-            if (CurrentHealth <= 0)
+            if (CurrentHP <= 0)
                 OnDied?.Invoke();
         }
 
@@ -46,6 +46,6 @@ namespace Game.Domain.Entities
             target.TakeDamage(AttackDamage);
         }
 
-        public bool IsDead => CurrentHealth <= 0;
+        public bool IsDead => CurrentHP <= 0;
     }
 }

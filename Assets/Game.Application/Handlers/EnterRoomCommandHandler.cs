@@ -6,20 +6,19 @@ using UnityEngine;
 
 namespace Game.Application.Handlers
 {
-
-public class EnterRoomHandler : ICommandHandler<EnterRoomCommand>
-{
-    private readonly IEventBus _bus;
-
-    public EnterRoomHandler()
+    public class EnterRoomHandler : ICommandHandler<EnterRoomCommand>
     {
-        Debug.Log("EnterRoomHandler created");
-        _bus = ServiceLocator.Get<IEventBus>();
-    }
+        private readonly IEventBus _bus;
 
-    public void Handle(EnterRoomCommand command)
-    {
-        _bus.Publish(new LoadSceneCommand(GameScene.BattleScene));
+        public EnterRoomHandler()
+        {
+            Debug.Log("EnterRoomHandler created");
+            _bus = ServiceLocator.Get<IEventBus>();
+        }
+
+        public void Handle(EnterRoomCommand command)
+        {
+            _bus.Publish(new LoadSceneCommand(GameScene.BattleScene));
+        }
     }
-}
 }

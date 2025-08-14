@@ -4,7 +4,8 @@ using UnityEngine.UI;
 using System;
 using Game.Application.Messaging;
 using Game.Core;
-using Game.Presentation.Helpers;
+using Game.Presentation.Models;
+
 
 
 #if UNITY_EDITOR

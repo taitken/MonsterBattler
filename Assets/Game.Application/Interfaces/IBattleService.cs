@@ -1,8 +1,11 @@
 
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Game.Application.Interfaces
 {
     public interface IBattleService
     {
-        void RunBattleAsync();
+        Task RunBattleAsync(CancellationToken ct);
     }
 }

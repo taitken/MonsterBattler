@@ -3,7 +3,7 @@ using System;
 using Game.Core;
 using UnityEngine;
 
-namespace Game.Presentation.Helpers
+namespace Game.Presentation.Models
 {
 
     /// <summary>

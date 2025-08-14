@@ -2,7 +2,7 @@ using Game.Domain.Entities;
 using Game.Domain.Enums;
 using Game.Domain.Messaging;
 
-namespace Game.Application.Messaging.Events
+namespace Game.Application.Messaging.Events.Spawning
 {
     public readonly struct MonsterSpawnedEvent : IDomainEvent
     {

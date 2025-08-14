@@ -4,6 +4,7 @@ namespace Game.Domain
 {
     public abstract class BaseEntity : BaseModel
     {
+        public Guid Id { get; private set; } = Guid.NewGuid();
         public event Action OnModelUpdated;
     }
 }

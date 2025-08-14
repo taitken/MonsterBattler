@@ -1,4 +1,3 @@
-// Presentation — CommandRouter.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,15 +29,6 @@ namespace Game.Presentation.Adapters
             SubscribePerCommandType();
             DontDestroyOnLoad(gameObject);
         }
-
-        public void Dispose()
-        {
-            for (int i = 0; i < _subscriptions.Count; i++)
-                _subscriptions[i]?.Dispose();
-            _subscriptions.Clear();
-        }
-
-        void OnDestroy() => Dispose();
 
         private void BuildHandlerMap()
         {
@@ -79,7 +69,6 @@ namespace Game.Presentation.Adapters
                 var subscribeMethod = typeof(IEventBus).GetMethods()
                     .First(m => m.Name == "Subscribe" && m.IsGenericMethod && m.GetGenericArguments().Length == 1);
                 var genericSubscribe = subscribeMethod.MakeGenericMethod(cmdType);
-                Debug.Log($"Subscribing to command type: {cmdType.Name}");
                 var actionType = typeof(Action<>).MakeGenericType(cmdType);
                 var action = Delegate.CreateDelegate(
                     actionType,
@@ -89,6 +78,7 @@ namespace Game.Presentation.Adapters
                 );
 
                 var disposable = (IDisposable)genericSubscribe.Invoke(_bus, new object[] { action, null });
+                Debug.Log($"Subscribed to command type: {disposable.GetType().Name}");
                 _subscriptions.Add(disposable);
             }
         }
@@ -104,7 +94,7 @@ namespace Game.Presentation.Adapters
                 try
                 {
                     var handler = handlerTypes[i].GetConstructor(Type.EmptyTypes)
-                        ?.Invoke(Array.Empty<object>()); 
+                        ?.Invoke(Array.Empty<object>());
                     ((ICommandHandler<T>)handler).Handle(command);
                 }
                 catch (Exception ex)
@@ -113,5 +103,15 @@ namespace Game.Presentation.Adapters
                 }
             }
         }
+
+        public void Dispose()
+        {
+            Debug.Log("Disposing CommandRouter and unsubscribing from all commands.");
+            for (int i = 0; i < _subscriptions.Count; i++)
+                _subscriptions[i]?.Dispose();
+            _subscriptions.Clear();
+        }
+
+        void OnDestroy() => Dispose();
     }
 }
