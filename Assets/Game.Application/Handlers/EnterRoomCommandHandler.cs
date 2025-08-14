@@ -1,7 +1,8 @@
+using Game.Applcation.DTOs;
+using Game.Application.Interfaces;
 using Game.Application.Messaging;
 using Game.Core;
 using Game.Domain.Enums;
-using UnityEngine;
 
 
 namespace Game.Application.Handlers
@@ -9,15 +10,17 @@ namespace Game.Application.Handlers
     public class EnterRoomHandler : ICommandHandler<EnterRoomCommand>
     {
         private readonly IEventBus _bus;
+        private readonly INavigationService _nav;
 
         public EnterRoomHandler()
         {
-            Debug.Log("EnterRoomHandler created");
             _bus = ServiceLocator.Get<IEventBus>();
+            _nav = ServiceLocator.Get<INavigationService>();
         }
 
         public void Handle(EnterRoomCommand command)
         {
+            _nav.SetPayload(GameScene.BattleScene, new BattlePayload(command.RoomId));
             _bus.Publish(new LoadSceneCommand(GameScene.BattleScene));
         }
     }

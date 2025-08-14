@@ -1,13 +1,14 @@
-namespace Game.Applcation.Models
+namespace Game.Applcation.DTOs
 {
 public readonly struct BarrierKey : System.IEquatable<BarrierKey>
 {
     public readonly BarrierToken Token;
     public readonly int Phase;
 
-    public BarrierKey(BarrierToken token, int phase)
+    public BarrierKey(BarrierToken token, int phase = 0)
     {
-        Token = token; Phase = phase;
+        Token = token;
+        Phase = phase;
     }
 
     public bool Equals(BarrierKey other) => Token.Equals(other.Token) && Phase == other.Phase;

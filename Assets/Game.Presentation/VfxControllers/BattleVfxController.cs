@@ -1,24 +1,33 @@
 namespace Game.Presentation.VfxControllers
 {
     using System;
+    using System.Threading.Tasks;
     using Assets.Game.Presentation.GameObjects;
+    using Assets.Game.Presentation.UI.TitleUI;
     using Assets.Game.Presentation.UiObjects;
+    using Game.Applcation.DTOs;
+    using Game.Application.Interfaces;
     using Game.Application.Messaging;
     using Game.Application.Messaging.Events.BattleFlow;
     using Game.Core;
     using Game.Presentation.Services;
+    using TMPro;
     using UnityEngine;
 
     public sealed class BattleVfxController : MonoBehaviour
     {
+        private VictoryText _victoryText;
+        private RectTransform _rootCanvas;
         private IEventBus _bus;
         private IViewRegistryService _viewRegistry;
         private ICombatTextFactory _combatTextFactory;
+        private IInteractionBarrier _waitBarrier;
         private IDisposable _subActionSelected;
         private IDisposable _subDamageApplied;
         private IDisposable _subFainted;
         private IDisposable _subTurnStart;
         private IDisposable _subTurnEnd;
+        private IDisposable _subBattleEnded;
         private string DAMAGE_COLOUR = "#B22222";
 
         void Awake()
@@ -26,6 +35,10 @@ namespace Game.Presentation.VfxControllers
             _bus = ServiceLocator.Get<IEventBus>();
             _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
             _combatTextFactory = ServiceLocator.Get<ICombatTextFactory>();
+            _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
+            _rootCanvas = GetComponent<RectTransform>();
+            _victoryText = GetComponentInChildren<VictoryText>();
+            _victoryText.gameObject.SetActive(false);
         }
 
         void OnEnable()
@@ -35,6 +48,7 @@ namespace Game.Presentation.VfxControllers
             _subFainted = _bus.Subscribe<MonsterFaintedEvent>(OnMonsterFainted);
             _subTurnStart = _bus.Subscribe<TurnStartedEvent>(OnTurnStarted);
             _subTurnEnd = _bus.Subscribe<TurnEndedEvent>(OnTurnEnded);
+            _subBattleEnded = _bus.Subscribe<BattleEndedEvent>(OnBattleEnded);
         }
 
         private void OnActionSelected(ActionSelectedEvent e)
@@ -50,7 +64,7 @@ namespace Game.Presentation.VfxControllers
             if (_viewRegistry.TryGet(e.Target.Id, out MonsterView targetView))
             {
                 ColorUtility.TryParseHtmlString(DAMAGE_COLOUR, out Color redDamageColor);
-                _combatTextFactory.Create(redDamageColor, $"{e.Amount}", targetView.transform.position + new Vector3(0, 1f, 0));
+                _combatTextFactory.Create(redDamageColor, $"{e.Amount}", _rootCanvas, targetView.transform.position + new Vector3(0, 1f, 0));
                 targetView.PlayHitReaction(e.Amount);
             }
         }
@@ -75,13 +89,23 @@ namespace Game.Presentation.VfxControllers
             // UiTurnBanner.Hide();
         }
 
+        private async void OnBattleEnded(BattleEndedEvent e)
+        {
+            _victoryText.gameObject.SetActive(true);
+            var waitKey = BarrierToken.New();
+            _victoryText.Play(waitKey);
+            await _waitBarrier.WaitAsync(new BarrierKey(waitKey));
+            _bus.Publish(new BattleFlowCompleteCommand(e.Result));
+        }
+
         void OnDisable()
         {
-            _subActionSelected?.Dispose(); _subActionSelected = null;
-            _subDamageApplied?.Dispose(); _subDamageApplied = null;
-            _subFainted?.Dispose(); _subFainted = null;
-            _subTurnStart?.Dispose(); _subTurnStart = null;
-            _subTurnEnd?.Dispose(); _subTurnEnd = null;
+            _subActionSelected?.Dispose();
+            _subDamageApplied?.Dispose();
+            _subFainted?.Dispose();
+            _subTurnStart?.Dispose();
+            _subTurnEnd?.Dispose();
+            _subBattleEnded?.Dispose();
         }
     }
 }

@@ -1,9 +1,7 @@
 using System.Threading;
-using Game.Applcation.DTOs;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Core.Logger;
-using Game.Domain.Enums;
 using UnityEngine;
 
 namespace Assets.Game.Presentation.Scenes
@@ -12,24 +10,22 @@ namespace Assets.Game.Presentation.Scenes
     /// Bootstrapper for the Battle Scene.
     /// Initializes services and starts the battle.
     /// </summary>
-    public class BattleSceneBootstrapper : MonoBehaviour
+    public class OverworldSceneBootstrapper : MonoBehaviour
     {
         private ILoggerService _loggerService;
-        private IBattleService _battleService;
         private INavigationService _navigationService;
+        private IBattleHistoryService _battleHistoryService;
         void Awake()
         {
             _loggerService = ServiceLocator.Get<ILoggerService>();
-            _battleService = ServiceLocator.Get<IBattleService>();
             _navigationService = ServiceLocator.Get<INavigationService>();
+            _battleHistoryService = ServiceLocator.Get<IBattleHistoryService>();
         }
         void Start()
         {
-            _navigationService.TryTakePayload(GameScene.OverworldScene, out BattlePayload payload);
             var ct = new CancellationToken();
-            _loggerService.Log("BattleSceneBootstrapper started");
-            _battleService.RunBattleAsync(payload.RoomId, ct);
-            _loggerService.Log("BattleSceneBootstrapper finished starting battle");
+            _loggerService.Log("OverworldSceneBootstrapper started");
+            _loggerService.Log("OverworldSceneBootstrapper finished starting battle");
         }
     }
 }

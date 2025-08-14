@@ -1,4 +1,4 @@
-using Game.Applcation.Models;
+using Game.Applcation.DTOs;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 using Game.Domain.Messaging;

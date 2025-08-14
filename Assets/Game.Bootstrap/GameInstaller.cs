@@ -21,7 +21,6 @@ namespace Game.Bootstrap
         [SerializeField] private GameObject monsterPrefab;
         [SerializeField] private GameObject roomPrefab;
         [SerializeField] private GameObject combatTextPrefab;
-        [SerializeField] private GameObject sharedCanvasPrefab;
         private EventBusRunner _eventRunner;
 
         void Awake()
@@ -36,7 +35,8 @@ namespace Game.Bootstrap
             _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
             _services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
             _services.RegisterAsSingleton<IInteractionBarrier, InteractionBarrier>();
-            
+            _services.RegisterAsSingleton<INavigationService, NavigationService>();
+            _services.RegisterAsSingleton<IBattleHistoryService, BattleHistoryService>();
             _services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
 
             _services.RegisterAsScoped<IBattleService, BattleService>();
@@ -47,7 +47,7 @@ namespace Game.Bootstrap
             // Factories
             _services.RegisterAsSingleton<IRoomFactory>(() => new RoomFactory(roomPrefab));
             _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
-            _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab, sharedCanvasPrefab.GetComponent<RectTransform>()));
+            _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab));
             _eventRunner = new EventBusRunner();
         }
 

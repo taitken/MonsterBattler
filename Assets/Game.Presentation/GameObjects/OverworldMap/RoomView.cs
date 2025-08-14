@@ -42,7 +42,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
             if (_isHovering)
             {
                 Debug.Log($"Room clicked:");
-                _eventBus.Publish(new EnterRoomCommand("room"));
+                _eventBus.Publish(new EnterRoomCommand(model.Id));
             }
         }
 

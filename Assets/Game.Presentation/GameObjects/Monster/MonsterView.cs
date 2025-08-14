@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Threading.Tasks;
-using Assets.Game.Presentation.UiObjects;
+using Game.Applcation.DTOs;
 using Game.Applcation.Enums;
-using Game.Applcation.Models;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Domain.Entities;

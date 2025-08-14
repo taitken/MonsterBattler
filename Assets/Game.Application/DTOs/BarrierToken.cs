@@ -1,6 +1,7 @@
+
 using System;
 
-namespace Game.Applcation.Models
+namespace Game.Applcation.DTOs
 {
     public readonly struct BarrierToken : IEquatable<BarrierToken>
     {

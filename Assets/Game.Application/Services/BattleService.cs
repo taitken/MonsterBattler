@@ -11,9 +11,9 @@ using Game.Application.IFactories;
 using Game.Application.Messaging.Events.BattleFlow;
 using Game.Application.Messaging.Events.Spawning;
 using Game.Domain.Structs;
-using Game.Applcation.Models;
-using UnityEngine;
 using Game.Applcation.Enums;
+using System;
+using Game.Applcation.DTOs;
 
 namespace Game.Application.Services
 {
@@ -24,6 +24,7 @@ namespace Game.Application.Services
         private readonly IMonsterEntityFactory _monsterFactory;
         private readonly ILoggerService _log;
         private readonly IRandomService _rng;
+        private readonly IBattleHistoryService _battleHistory;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
 
@@ -31,26 +32,28 @@ namespace Game.Application.Services
                              IMonsterEntityFactory monsterFactory,
                              ILoggerService log,
                              IRandomService rng,
-                             IInteractionBarrier waitBarrier)
+                             IInteractionBarrier waitBarrier,
+                             IBattleHistoryService battleHistory)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
             _log = log;
             _rng = rng;
             _waitBarrier = waitBarrier;
+            _battleHistory = battleHistory;
             _log.Log("BattleService initialized.");
         }
-        public async Task RunBattleAsync(CancellationToken ct = default)
+        public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
         {
             SetupTeams();
 
             _bus.Publish(new BattleStartedEvent(_player, _enemy));
             _log.Log("Battle started.");
 
-            var result = await RunLoopAsync(ct);
+            var result = await RunLoopAsync(roomId, ct);
 
             _log.Log($"Battle ended: {result.Outcome}, turns={result.TurnCount}");
-            _bus.Publish(new BattleEndedEvent(result.Outcome, result.SurvivingMonsters, result.TurnCount));
+            _bus.Publish(new BattleEndedEvent(result));
         }
 
         private void SetupTeams()
@@ -68,7 +71,7 @@ namespace Game.Application.Services
             _bus.Publish(new MonsterSpawnedEvent(m, team));
         }
 
-        private async Task<BattleResult> RunLoopAsync(CancellationToken ct)
+        private async Task<BattleResult> RunLoopAsync(Guid roomId, CancellationToken ct)
         {
             int turns = 0;
 
@@ -92,7 +95,7 @@ namespace Game.Application.Services
                 _ => GetAlive(_player, _enemy) // draw => all remaining
             };
 
-            return new BattleResult(outcome, turns, survivors);
+            return new BattleResult(roomId, outcome, turns, survivors, _battleHistory.GetBattleCount() + 1);
         }
 
         private async Task RunTeamTurnAsync(List<MonsterEntity> attackers, List<MonsterEntity> defenders, BattleTeam team, CancellationToken ct)

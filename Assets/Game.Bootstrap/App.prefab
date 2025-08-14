@@ -49,7 +49,7 @@ MonoBehaviour:
   monsterPrefab: {fileID: 8057753359465888455, guid: 8936d3239c3257f4596f94a82480440f, type: 3}
   roomPrefab: {fileID: 1272431741656861670, guid: 32b6ab25d41d7f14f8120d42cd02a983, type: 3}
   combatTextPrefab: {fileID: 5362606225375500960, guid: fc89fdfab7f04af469449d1b0277558f, type: 3}
-  sharedCanvasPrefab: {fileID: 0}
+  sharedCanvasPrefab: {fileID: 2768098025415720384, guid: f78e48246b3ec164584e1cf8c7281fd3, type: 3}
 --- !u!1001 &5923611480897633426
 PrefabInstance:
   m_ObjectHideFlags: 0

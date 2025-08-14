@@ -5,6 +5,6 @@ namespace Assets.Game.Presentation.UiObjects
 {
     public interface ICombatTextFactory
     {
-        CombatTextUi Create(Color color, string text, Vector3 worldPosition);
+        CombatTextUi Create(Color color, string text, RectTransform rootCanvas, Vector3 worldPosition);
     }
 }

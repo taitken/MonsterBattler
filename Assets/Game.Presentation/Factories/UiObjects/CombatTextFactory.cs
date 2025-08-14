@@ -6,18 +6,16 @@ namespace Assets.Game.Presentation.UiObjects
     public class CombatTextFactory : ICombatTextFactory
     {
         private readonly GameObject _combatTextPrefab;
-        private readonly RectTransform _combatTextContainer;
-        public CombatTextFactory(GameObject prefab, RectTransform container)
+        public CombatTextFactory(GameObject prefab)
         {
             _combatTextPrefab = prefab;
-            _combatTextContainer = container;
         }
-        public CombatTextUi Create(Color color, string text, Vector3 worldPosition)
+        public CombatTextUi Create(Color color, string text, RectTransform rootCanvas, Vector3 worldPosition)
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition);
 
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _combatTextContainer,
+                rootCanvas,
                 screenPos,
                 null, // ← Use `null` for Screen Space - Overlay!
                 out Vector2 anchoredPos
@@ -28,7 +26,7 @@ namespace Assets.Game.Presentation.UiObjects
                 Random.Range(-15f, 15f)
             );
 
-            var instance = Object.Instantiate(_combatTextPrefab, _combatTextContainer);
+            var instance = Object.Instantiate(_combatTextPrefab, rootCanvas);
             var rectTransform = instance.GetComponent<RectTransform>();
 
             // ✅ Set center anchor and pivot for precise placement
