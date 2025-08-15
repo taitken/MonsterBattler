@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Presentation.GameObjects.Factories
 {
-    public interface IRoomFactory
+    public interface IRoomViewFactory
     {
         RoomView Create(RoomEntity model, Vector3 spawnPoint);
     }

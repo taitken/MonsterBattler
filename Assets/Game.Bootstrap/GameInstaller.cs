@@ -37,6 +37,7 @@ namespace Game.Bootstrap
             _services.RegisterAsSingleton<IInteractionBarrier, InteractionBarrier>();
             _services.RegisterAsSingleton<INavigationService, NavigationService>();
             _services.RegisterAsSingleton<IBattleHistoryService, BattleHistoryService>();
+            _services.RegisterAsSingleton<ISpriteCache, SpriteCache>();
             _services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
 
             _services.RegisterAsScoped<IBattleService, BattleService>();
@@ -45,7 +46,7 @@ namespace Game.Bootstrap
             _services.RegisterAsTransient<IFadeController, FadeController>();
 
             // Factories
-            _services.RegisterAsSingleton<IRoomFactory>(() => new RoomFactory(roomPrefab));
+            _services.RegisterAsSingleton<IRoomViewFactory>(() => new RoomViewFactory(roomPrefab));
             _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
             _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab));
             _eventRunner = new EventBusRunner();

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Game.Core.Extensions
 {
-    public static class ListExtenionClasses
+    public static class ListExtensionClasses
     {
         public static t1 Find<t1>(this IList<t1> list, Func<t1, bool> callback)
         {

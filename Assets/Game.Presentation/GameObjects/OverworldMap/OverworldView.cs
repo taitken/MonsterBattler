@@ -9,13 +9,13 @@ namespace Game.Presentation.GameObjects.OverworldMap
     {
         public Vector3 originalPosition;
         private SpriteRenderer _spriteRenderer;
-        private IRoomFactory _roomFactory;
+        private IRoomViewFactory _roomFactory;
         void Awake()
         {
             Debug.Log("Overworld Created");
             originalPosition = transform.position;
             _spriteRenderer = GetComponent<SpriteRenderer>();
-            _roomFactory = ServiceLocator.Get<IRoomFactory>();
+            _roomFactory = ServiceLocator.Get<IRoomViewFactory>();
         }
         // Overworld specific properties and methods would go here
         // For example, handling rooms, player movement, etc.

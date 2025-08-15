@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 
 namespace Game.Core.Extensions
 {
-    public static class ExtenionClasses
+    public static class ExtensionClasses
     {
         public static void OnClickedByUser(this MonoBehaviour monoBehaviour)
         {

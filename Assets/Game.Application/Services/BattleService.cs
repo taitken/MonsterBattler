@@ -45,15 +45,38 @@ namespace Game.Application.Services
         }
         public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
         {
-            SetupTeams();
+            if (roomId == Guid.Empty)
+                throw new System.ArgumentException("Room ID cannot be empty", nameof(roomId));
 
-            _bus.Publish(new BattleStartedEvent(_player, _enemy));
-            _log.Log("Battle started.");
+            try
+            {
+                _log?.Log("Setting up battle teams...");
+                SetupTeams();
 
-            var result = await RunLoopAsync(roomId, ct);
+                if (_player.Count == 0)
+                    throw new System.InvalidOperationException("No player monsters were spawned");
+                
+                if (_enemy.Count == 0)
+                    throw new System.InvalidOperationException("No enemy monsters were spawned");
 
-            _log.Log($"Battle ended: {result.Outcome}, turns={result.TurnCount}");
-            _bus.Publish(new BattleEndedEvent(result));
+                _bus.Publish(new BattleStartedEvent(_player, _enemy));
+                _log?.Log("Battle started.");
+
+                var result = await RunLoopAsync(roomId, ct);
+
+                _log?.Log($"Battle ended: {result.Outcome}, turns={result.TurnCount}");
+                _bus.Publish(new BattleEndedEvent(result));
+            }
+            catch (System.OperationCanceledException)
+            {
+                _log?.Log("Battle was cancelled");
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                _log?.LogError($"Critical error during battle: {ex.Message}");
+                throw new System.InvalidOperationException($"Battle failed for room {roomId}: {ex.Message}", ex);
+            }
         }
 
         private void SetupTeams()

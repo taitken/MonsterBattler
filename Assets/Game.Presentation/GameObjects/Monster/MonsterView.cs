@@ -19,6 +19,7 @@ namespace Assets.Game.Presentation.GameObjects
         private Vector3 originalPosition;
         private SpriteRenderer spriteRenderer;
         private IInteractionBarrier _waitBarrier;
+        private ISpriteCache _spriteCache;
         private Color WHITE = Color.white;
         private Color BLUE = Color.Lerp(Color.white, Color.blue, 0.5f);
         private Color RED = Color.Lerp(Color.white, Color.red, 0.5f);
@@ -27,14 +28,61 @@ namespace Assets.Game.Presentation.GameObjects
         void Awake()
         {
             originalPosition = transform.position;
+            
             spriteRenderer = GetComponent<SpriteRenderer>();
-            _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
-            _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
+            if (spriteRenderer == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"SpriteRenderer component not found on {gameObject.name}. MonsterView requires a SpriteRenderer component.");
+            }
+            
+            try
+            {
+                _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
+                _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
+                _spriteCache = ServiceLocator.Get<ISpriteCache>();
+            }
+            catch (System.Exception ex)
+            {
+                throw new System.InvalidOperationException(
+                    $"Failed to resolve required services in MonsterView on {gameObject.name}. " +
+                    $"Ensure services are properly registered in GameInstaller. Error: {ex.Message}", ex);
+            }
         }
 
-        protected override void OnModelBound()
+        protected override async void OnModelBound()
         {
-            spriteRenderer.sprite = Resources.Load<Sprite>($"Monsters/Sprites/{model.Type}");
+            if (model == null)
+            {
+                throw new System.InvalidOperationException("Cannot bind null model to MonsterView");
+            }
+            
+            try
+            {
+                var sprite = await _spriteCache.GetSpriteAsync(model.Type, type => $"Monsters/Sprites/{type}");
+                if (sprite != null)
+                {
+                    spriteRenderer.sprite = sprite;
+                }
+                else
+                {
+                    throw new System.InvalidOperationException(
+                        $"Failed to load sprite for monster type: {model.Type}. " +
+                        $"Expected sprite at: Monsters/Sprites/{model.Type}");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                throw new System.InvalidOperationException(
+                    $"Critical error loading sprite for monster {model.MonsterName} ({model.Type}): {ex.Message}", ex);
+            }
+            
+            if (healthBar == null)
+            {
+                throw new System.InvalidOperationException(
+                    $"HealthBar component not assigned on MonsterView for {model.MonsterName}");
+            }
+            
             model.OnHealthChanged += UpdateHealthVisuals;
             healthBar.SetHealth(model.CurrentHP, model.MaxHealth);
             _viewRegistry.Register(model.Id, this);

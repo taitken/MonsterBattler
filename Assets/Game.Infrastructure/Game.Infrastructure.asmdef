@@ -3,7 +3,9 @@
     "references": [
         "Game.Core",
         "Game.Application",
-        "Game.Domain"
+        "Game.Domain",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
