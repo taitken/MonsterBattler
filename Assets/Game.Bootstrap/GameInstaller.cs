@@ -29,27 +29,53 @@ namespace Game.Bootstrap
             var _services = new ServiceContainer();
             ServiceLocator.Set(_services);
 
-            // Services
-            _services.RegisterAsSingleton<ILoggerService, LoggerService>();
-            _services.RegisterAsSingleton<IEventBus, EventBus>();
-            _services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
-            _services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
-            _services.RegisterAsSingleton<IInteractionBarrier, InteractionBarrier>();
-            _services.RegisterAsSingleton<INavigationService, NavigationService>();
-            _services.RegisterAsSingleton<IBattleHistoryService, BattleHistoryService>();
-            _services.RegisterAsSingleton<ISpriteCache, SpriteCache>();
-            _services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
-
-            _services.RegisterAsScoped<IBattleService, BattleService>();
-
-            _services.RegisterAsTransient<IRandomService, UnityRandomService>();
-            _services.RegisterAsTransient<IFadeController, FadeController>();
-
-            // Factories
-            _services.RegisterAsSingleton<IRoomViewFactory>(() => new RoomViewFactory(roomPrefab));
-            _services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
-            _services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab));
+            RegisterSingletonServices(_services);
+            RegisterScopedServices(_services);
+            RegisterTransientServices(_services);
+            RegisterFactories(_services);
+            
             _eventRunner = new EventBusRunner();
+        }
+
+        private void RegisterSingletonServices(ServiceContainer services)
+        {
+            // Core Services
+            services.RegisterAsSingleton<ILoggerService, LoggerService>();
+            services.RegisterAsSingleton<IEventBus, EventBus>();
+            services.RegisterAsSingleton<IInteractionBarrier, InteractionBarrier>();
+            
+            // Application Services
+            services.RegisterAsSingleton<INavigationService, NavigationService>();
+            services.RegisterAsSingleton<IBattleHistoryService, BattleHistoryService>();
+            services.RegisterAsSingleton<IOverworldPersistenceService, OverworldPersistenceService>();
+            services.RegisterAsSingleton<IOverworldGenerator, RandomOverworldGenerator>();
+            
+            // Presentation Services
+            services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
+            services.RegisterAsSingleton<ISpriteCache, SpriteCache>();
+            services.RegisterAsSingleton<ISceneConductorService>(() => GetComponentInChildren<SceneConductorService>());
+            
+            // Entity Factories
+            services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
+        }
+
+        private void RegisterScopedServices(ServiceContainer services)
+        {
+            services.RegisterAsScoped<IBattleService, BattleService>();
+            services.RegisterAsScoped<IOverworldService, OverworldService>();
+        }
+
+        private void RegisterTransientServices(ServiceContainer services)
+        {
+            services.RegisterAsTransient<IRandomService, UnityRandomService>();
+            services.RegisterAsTransient<IFadeController, FadeController>();
+        }
+
+        private void RegisterFactories(ServiceContainer services)
+        {
+            services.RegisterAsSingleton<IRoomViewFactory>(() => new RoomViewFactory(roomPrefab));
+            services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
+            services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab));
         }
 
         void Update()

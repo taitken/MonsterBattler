@@ -6,5 +6,10 @@ namespace Game.Domain
     {
         public Guid Id { get; private set; } = Guid.NewGuid();
         public event Action OnModelUpdated;
+
+        protected virtual void NotifyModelUpdated()
+        {
+            OnModelUpdated?.Invoke();
+        }
     }
 }

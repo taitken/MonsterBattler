@@ -75,9 +75,28 @@ namespace Game.Presentation.Spawners
 
         public void SpawnRoomsFromOverworld(OverworldEntity overworld)
         {
+            // Find the starting room to use as origin (0,0)
+            var startingRoom = overworld.GetStartingRoom();
+            if (startingRoom == null) return;
+            
+            Vector2 originOffset = new Vector2(startingRoom.X, startingRoom.Y);
+            
             foreach (var room in overworld.Rooms)
             {
-                SpawnRoom(room);
+                // Convert room grid coordinates to world position, normalized so starting room is at (0,0)
+                Vector3 worldPosition = new Vector3(
+                    (room.X - originOffset.x) * gridSpacing.x, 
+                    (room.Y - originOffset.y) * gridSpacing.y, 
+                    0
+                );
+                
+                // Add spawn parent offset if it exists
+                if (roomSpawnParent != null)
+                {
+                    worldPosition += roomSpawnParent.position;
+                }
+                
+                SpawnRoom(room, worldPosition);
             }
         }
 

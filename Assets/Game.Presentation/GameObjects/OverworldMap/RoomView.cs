@@ -41,7 +41,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
         {
             if (_isHovering)
             {
-                Debug.Log($"Room clicked:");
+                Debug.Log($"Room spawned: {model} with gui {model?.Id}");
                 _eventBus.Publish(new EnterRoomCommand(model.Id));
             }
         }
