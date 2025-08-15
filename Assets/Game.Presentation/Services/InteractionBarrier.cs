@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 using Game.Application.Interfaces;
 
 namespace Game.Presentation.Services

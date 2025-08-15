@@ -1,4 +1,4 @@
-namespace Game.Applcation.Enums
+namespace Game.Application.Enums
 {
     public enum AttackPhase
     {

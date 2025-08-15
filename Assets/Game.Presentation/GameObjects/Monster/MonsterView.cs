@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Threading.Tasks;
-using Game.Applcation.DTOs;
-using Game.Applcation.Enums;
+using Game.Application.DTOs;
+using Game.Application.Enums;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Domain.Entities;

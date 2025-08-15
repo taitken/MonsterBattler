@@ -1,7 +1,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 
 namespace Game.Application.Interfaces
 {

@@ -1,5 +1,5 @@
 using System.Threading;
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Core.Logger;

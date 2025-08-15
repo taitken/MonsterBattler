@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using System.Threading;
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Core;
 

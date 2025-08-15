@@ -11,9 +11,9 @@ using Game.Application.IFactories;
 using Game.Application.Messaging.Events.BattleFlow;
 using Game.Application.Messaging.Events.Spawning;
 using Game.Domain.Structs;
-using Game.Applcation.Enums;
+using Game.Application.Enums;
 using System;
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 
 namespace Game.Application.Services
 {

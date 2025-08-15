@@ -1,7 +1,7 @@
 using Game.Application.Messaging;
 using Game.Core;
 
-namespace Game.Applcation.HelperClasses
+namespace Game.Application.HelperClasses
 {
     public static class BusDefaults
     {

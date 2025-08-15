@@ -1,4 +1,4 @@
-namespace Game.Applcation.DTOs
+namespace Game.Application.DTOs
 {
 public readonly struct BarrierKey : System.IEquatable<BarrierKey>
 {

@@ -5,7 +5,7 @@ namespace Game.Presentation.VfxControllers
     using Assets.Game.Presentation.GameObjects;
     using Assets.Game.Presentation.UI.TitleUI;
     using Assets.Game.Presentation.UiObjects;
-    using Game.Applcation.DTOs;
+    using Game.Application.DTOs;
     using Game.Application.Interfaces;
     using Game.Application.Messaging;
     using Game.Application.Messaging.Events.BattleFlow;

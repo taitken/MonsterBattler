@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Game.Application.Messaging;
 using Game.Domain.Messaging;
-using Game.Applcation.HelperClasses;
+using Game.Application.HelperClasses;
 using Game.Core;
 using Game.Infrastructure.Messaging;
 using UnityEngine;

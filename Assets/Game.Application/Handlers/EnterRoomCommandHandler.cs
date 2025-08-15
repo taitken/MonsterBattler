@@ -1,4 +1,4 @@
-using Game.Applcation.DTOs;
+using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
 using Game.Core;
