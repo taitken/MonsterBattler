@@ -10,5 +10,8 @@ namespace Game.Application.Interfaces
     {
         OverworldEntity InitializeOverworld(OverworldPayload payload);
         void LoadOverworld(OverworldPayload payload);
+        OverworldEntity GetCurrentOverworld();
+        void MarkRoomAsCompleted(Guid roomId);
+        bool IsRoomAccessible(Guid roomId);
     }
 }

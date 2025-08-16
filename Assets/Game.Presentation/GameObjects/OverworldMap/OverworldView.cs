@@ -30,6 +30,9 @@ namespace Game.Presentation.GameObjects.OverworldMap
             {
                 Debug.Log($"Spawning {model.Rooms.Count} rooms from overworld");
                 _spawner.SpawnRoomsFromOverworld(model);
+                
+                // Refresh room accessibility after spawning
+                _spawner.RefreshAllRoomAccessibility();
             }
             else
             {

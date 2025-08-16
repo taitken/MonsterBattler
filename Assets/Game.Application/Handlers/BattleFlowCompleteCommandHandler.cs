@@ -11,16 +11,24 @@ namespace Game.Application.Handlers
     {
         private readonly IEventBus _bus;
         private readonly IBattleHistoryService _battleHistory;
+        private readonly IOverworldService _overworldService;
 
         public BattleFlowCompleteCommandHandler()
         {
             _bus = ServiceLocator.Get<IEventBus>();
             _battleHistory = ServiceLocator.Get<IBattleHistoryService>();
+            _overworldService = ServiceLocator.Get<IOverworldService>();
         }
 
         public void Handle(BattleFlowCompleteCommand command)
         {
             _battleHistory.SaveBattleHistory(command.Result.RoomId, command.Result);
+            
+            if (command.Result.Outcome == BattleOutcome.PlayerVictory)
+            {
+                _overworldService.MarkRoomAsCompleted(command.Result.RoomId);
+            }
+            
             _bus.Publish(new LoadSceneCommand(GameScene.OverworldScene));
         }
     }

@@ -112,6 +112,17 @@ namespace Game.Presentation.Spawners
             spawnedRooms.Clear();
             roomCount = 0;
         }
+        
+        public void RefreshAllRoomAccessibility()
+        {
+            foreach (var roomView in spawnedRooms)
+            {
+                if (roomView != null)
+                {
+                    roomView.RefreshAccessibility();
+                }
+            }
+        }
 
         void OnDestroy()
         {
