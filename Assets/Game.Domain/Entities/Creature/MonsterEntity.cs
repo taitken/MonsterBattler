@@ -47,5 +47,15 @@ namespace Game.Domain.Entities
         }
 
         public bool IsDead => CurrentHP <= 0;
+
+        public void SetCurrentHP(int hp)
+        {
+            CurrentHP = Math.Clamp(hp, 0, MaxHealth);
+        }
+
+        public void RestoreToFullHealth()
+        {
+            CurrentHP = MaxHealth;
+        }
     }
 }

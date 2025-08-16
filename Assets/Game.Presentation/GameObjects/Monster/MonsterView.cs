@@ -19,7 +19,7 @@ namespace Assets.Game.Presentation.GameObjects
         private Vector3 originalPosition;
         private SpriteRenderer spriteRenderer;
         private IInteractionBarrier _waitBarrier;
-        private ISpriteCache _spriteCache;
+        private IMonsterSpriteProvider _spriteProvider;
         private Color WHITE = Color.white;
         private Color BLUE = Color.Lerp(Color.white, Color.blue, 0.5f);
         private Color RED = Color.Lerp(Color.white, Color.red, 0.5f);
@@ -40,7 +40,7 @@ namespace Assets.Game.Presentation.GameObjects
             {
                 _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
                 _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
-                _spriteCache = ServiceLocator.Get<ISpriteCache>();
+                _spriteProvider = ServiceLocator.Get<IMonsterSpriteProvider>();
             }
             catch (System.Exception ex)
             {
@@ -59,7 +59,7 @@ namespace Assets.Game.Presentation.GameObjects
             
             try
             {
-                var sprite = await _spriteCache.GetSpriteAsync(model.Type, type => $"Monsters/Sprites/{type}");
+                var sprite = await _spriteProvider.GetMonsterSpriteAsync<Sprite>(model.Type);
                 if (sprite != null)
                 {
                     spriteRenderer.sprite = sprite;
@@ -67,8 +67,7 @@ namespace Assets.Game.Presentation.GameObjects
                 else
                 {
                     throw new System.InvalidOperationException(
-                        $"Failed to load sprite for monster type: {model.Type}. " +
-                        $"Expected sprite at: Monsters/Sprites/{model.Type}");
+                        $"Failed to load sprite for monster type: {model.Type}");
                 }
             }
             catch (System.Exception ex)
@@ -85,7 +84,8 @@ namespace Assets.Game.Presentation.GameObjects
             
             model.OnHealthChanged += UpdateHealthVisuals;
             healthBar.SetHealth(model.CurrentHP, model.MaxHealth);
-            _viewRegistry.Register(model.Id, this);
+            // Registration is now handled by MonsterViewSpawner
+            Debug.Log($"MonsterView {model.MonsterName} (ID: {model.Id}) bound successfully");
         }
 
         public async void PlayAttackAnimation(BarrierToken token)
@@ -102,6 +102,7 @@ namespace Assets.Game.Presentation.GameObjects
         private IEnumerator SignalEndAfterDelay(float seconds, BarrierToken token)
         {
             yield return new WaitForSeconds(seconds);
+            Debug.Log($"{model.MonsterName} signaling AttackPhase.End");
             _waitBarrier.Signal(new BarrierKey(token, (int)AttackPhase.End));
         }
 

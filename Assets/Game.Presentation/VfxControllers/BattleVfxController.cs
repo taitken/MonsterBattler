@@ -53,9 +53,14 @@ namespace Game.Presentation.VfxControllers
 
         private void OnActionSelected(ActionSelectedEvent e)
         {
+            Debug.Log($"ActionSelected: {e.Attacker.MonsterName} attacking {e.Target.MonsterName} with token {e.Token}");
             if (!_viewRegistry.TryGet(e.Attacker.Id, out MonsterView attackerView))
+            {
+                Debug.LogError($"MonsterView not found for attacker {e.Attacker.MonsterName} (ID: {e.Attacker.Id})");
                 return;
+            }
 
+            Debug.Log($"Found attacker view, calling PlayAttackAnimation");
             attackerView.PlayAttackAnimation(e.Token);
         }
 

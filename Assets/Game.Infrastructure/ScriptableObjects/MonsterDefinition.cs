@@ -1,4 +1,5 @@
 using Game.Domain.Enums;
+using Game.Infrastructure.DTOs;
 using UnityEngine;
 namespace Game.Infrastructure.ScriptableObjects
 {

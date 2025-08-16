@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c011bc6adabe1a4c88d1a6494c8da53, type: 3}
+  m_Name: MonsterDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.MonsterDatabase
+  monsters:
+  - type: 1
+    sprite: {fileID: 785046654823379619, guid: 879d069bb221b4e42b66ff393af1783c, type: 3}
+  - type: 2
+    sprite: {fileID: -270213254142107820, guid: a03846f80af093a499e4b78c08452680, type: 3}
+  - type: 3
+    sprite: {fileID: -2554521816818259791, guid: 139ea194c27b734448868edf1dcd802c, type: 3}
+  - type: 0
+    sprite: {fileID: 2830959537964906364, guid: ff70f885ab1eff94090508ab40375448, type: 3}
+  - type: 7
+    sprite: {fileID: -5711848221618334454, guid: 9557f2717db41424ebcd0739fd7cded1, type: 3}
+  - type: 4
+    sprite: {fileID: 21300000, guid: 4115a3bd3cd16f04ab5d534d2462103f, type: 3}
+  - type: 6
+    sprite: {fileID: -6621362230890156339, guid: 317804d22c3a75a4f89923a87e6f700a, type: 3}
+  - type: 5
+    sprite: {fileID: -1283672317605745731, guid: 425cdbb5d8dd9324eb1ff37e948c866c, type: 3}
+  - type: 10
+    sprite: {fileID: -916673134262589660, guid: f79c0abe61eefc043bdd922e3337fdd3, type: 3}
+  - type: 11
+    sprite: {fileID: -2423999143598775194, guid: 7449020a09be78c44a68a499e19a83f6, type: 3}
+  - type: 9
+    sprite: {fileID: 797468238859185419, guid: 31b5db622b62bff4f893373218e2aeca, type: 3}
+  - type: 12
+    sprite: {fileID: 8456854214989567614, guid: ccf3916e2812bc94bba5fc402f1ccc34, type: 3}
+  - type: 8
+    sprite: {fileID: 6426833640399685670, guid: 9b724eab0a4422b43adfb1447f59f272, type: 3}

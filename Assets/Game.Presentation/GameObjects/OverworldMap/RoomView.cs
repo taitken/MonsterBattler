@@ -18,6 +18,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
         private Color _originalColor;
         private Color _targetColor;
         private Color _greyedOutColor;
+        private Color _completedColor;
         private bool _isHovering;
         private bool _isAccessible = true;
         void Awake()
@@ -29,6 +30,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
             _overworldService = ServiceLocator.Get<IOverworldService>();
             _originalColor = _spriteRenderer.color;
             _greyedOutColor = new Color(_originalColor.r * 0.5f, _originalColor.g * 0.5f, _originalColor.b * 0.5f, _originalColor.a * 0.7f);
+            _completedColor = new Color(0.4f, 0.8f, 0.4f, _originalColor.a);
             _targetColor = _originalColor;
         }
 
@@ -55,7 +57,11 @@ namespace Game.Presentation.GameObjects.OverworldMap
             {
                 _isAccessible = _overworldService.IsRoomAccessible(model.Id);
                 
-                if (!_isAccessible)
+                if (model.IsCompleted)
+                {
+                    _targetColor = _completedColor;
+                }
+                else if (!_isAccessible)
                 {
                     _targetColor = _greyedOutColor;
                 }
@@ -68,7 +74,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
 
         void OnMouseUp()
         {
-            if (_isHovering && _isAccessible)
+            if (_isHovering && _isAccessible && !model.IsCompleted)
             {
                 Debug.Log($"Room spawned: {model} with gui {model?.Id}");
                 _eventBus.Publish(new EnterRoomCommand(model.Id));
@@ -79,7 +85,7 @@ namespace Game.Presentation.GameObjects.OverworldMap
         {
             _isHovering = true;
             
-            if (_isAccessible)
+            if (_isAccessible && !model.IsCompleted)
             {
                 _targetColor = _originalColor * highlightMultiplier;
                 SetPointerCursor();
@@ -90,7 +96,11 @@ namespace Game.Presentation.GameObjects.OverworldMap
         {
             _isHovering = false;
             
-            if (_isAccessible)
+            if (model.IsCompleted)
+            {
+                _targetColor = _completedColor;
+            }
+            else if (_isAccessible)
             {
                 _targetColor = _originalColor;
             }

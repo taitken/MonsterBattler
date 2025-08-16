@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ea28fdf4fa33914b8edcf72d7048200, type: 3}
+  m_Name: EnemyEncounterDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.EnemyEncounterDatabase
+  encounters:
+  - teamName: Desert
+    monsterTypes: 0c000000
+    validBiomes: 01000000
+    difficultyLevel: 1
+    spawnWeight: 1
+  - teamName: RangerMage
+    monsterTypes: 0500000006000000
+    validBiomes: 0000000001000000020000000300000004000000
+    difficultyLevel: 1
+    spawnWeight: 0.25
+  - teamName: Swamp
+    monsterTypes: 0a000000
+    validBiomes: 02000000
+    difficultyLevel: 1
+    spawnWeight: 1
+  - teamName: TropicalIsland
+    monsterTypes: 0b000000
+    validBiomes: 03000000
+    difficultyLevel: 1
+    spawnWeight: 1
+  - teamName: Forest
+    monsterTypes: 08000000
+    validBiomes: 00000000
+    difficultyLevel: 1
+    spawnWeight: 1
+  - teamName: Swamp
+    monsterTypes: 09000000
+    validBiomes: 04000000
+    difficultyLevel: 1
+    spawnWeight: 1

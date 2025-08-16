@@ -14,6 +14,7 @@ using Game.Domain.Structs;
 using Game.Application.Enums;
 using System;
 using Game.Application.DTOs;
+using System.Linq;
 
 namespace Game.Application.Services
 {
@@ -25,6 +26,9 @@ namespace Game.Application.Services
         private readonly ILoggerService _log;
         private readonly IRandomService _rng;
         private readonly IBattleHistoryService _battleHistory;
+        private readonly IPlayerTeamPersistenceService _playerTeamPersistence;
+        private readonly IEnemyEncounterProvider _encounterProvider;
+        private readonly IOverworldPersistenceService _overworldPersistenceService;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
 
@@ -33,7 +37,10 @@ namespace Game.Application.Services
                              ILoggerService log,
                              IRandomService rng,
                              IInteractionBarrier waitBarrier,
-                             IBattleHistoryService battleHistory)
+                             IBattleHistoryService battleHistory,
+                             IPlayerTeamPersistenceService playerTeamPersistence,
+                             IEnemyEncounterProvider encounterProvider,
+                             IOverworldPersistenceService overworldPersistenceService)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
@@ -41,28 +48,57 @@ namespace Game.Application.Services
             _rng = rng;
             _waitBarrier = waitBarrier;
             _battleHistory = battleHistory;
+            _playerTeamPersistence = playerTeamPersistence;
+            _encounterProvider = encounterProvider;
+            _overworldPersistenceService = overworldPersistenceService;
             _log.Log("BattleService initialized.");
         }
         public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
         {
+            _log?.Log($"RunBattleAsync called with roomId: {roomId}");
+
             if (roomId == Guid.Empty)
                 throw new System.ArgumentException("Room ID cannot be empty", nameof(roomId));
 
             try
             {
                 _log?.Log("Setting up battle teams...");
-                SetupTeams();
+                SetupTeams(roomId);
+                _log?.Log($"Teams setup complete. Player count: {_player.Count}, Enemy count: {_enemy.Count}");
 
                 if (_player.Count == 0)
                     throw new System.InvalidOperationException("No player monsters were spawned");
-                
+
                 if (_enemy.Count == 0)
                     throw new System.InvalidOperationException("No enemy monsters were spawned");
 
+                _log?.Log("Publishing BattleStartedEvent...");
                 _bus.Publish(new BattleStartedEvent(_player, _enemy));
-                _log?.Log("Battle started.");
+                _log?.Log("Battle started, waiting for monster views to be created...");
+
+                // Create barrier token for spawn completion
+                var spawnCompletionToken = BarrierToken.New();
+                var totalMonsterCount = _player.Count + _enemy.Count;
+
+                // Re-publish monster spawned events with barrier info
+                foreach (var monster in _player)
+                {
+                    _bus.Publish(new MonsterSpawnedEvent(monster, BattleTeam.Player, spawnCompletionToken, totalMonsterCount));
+                }
+                foreach (var monster in _enemy)
+                {
+                    _bus.Publish(new MonsterSpawnedEvent(monster, BattleTeam.Enemy, spawnCompletionToken, totalMonsterCount));
+                }
+
+                await _waitBarrier.WaitAsync(new BarrierKey(spawnCompletionToken), ct);
+                _log?.Log("All monster views created, starting battle loop...");
 
                 var result = await RunLoopAsync(roomId, ct);
+                _log?.Log("RunLoopAsync completed");
+
+                // Save player team state after battle
+                _playerTeamPersistence.UpdatePlayerTeam(_player);
+                _log?.Log("Player team state saved to persistence");
 
                 _log?.Log($"Battle ended: {result.Outcome}, turns={result.TurnCount}");
                 _bus.Publish(new BattleEndedEvent(result));
@@ -75,38 +111,85 @@ namespace Game.Application.Services
             catch (System.Exception ex)
             {
                 _log?.LogError($"Critical error during battle: {ex.Message}");
+                _log?.LogError($"Stack trace: {ex.StackTrace}");
                 throw new System.InvalidOperationException($"Battle failed for room {roomId}: {ex.Message}", ex);
             }
         }
 
-        private void SetupTeams()
+        private void SetupTeams(Guid roomId)
         {
-            Spawn(MonsterType.Goald, BattleTeam.Player);
-            Spawn(MonsterType.Kraggan, BattleTeam.Player);
-            Spawn(MonsterType.Flimboon, BattleTeam.Player);
-            Spawn(MonsterType.Knight, BattleTeam.Enemy);
+            // Clear previous teams
+            _player.Clear();
+            _enemy.Clear();
+
+            // Load player team from persistence service
+            var playerMonsters = _playerTeamPersistence.GetPlayerTeam();
+            _player.AddRange(playerMonsters);
+            _log?.Log($"Loaded {playerMonsters.Count} player monsters from persistence");
+
+            // Generate enemy team based on room biome
+            var newEnemies = GenerateEnemyTeam(roomId);
+            newEnemies.ForEach(ne => _enemy.Add(ne));
         }
 
-        private void Spawn(MonsterType type, BattleTeam team)
+        private List<MonsterEntity> GenerateEnemyTeam(Guid roomId)
         {
-            var m = _monsterFactory.Create(type);
-            (team == BattleTeam.Player ? _player : _enemy).Add(m);
-            _bus.Publish(new MonsterSpawnedEvent(m, team));
+            try
+            {
+                var room = _overworldPersistenceService.GetRoomById(roomId);
+                if (room == null)
+                {
+                    _log?.LogError($"Room with ID {roomId} not found, using random encounter");
+                    var fallbackEnemyTypes = _encounterProvider.GetRandomEnemyTeam();
+                    return CreateEnemiesFromTypes(fallbackEnemyTypes);
+
+                }
+
+                _log?.Log($"Generating enemies for biome: {room.Biome}");
+                var enemyTypes = _encounterProvider.GetEnemyTeamForBiome(room.Biome);
+
+                if (enemyTypes == null || enemyTypes.Length == 0)
+                {
+                    _log?.LogWarning($"No enemies found for biome {room.Biome}, using fallback");
+                    enemyTypes = new MonsterType[] { MonsterType.Knight }; // Fallback
+                }
+                return CreateEnemiesFromTypes(enemyTypes);
+            }
+            catch (System.Exception ex)
+            {
+                _log?.LogError($"Error generating enemy team: {ex.Message}");
+                // Fallback to single enemy
+                var fallbackEnemy = new List<MonsterEntity>() { _monsterFactory.Create(MonsterType.Knight) };
+                _log?.Log("Created fallback Knight enemy due to error");
+                return fallbackEnemy;
+            }
         }
+
+        private List<MonsterEntity> CreateEnemiesFromTypes(MonsterType[] enemyTypes)
+        {
+            var returnList = new List<MonsterEntity>();
+            foreach (var enemyType in enemyTypes)
+            {
+                var enemy = _monsterFactory.Create(enemyType);
+                returnList.Add(enemy);
+                _log?.Log($"Created enemy: {enemy.MonsterName} ({enemyType})");
+            }
+            return returnList;
+        }
+
 
         private async Task<BattleResult> RunLoopAsync(Guid roomId, CancellationToken ct)
         {
             int turns = 0;
+            _log?.Log($"Starting battle loop. Player alive: {HasAlive(_player)}, Enemy alive: {HasAlive(_enemy)}");
 
             while (!ct.IsCancellationRequested && HasAlive(_player) && HasAlive(_enemy))
             {
                 turns++;
-
-                // PHASE: Player turn
+                _log?.Log($"=== TURN {turns} ===");
                 await RunTeamTurnAsync(_player, _enemy, BattleTeam.Player, ct);
                 if (!HasAlive(_enemy)) break;
 
-                // PHASE: Enemy turn
                 await RunTeamTurnAsync(_enemy, _player, BattleTeam.Enemy, ct);
             }
 
@@ -148,7 +231,7 @@ namespace Game.Application.Services
                 ResolveBasicAttack(attacker, target);
                 await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.End), ct);
 
-                await Task.Yield(); 
+                await Task.Yield();
             }
 
             _bus.Publish(new TurnEndedEvent(team));

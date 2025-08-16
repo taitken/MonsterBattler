@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebc18d37422e0e94db7767090f7224e5, type: 3}
   m_Name: Knight
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
-  monsterName: Cryoot
+  monsterName: Knight
   maxHealth: 76
   attackDamage: 12
   type: 7

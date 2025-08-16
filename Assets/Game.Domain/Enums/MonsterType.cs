@@ -9,6 +9,11 @@ namespace Game.Domain.Enums
         Kraggan,
         Ranger,
         Mage,
-        Knight
+        Knight,
+        KnightForest,
+        KnightTundra,
+        KnightSwamp,
+        KnightTropicalIsland,
+        KnightDesert
     }
 }

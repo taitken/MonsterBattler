@@ -1,13 +1,9 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
 using Game.Core.Logger;
 using Game.Domain.Entities.Overworld;
 using Game.Application.DTOs;
-using Game.Application.Messaging.Events.BattleFlow;
-using Game.Domain.Enums;
 
 namespace Game.Application.Services
 {
@@ -16,40 +12,54 @@ namespace Game.Application.Services
         private readonly IEventBus _bus;
         private readonly ILoggerService _log;
         private readonly IOverworldPersistenceService _persistence;
+        private readonly IOverworldGenerator _generator;
         private OverworldEntity _currentOverworld;
 
-        public OverworldService(IEventBus bus, ILoggerService log, IOverworldPersistenceService persistence)
+        public OverworldService(
+            IEventBus bus,
+            ILoggerService log,
+            IOverworldPersistenceService persistence,
+            IOverworldGenerator generator)
         {
             _bus = bus;
             _log = log;
             _persistence = persistence;
-            
-            
+            _generator = generator;
+
             _log.Log("OverworldService initialized.");
         }
 
-        public OverworldEntity InitializeOverworld(OverworldPayload payload)
+        public OverworldEntity InitializeOverworld()
         {
-            _currentOverworld = _persistence.GetOrCreateCurrentOverworld();
-            _log?.Log("Initialized current overworld");
+            if (_persistence.HasCurrentOverworld())
+            {
+                _currentOverworld = _persistence.GetCurrentOverworld();
+                _log?.Log("Loaded existing overworld");
+            }
+            else
+            {
+                _log?.Log("No existing overworld found, generating new one...");
+                _currentOverworld = _generator.GenerateOverworld();
+                _persistence.SaveCurrentOverworld(_currentOverworld);
+                _log?.Log("Created and saved new overworld");
+            }
+            
             return _currentOverworld;
-        }
-
-        public void LoadOverworld(OverworldPayload payload)
-        {
-            // if (payload.RoomId == Guid.Empty)
-            //     throw new ArgumentException("Room ID cannot be empty", nameof(payload));
-
-            // if (_currentOverworld != null)
-            // {
-            //     _persistence.SaveCurrentOverworld(_currentOverworld);
-            //     _log?.Log("Saved current overworld state");
-            // }
         }
 
         public OverworldEntity GetCurrentOverworld()
         {
             return _currentOverworld;
+        }
+
+        public RoomEntity GetRoomById(Guid roomId)
+        {
+            if (_currentOverworld == null)
+            {
+                _log?.LogWarning("Cannot get room: no current overworld");
+                return null;
+            }
+            return _currentOverworld.GetRoomById(roomId);
         }
 
         public void MarkRoomAsCompleted(Guid roomId)

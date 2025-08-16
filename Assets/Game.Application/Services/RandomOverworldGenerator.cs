@@ -33,12 +33,7 @@ namespace Game.Application.Services
             _log?.Log($"Generating overworld with {roomCount} rooms");
 
             // Create starting room at center
-            var startingRoom = new RoomEntity
-            {
-                X = CENTER,
-                Y = CENTER,
-                IsStartingRoom = true
-            };
+            var startingRoom = new RoomEntity(CENTER, CENTER, true);
             grid[CENTER, CENTER] = startingRoom;
             overworld.AddRoom(startingRoom);
 
@@ -209,12 +204,7 @@ namespace Game.Application.Services
             if (grid[newX, newY] != null)
                 return null;
 
-            var newRoom = new RoomEntity
-            {
-                X = newX,
-                Y = newY,
-                IsStartingRoom = false
-            };
+            var newRoom = new RoomEntity(newX, newY);
 
             // Set bidirectional connections
             parentRoom.SetConnection(direction, newRoom.Id);

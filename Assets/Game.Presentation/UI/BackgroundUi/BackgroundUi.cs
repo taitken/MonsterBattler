@@ -1,29 +1,33 @@
-using Game.Application.Messaging;
-using Game.Core;
-using Game.Presentation.Messaging;
 using UnityEngine;
 
-namespace Game.Presentation.UI.BackgroundUi
+namespace Game.Presentation.UI
 {
     /// <summary>
     /// Scales the background sprite to fit the camera view.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
-    public class BackgroundUi : MonoBehaviour
+    public class BackgroundUI : MonoBehaviour
     {
+        private SpriteRenderer _sr;
         void Start()
         {
+            _sr = GetComponent<SpriteRenderer>();
+            ScaleToCamera(Camera.main);
+        }
+
+        public void SetImage(Sprite image)
+        {
+            _sr.sprite = image;
             ScaleToCamera(Camera.main);
         }
 
         public void ScaleToCamera(Camera cam)
         {
-            SpriteRenderer sr = GetComponent<SpriteRenderer>();
-            if (sr.sprite == null || cam == null) return;
+            if (_sr.sprite == null || cam == null) return;
 
             // Get sprite size in world units
-            float spriteWidth = sr.sprite.bounds.size.x;
-            float spriteHeight = sr.sprite.bounds.size.y;
+            float spriteWidth = _sr.sprite.bounds.size.x;
+            float spriteHeight = _sr.sprite.bounds.size.y;
 
             // Get camera size
             float worldScreenHeight = cam.orthographicSize * 2f;

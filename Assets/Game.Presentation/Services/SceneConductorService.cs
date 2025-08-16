@@ -81,6 +81,11 @@ public sealed class SceneConductorService : MonoBehaviour, ISceneConductorServic
         {
             if (withFade && _fade != null) await _fade.FadeOut(ct: token);
 
+            // Reset scoped services before loading new scene
+            var serviceContainer = ServiceLocator.Get<IServiceContainer>();
+            serviceContainer?.ResetScopedInstances();
+            Debug.Log("Reset scoped service instances for scene change");
+
             var async = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             async.allowSceneActivation = true;
             while (!async.isDone)

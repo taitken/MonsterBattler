@@ -5,8 +5,9 @@ namespace Game.Application.Interfaces
 {
     public interface IOverworldPersistenceService
     {
-        OverworldEntity GetOrCreateCurrentOverworld();
+        OverworldEntity GetCurrentOverworld();
+        RoomEntity GetRoomById(Guid roomId);
         void SaveCurrentOverworld(OverworldEntity overworld);
-        void MarkRoomCompleted(Guid roomId);
+        bool HasCurrentOverworld();
     }
 }
