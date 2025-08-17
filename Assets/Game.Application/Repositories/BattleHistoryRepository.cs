@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using Game.Domain.Structs;
 
-namespace Game.Application.Interfaces
+namespace Game.Application.Repositories
 {
-    public class BattleHistoryService : IBattleHistoryService
+    public class BattleHistoryRepository : IBattleHistoryRepository
     {
         private Dictionary<Guid, BattleResult> _battleHistory = new();
         public int GetBattleCount()

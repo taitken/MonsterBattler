@@ -14,6 +14,11 @@ namespace Game.Domain.Enums
         KnightTundra,
         KnightSwamp,
         KnightTropicalIsland,
-        KnightDesert
+        KnightDesert,
+        Dropletus,
+        Ashwick,
+        Slumbrin,
+        Shardilo,
+        Grumlock
     }
 }

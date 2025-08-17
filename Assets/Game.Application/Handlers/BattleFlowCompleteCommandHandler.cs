@@ -1,6 +1,7 @@
 using System;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
+using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
 
@@ -10,13 +11,13 @@ namespace Game.Application.Handlers
     public class BattleFlowCompleteCommandHandler : ICommandHandler<BattleFlowCompleteCommand>
     {
         private readonly IEventBus _bus;
-        private readonly IBattleHistoryService _battleHistory;
+        private readonly IBattleHistoryRepository _battleHistory;
         private readonly IOverworldService _overworldService;
 
         public BattleFlowCompleteCommandHandler()
         {
             _bus = ServiceLocator.Get<IEventBus>();
-            _battleHistory = ServiceLocator.Get<IBattleHistoryService>();
+            _battleHistory = ServiceLocator.Get<IBattleHistoryRepository>();
             _overworldService = ServiceLocator.Get<IOverworldService>();
         }
 

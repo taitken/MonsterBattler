@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Game.Domain.Enums;
+using Game.Domain.Entities.Abilities;
 
 namespace Game.Domain.Entities
 {
@@ -11,16 +14,25 @@ namespace Game.Domain.Entities
         public MonsterType Type { get; private set; }
         public string MonsterName { get; private set; }
         public AttackDirection AttackDirection { get; private set; }
+        public Deck AbilityDeck { get; private set; }
+        public IReadOnlyList<StatusEffect> StatusEffects => _statusEffects.AsReadOnly();
+        
+        private readonly List<StatusEffect> _statusEffects = new();
+        
         public event Action<int> OnHealthChanged;
         public event Action OnAttack;
         public event Action OnDied;
+        public event Action<AbilityCard> OnAbilityUsed;
+        public event Action<StatusEffect> OnStatusEffectAdded;
+        public event Action<StatusEffect> OnStatusEffectRemoved;
 
         public MonsterEntity(
             int maxHealth,
             int attackDamage,
             MonsterType type,
             string monsterName,
-            AttackDirection attackDirection
+            AttackDirection attackDirection,
+            Deck abilityDeck = null
         )
         {
             CurrentHP = maxHealth;
@@ -29,6 +41,7 @@ namespace Game.Domain.Entities
             Type = type;
             MonsterName = monsterName;
             AttackDirection = attackDirection;
+            AbilityDeck = abilityDeck;
         }
 
         public void TakeDamage(int amount)
@@ -57,5 +70,59 @@ namespace Game.Domain.Entities
         {
             CurrentHP = MaxHealth;
         }
+        
+        public void UseAbility(AbilityCard card)
+        {
+            if (AbilityDeck == null)
+                throw new InvalidOperationException("Monster has no ability deck");
+            if (!AbilityDeck.IsCardAvailable(card))
+                throw new InvalidOperationException("Card not available in deck");
+            
+            AbilityDeck.PlayCard(card);
+            OnAbilityUsed?.Invoke(card);
+        }
+        
+        public void AddStatusEffect(StatusEffect statusEffect)
+        {
+            if (statusEffect == null)
+                throw new ArgumentNullException(nameof(statusEffect));
+            
+            _statusEffects.Add(statusEffect);
+            statusEffect.OnExpired += () => RemoveStatusEffect(statusEffect);
+            OnStatusEffectAdded?.Invoke(statusEffect);
+        }
+        
+        public void RemoveStatusEffect(StatusEffect statusEffect)
+        {
+            if (_statusEffects.Remove(statusEffect))
+            {
+                OnStatusEffectRemoved?.Invoke(statusEffect);
+            }
+        }
+        
+        public void ProcessStatusEffects()
+        {
+            var expiredEffects = new List<StatusEffect>();
+            
+            foreach (var effect in _statusEffects)
+            {
+                effect.ProcessTurn();
+                if (effect.IsExpired)
+                {
+                    expiredEffects.Add(effect);
+                }
+            }
+            
+            foreach (var expired in expiredEffects)
+            {
+                RemoveStatusEffect(expired);
+            }
+        }
+        
+        public bool HasStatusEffect(EffectType effectType) =>
+            _statusEffects.Any(e => e.Type == effectType);
+        
+        public IEnumerable<StatusEffect> GetStatusEffectsOfType(EffectType effectType) =>
+            _statusEffects.Where(e => e.Type == effectType);
     }
 }

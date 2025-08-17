@@ -1,6 +1,7 @@
 using System.Threading;
 using Game.Application.DTOs;
 using Game.Application.Interfaces;
+using Game.Application.Repositories;
 using Game.Core;
 using Game.Core.Logger;
 using Game.Domain.Enums;
@@ -21,14 +22,14 @@ namespace Assets.Game.Presentation.Scenes
         private IBattleService _battleService;
         private INavigationService _navigationService;
         private IBiomeBackgroundProvider _backgroundProvider;
-        private IOverworldPersistenceService _overworldService;
+        private IOverworldRepository _overworldService;
         void Awake()
         {
             _loggerService = ServiceLocator.Get<ILoggerService>();
             _battleService = ServiceLocator.Get<IBattleService>();
             _navigationService = ServiceLocator.Get<INavigationService>();
             _backgroundProvider = ServiceLocator.Get<IBiomeBackgroundProvider>();
-            _overworldService = ServiceLocator.Get<IOverworldPersistenceService>();
+            _overworldService = ServiceLocator.Get<IOverworldRepository>();
         }
         async void Start()
         {

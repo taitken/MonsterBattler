@@ -3,6 +3,7 @@ using Assets.Game.Presentation.UiObjects;
 using Game.Application.IFactories;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
+using Game.Application.Repositories;
 using Game.Application.Services;
 using Game.Core;
 using Game.Core.Logger;
@@ -54,10 +55,10 @@ namespace Game.Bootstrap
 
             // Application Services
             services.RegisterAsSingleton<INavigationService, NavigationService>();
-            services.RegisterAsSingleton<IBattleHistoryService, BattleHistoryService>();
-            services.RegisterAsSingleton<IOverworldPersistenceService, OverworldPersistenceService>();
+            services.RegisterAsSingleton<IBattleHistoryRepository, BattleHistoryRepository>();
+            services.RegisterAsSingleton<IOverworldRepository, OverworldRepository>();
             services.RegisterAsSingleton<IOverworldGenerator, RandomOverworldGenerator>();
-            services.RegisterAsSingleton<IPlayerTeamPersistenceService, PlayerTeamPersistenceService>();
+            services.RegisterAsSingleton<IPlayerTeamRepository, PlayerTeamRepository>();
 
             // Presentation Services
             services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();

@@ -1,9 +1,9 @@
 using System;
 using Game.Domain.Entities.Overworld;
 
-namespace Game.Application.Interfaces
+namespace Game.Application.Repositories
 {
-    public interface IOverworldPersistenceService
+    public interface IOverworldRepository
     {
         OverworldEntity GetCurrentOverworld();
         RoomEntity GetRoomById(Guid roomId);

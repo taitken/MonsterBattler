@@ -2,9 +2,9 @@
 using System;
 using Game.Domain.Structs;
 
-namespace Game.Application.Interfaces
+namespace Game.Application.Repositories
 {
-    public interface IBattleHistoryService
+    public interface IBattleHistoryRepository
     {
         int GetBattleCount();
         BattleResult GetBattleHistory(Guid roomId);

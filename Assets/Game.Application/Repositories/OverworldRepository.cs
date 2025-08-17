@@ -1,15 +1,10 @@
 using System;
 using Game.Application.Interfaces;
-using Game.Application.Messaging;
-using Game.Application.Messaging.Events.BattleFlow;
-using Game.Core;
-using Game.Core.Logger;
 using Game.Domain.Entities.Overworld;
 using Game.Domain.Enums;
-
-namespace Game.Application.Services
+namespace Game.Application.Repositories
 {
-    public class OverworldPersistenceService : IOverworldPersistenceService
+    public class OverworldRepository : IOverworldRepository
     {
         private OverworldEntity _currentOverworld;
 

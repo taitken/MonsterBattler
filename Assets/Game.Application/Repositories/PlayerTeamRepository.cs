@@ -6,15 +6,15 @@ using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 
-namespace Game.Application.Services
+namespace Game.Application.Repositories
 {
-    public class PlayerTeamPersistenceService : IPlayerTeamPersistenceService
+    public class PlayerTeamRepository : IPlayerTeamRepository
     {
         private readonly IMonsterEntityFactory _monsterFactory;
         private readonly ILoggerService _log;
         private List<MonsterEntity> _playerTeam;
 
-        public PlayerTeamPersistenceService(IMonsterEntityFactory monsterFactory, ILoggerService log)
+        public PlayerTeamRepository(IMonsterEntityFactory monsterFactory, ILoggerService log)
         {
             _monsterFactory = monsterFactory;
             _log = log;
@@ -84,9 +84,9 @@ namespace Game.Application.Services
             _playerTeam.Clear();
             
             // Create default starting team
-            var goald = _monsterFactory.Create(MonsterType.Goald);
-            var kraggan = _monsterFactory.Create(MonsterType.Kraggan);
-            var flimboon = _monsterFactory.Create(MonsterType.Flimboon);
+            var goald = _monsterFactory.Create(MonsterType.Ashwick);
+            var kraggan = _monsterFactory.Create(MonsterType.Dropletus);
+            var flimboon = _monsterFactory.Create(MonsterType.Shardilo);
             
             _playerTeam.Add(goald);
             _playerTeam.Add(kraggan);

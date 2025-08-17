@@ -39,3 +39,15 @@ MonoBehaviour:
     sprite: {fileID: 8456854214989567614, guid: ccf3916e2812bc94bba5fc402f1ccc34, type: 3}
   - type: 8
     sprite: {fileID: 6426833640399685670, guid: 9b724eab0a4422b43adfb1447f59f272, type: 3}
+  - type: 13
+    sprite: {fileID: -5634045400281357114, guid: 7def86b16f35e9740ac56b9ee951ffec, type: 3}
+  - type: 14
+    sprite: {fileID: -563804659270241382, guid: 6bf4515d2ac972f4e8f2caf3142041dc, type: 3}
+  - type: 16
+    sprite: {fileID: 7370357852646462151, guid: 7e614e78cced8214c8c0abb3817c6ee0, type: 3}
+  - type: 15
+    sprite: {fileID: -1388083078755620802, guid: c32a535cb0e94a24c90a0a8d0430f2ee, type: 3}
+  - type: 15
+    sprite: {fileID: -1388083078755620802, guid: c32a535cb0e94a24c90a0a8d0430f2ee, type: 3}
+  - type: 17
+    sprite: {fileID: -4904542189026476931, guid: fcbdecefa8c575348826b2754d6b2c5f, type: 3}

@@ -1,0 +1,7 @@
+Fantastic, lets generate a new monster with the same guidelines as before. This time, i want the monster to have: 
+
+- A pink-purplish monster that is vaguely gorilla shaped, but with two small horns on his head. He should be heavily weighted on his upper body and head, and have much smaller lower body and legs. 
+- The creature should be wearing a cape 
+- His personality is bemused and disdainful. 
+
+Please generate it in the same pixel style as other images in this chat.

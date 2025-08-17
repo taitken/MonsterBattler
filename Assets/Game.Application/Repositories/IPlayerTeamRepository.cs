@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Game.Domain.Entities;
 
-namespace Game.Application.Interfaces
+namespace Game.Application.Repositories
 {
-    public interface IPlayerTeamPersistenceService
+    public interface IPlayerTeamRepository
     {
         /// <summary>
         /// Gets the current player monster team. Creates default team if none exists.

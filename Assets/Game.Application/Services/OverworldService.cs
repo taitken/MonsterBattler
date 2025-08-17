@@ -4,6 +4,7 @@ using Game.Application.Messaging;
 using Game.Core.Logger;
 using Game.Domain.Entities.Overworld;
 using Game.Application.DTOs;
+using Game.Application.Repositories;
 
 namespace Game.Application.Services
 {
@@ -11,14 +12,14 @@ namespace Game.Application.Services
     {
         private readonly IEventBus _bus;
         private readonly ILoggerService _log;
-        private readonly IOverworldPersistenceService _persistence;
+        private readonly IOverworldRepository _persistence;
         private readonly IOverworldGenerator _generator;
         private OverworldEntity _currentOverworld;
 
         public OverworldService(
             IEventBus bus,
             ILoggerService log,
-            IOverworldPersistenceService persistence,
+            IOverworldRepository persistence,
             IOverworldGenerator generator)
         {
             _bus = bus;

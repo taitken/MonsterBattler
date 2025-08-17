@@ -14,7 +14,7 @@ using Game.Domain.Structs;
 using Game.Application.Enums;
 using System;
 using Game.Application.DTOs;
-using System.Linq;
+using Game.Application.Repositories;
 
 namespace Game.Application.Services
 {
@@ -25,10 +25,10 @@ namespace Game.Application.Services
         private readonly IMonsterEntityFactory _monsterFactory;
         private readonly ILoggerService _log;
         private readonly IRandomService _rng;
-        private readonly IBattleHistoryService _battleHistory;
-        private readonly IPlayerTeamPersistenceService _playerTeamPersistence;
+        private readonly IBattleHistoryRepository _battleHistory;
+        private readonly IPlayerTeamRepository _playerTeamPersistence;
         private readonly IEnemyEncounterProvider _encounterProvider;
-        private readonly IOverworldPersistenceService _overworldPersistenceService;
+        private readonly IOverworldRepository _overworldPersistenceService;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
 
@@ -37,10 +37,10 @@ namespace Game.Application.Services
                              ILoggerService log,
                              IRandomService rng,
                              IInteractionBarrier waitBarrier,
-                             IBattleHistoryService battleHistory,
-                             IPlayerTeamPersistenceService playerTeamPersistence,
+                             IBattleHistoryRepository battleHistory,
+                             IPlayerTeamRepository playerTeamPersistence,
                              IEnemyEncounterProvider encounterProvider,
-                             IOverworldPersistenceService overworldPersistenceService)
+                             IOverworldRepository overworldPersistenceService)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
