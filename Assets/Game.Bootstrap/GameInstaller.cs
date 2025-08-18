@@ -8,6 +8,7 @@ using Game.Application.Services;
 using Game.Core;
 using Game.Core.Logger;
 using Game.Core.Randomness;
+using Game.Infrastructure.Factories;
 using Game.Infrastructure.Randomness;
 using Game.Infrastructure.ScriptableObjects;
 using Game.Infrastructure.Services;
@@ -23,6 +24,7 @@ namespace Game.Bootstrap
         [Header("Image Databases")]
         [SerializeField] private MonsterDatabase monsterDatabase;
         [SerializeField] private EnemyEncounterDatabase enemyEncounterDatabase;
+        [SerializeField] private AbilityCardDatabase abilityCardDatabase;
         
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
@@ -67,6 +69,7 @@ namespace Game.Bootstrap
 
             // Entity Factories
             services.RegisterAsSingleton<IMonsterEntityFactory, MonsterEntityFactory>();
+            services.RegisterAsSingleton<IAbilityCardFactory>(() => new AbilityCardFactory(abilityCardDatabase));
             services.RegisterAsSingleton<IBiomeBackgroundProvider, BiomeBackgroundAdapter>();
         }
 

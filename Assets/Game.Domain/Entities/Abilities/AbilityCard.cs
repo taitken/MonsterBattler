@@ -10,12 +10,9 @@ namespace Game.Domain.Entities.Abilities
     {
         public string Name { get; private set; }
         public string Description { get; private set; }
-        public AbilityType Type { get; private set; }
-        public TargetType TargetType { get; private set; }
         public IReadOnlyList<AbilityEffect> Effects { get; private set; }
         
         public AbilityCard(string name, string description, 
-                          AbilityType type, TargetType targetType, 
                           IEnumerable<AbilityEffect> effects)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -23,8 +20,6 @@ namespace Game.Domain.Entities.Abilities
             
             Name = name;
             Description = description ?? string.Empty;
-            Type = type;
-            TargetType = targetType;
             Effects = effects?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(effects));
         }
         

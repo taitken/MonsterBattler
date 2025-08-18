@@ -7,11 +7,13 @@ namespace Game.Domain.Structs
         public EffectType Type { get; }
         public int Value { get; }
         public int Duration { get; }
+        public TargetType TargetType { get; }
         
-        public AbilityEffect(EffectType type, int value, int duration = 0)
+        public AbilityEffect(EffectType type, int value, TargetType targetType, int duration = 0)
         {
             Type = type;
             Value = value;
+            TargetType = targetType;
             Duration = duration;
         }
         

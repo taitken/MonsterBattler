@@ -48,6 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::App
   monsterDatabase: {fileID: 11400000, guid: 0b92c932ec2b92142a210831bb5586df, type: 2}
   enemyEncounterDatabase: {fileID: 11400000, guid: 7e6a01c267ef3054f9ba4c4e3910adb0, type: 2}
+  abilityCardDatabase: {fileID: 11400000, guid: 83807217b1923a94e92e42cea602f5e5, type: 2}
   monsterPrefab: {fileID: 8057753359465888455, guid: 8936d3239c3257f4596f94a82480440f, type: 3}
   roomPrefab: {fileID: 1272431741656861670, guid: 32b6ab25d41d7f14f8120d42cd02a983, type: 3}
   combatTextPrefab: {fileID: 5362606225375500960, guid: fc89fdfab7f04af469449d1b0277558f, type: 3}

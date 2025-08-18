@@ -4,7 +4,7 @@ namespace Game.Domain.Enums
     {
         Damage,
         Heal,
-        AttackBoost,
+        Defend,
         DefenseBoost,
         SpeedBoost,
         AttackDebuff,

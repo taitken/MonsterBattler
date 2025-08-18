@@ -1,0 +1,5 @@
+I want to generate some card art for my game, similar to games like hearthstone or Magic the Gathering.
+The art will take up roughly 50% of the card, so please design the art to fit the aspect ratio of 5:3.5.
+The art style is pixelated, see other images in this chat for the style to use.
+
+I want you to generate this piece of art with the following:
