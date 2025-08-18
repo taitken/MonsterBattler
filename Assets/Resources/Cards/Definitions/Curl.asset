@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 16eb075e5d2c4854e8283aa0d6e6a981, type: 3}
-  m_Name: Attack
+  m_Name: Curl
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
-  cardName: Basic Attack
+  cardName: Curl
   description: Deal {{0:Value}} damage to an <b>Enemy</b>
   cardArt: {fileID: 0}
   effects:
