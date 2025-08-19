@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Grumlock
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Grumlock
-  maxHealth: 55
+  maxHealth: 20
   attackDamage: 20
   type: 17
   attackDirection: 1

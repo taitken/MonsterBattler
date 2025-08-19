@@ -103,12 +103,12 @@ TextureImporter:
       name: Daybloom_0
       rect:
         serializedVersion: 2
-        x: 51
-        y: 79
-        width: 922
-        height: 882
+        x: 52
+        y: 81
+        width: 919
+        height: 878
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9de4ae7401da9f546a05e08320d40ecb
     internalID: 0
     vertices: []
     indices: 

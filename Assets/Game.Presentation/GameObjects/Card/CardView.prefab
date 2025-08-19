@@ -15,7 +15,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3978236015466370978
 Transform:
   m_ObjectHideFlags: 0
@@ -147,8 +147,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000024915, y: 0.0000093728}
-  m_SizeDelta: {x: 32.3235, y: 21.4989}
+  m_AnchoredPosition: {x: -0.000024915, y: -0.4}
+  m_SizeDelta: {x: 32.32, y: 20.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6334778097534808899
 CanvasRenderer:
@@ -213,7 +213,7 @@ MonoBehaviour:
   m_fontSizeMax: 4
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 2048
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -297,7 +297,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13.62, y: -34}
+  m_AnchoredPosition: {x: 10.9, y: -8.3}
   m_SizeDelta: {x: 3.8009, y: 4.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1195153231830579127
@@ -523,7 +523,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 20.91, y: -34.06}
+  m_AnchoredPosition: {x: 5.5, y: -8.2}
   m_SizeDelta: {x: 4.5119, y: 4.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5296687638518715105
@@ -885,7 +885,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -6.88, y: -34.1}
+  m_AnchoredPosition: {x: -6.4, y: -8.3}
   m_SizeDelta: {x: 4.6409, y: 4.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4505489658815303216
@@ -960,7 +960,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 6.68, y: -34.12}
+  m_AnchoredPosition: {x: 16.1, y: -8.4}
   m_SizeDelta: {x: 4.3186, y: 4.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3641492881266493982
@@ -1012,8 +1012,10 @@ GameObject:
   - component: {fileID: 4874449413921584798}
   - component: {fileID: 5790212965918875736}
   - component: {fileID: -1241186226585271027}
+  - component: {fileID: 5373896609663965780}
+  - component: {fileID: 1676488275967208990}
   m_Layer: 0
-  m_Name: Card
+  m_Name: CardView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1028,7 +1030,7 @@ RectTransform:
   m_GameObject: {fileID: 7397307455940112904}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4089234455892343603}
@@ -1063,6 +1065,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d44992a685b0724d94d8db41a4c7716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation::CardView
+  _cardTitle: {fileID: 566933986312696891}
+  _bodyText: {fileID: 6339936953636648971}
+  _cardArt: {fileID: 4581688701804551535}
+--- !u!223 &5373896609663965780
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7397307455940112904}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &1676488275967208990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7397307455940112904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!1 &8195238006447980429
 GameObject:
   m_ObjectHideFlags: 0
@@ -1097,8 +1148,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.17994869, y: -34.260002}
-  m_SizeDelta: {x: 4.8021, y: 4.5}
+  m_AnchoredPosition: {x: -0.5, y: -8.5244}
+  m_SizeDelta: {x: 4.8021, y: 4.6511}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8104989920350434878
 CanvasRenderer:

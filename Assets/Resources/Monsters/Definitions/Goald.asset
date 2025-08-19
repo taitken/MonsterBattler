@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Goald
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Goald
-  maxHealth: 100
+  maxHealth: 20
   attackDamage: 5
   type: 0
   attackDirection: 1

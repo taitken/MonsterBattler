@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
   cardName: Basic Defend
   description: Defend all allies for {{0:Value}}
-  cardArt: {fileID: 0}
+  cardArt: {fileID: 6633985309672553009, guid: e2fef003dc539b141a392c76ce57e565, type: 3}
   effects:
   - effectType: 2
     value: 3

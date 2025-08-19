@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
   cardName: Curl
   description: Deal {{0:Value}} damage to an <b>Enemy</b>
-  cardArt: {fileID: 0}
+  cardArt: {fileID: -4136205752612972851, guid: aab051f5c95442d49b11c20431cb06a1, type: 3}
   effects:
   - effectType: 0
     value: 4
     targetType: 1
     duration: 0
-  - effectType: 0
+  - effectType: 2
     value: 4
-    targetType: 1
+    targetType: 0
     duration: 0
   playSound: {fileID: 0}

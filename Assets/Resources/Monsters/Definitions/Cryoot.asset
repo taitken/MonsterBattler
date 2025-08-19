@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Cryoot
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Cryoot
-  maxHealth: 76
+  maxHealth: 20
   attackDamage: 12
   type: 1
   attackDirection: 1

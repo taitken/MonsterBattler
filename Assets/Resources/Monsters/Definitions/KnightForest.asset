@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KnightForest
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: KnightForest
-  maxHealth: 76
+  maxHealth: 15
   attackDamage: 12
   type: 8
   attackDirection: 0

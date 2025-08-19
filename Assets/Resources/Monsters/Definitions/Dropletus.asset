@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Dropletus
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Dropletus
-  maxHealth: 55
+  maxHealth: 20
   attackDamage: 20
   type: 13
   attackDirection: 1

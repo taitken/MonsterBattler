@@ -103,12 +103,12 @@ TextureImporter:
       name: Ranger 1_0
       rect:
         serializedVersion: 2
-        x: 135
-        y: 87
-        width: 738
-        height: 850
+        x: 136
+        y: 88
+        width: 736
+        height: 848
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6791ac99ff0d72f4e81182148aa7a406
     internalID: 0
     vertices: []
     indices: 

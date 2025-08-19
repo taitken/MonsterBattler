@@ -29,6 +29,7 @@ namespace Game.Bootstrap
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
         [SerializeField] private GameObject roomPrefab;
+        [SerializeField] private GameObject cardPrefab;
         [SerializeField] private GameObject combatTextPrefab;
         private EventBusRunner _eventRunner;
 
@@ -77,6 +78,7 @@ namespace Game.Bootstrap
         {
             services.RegisterAsScoped<IBattleService, BattleService>();
             services.RegisterAsScoped<IOverworldService, OverworldService>();
+            services.RegisterAsScoped<ICardEffectResolver, CardEffectResolver>();
         }
 
         private void RegisterTransientServices(ServiceContainer services)
@@ -89,6 +91,7 @@ namespace Game.Bootstrap
         {
             services.RegisterAsSingleton<IRoomViewFactory>(() => new RoomViewFactory(roomPrefab));
             services.RegisterAsSingleton<IMonsterViewFactory>(() => new MonsterViewFactory(monsterPrefab));
+            services.RegisterAsSingleton<ICardViewFactory>(() => new CardViewFactory(cardPrefab));
             services.RegisterAsSingleton<ICombatTextFactory>(() => new CombatTextFactory(combatTextPrefab));
         }
 
@@ -96,6 +99,7 @@ namespace Game.Bootstrap
         {
             services.RegisterAsSingleton<IMonsterSpriteProvider>(() => new MonsterSpriteAdapter(monsterDatabase));
             services.RegisterAsSingleton<IEnemyEncounterProvider>(() => new EnemyEncounterAdapter(enemyEncounterDatabase));
+            services.RegisterAsSingleton<ICardArtProvider>(() => new CardArtAdapter(abilityCardDatabase));
         }
 
         void Update()

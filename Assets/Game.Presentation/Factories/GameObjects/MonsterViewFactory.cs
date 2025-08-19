@@ -9,7 +9,7 @@ namespace Game.Presentation.GameObjects.Factories
     {
         private readonly GameObject monsterPrefab;
         private const float PLAYER_SCALE = 0.25f;
-        private const float ENEMY_SCALE = 0.45f;
+        private const float ENEMY_SCALE = 0.35f;
 
         public MonsterViewFactory(GameObject _monsterPrefab)
         {

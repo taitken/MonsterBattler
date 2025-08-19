@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mage
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Cryoot
-  maxHealth: 40
+  maxHealth: 8
   attackDamage: 20
   type: 6
   attackDirection: 0

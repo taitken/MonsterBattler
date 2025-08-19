@@ -103,12 +103,12 @@ TextureImporter:
       name: Goald_0
       rect:
         serializedVersion: 2
-        x: 94
-        y: 108
-        width: 796
-        height: 793
+        x: 95
+        y: 110
+        width: 794
+        height: 789
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 91afc9fd1f272c44c8edf8dd9e91df04
     internalID: 0
     vertices: []
     indices: 

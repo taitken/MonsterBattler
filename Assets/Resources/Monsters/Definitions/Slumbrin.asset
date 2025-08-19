@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Slumbrin
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Slumbrin
-  maxHealth: 55
+  maxHealth: 20
   attackDamage: 20
   type: 15
   attackDirection: 1

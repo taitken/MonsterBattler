@@ -5,12 +5,10 @@ namespace Game.Domain.Enums
         Damage,
         Heal,
         Defend,
-        DefenseBoost,
-        SpeedBoost,
-        AttackDebuff,
-        DefenseDebuff,
-        SpeedDebuff,
+        Burn,
         Poison,
-        Regeneration
+        Regeneration,
+        Weaken,
+        Strengthen,
     }
 }

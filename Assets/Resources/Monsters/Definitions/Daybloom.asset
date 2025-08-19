@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Daybloom
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Daybloom
-  maxHealth: 90
+  maxHealth: 20
   attackDamage: 3
   type: 2
   attackDirection: 1

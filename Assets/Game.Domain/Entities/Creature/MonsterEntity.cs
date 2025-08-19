@@ -46,11 +46,33 @@ namespace Game.Domain.Entities
 
         public void TakeDamage(int amount)
         {
-            CurrentHP = Math.Max(0, CurrentHP - amount);
-            OnHealthChanged?.Invoke(amount);
+            // Apply defend shields first
+            var remainingDamage = amount;
+            var defendEffects = _statusEffects.Where(e => e.Type == EffectType.Defend).ToList();
+            
+            foreach (var defendEffect in defendEffects)
+            {
+                if (remainingDamage <= 0) break;
+                
+                var blocked = Math.Min(defendEffect.Value, remainingDamage);
+                remainingDamage -= blocked;
+                defendEffect.ReduceValue(blocked);
+            }
+            
+            // Apply remaining damage to health
+            CurrentHP = Math.Max(0, CurrentHP - remainingDamage);
+            OnHealthChanged?.Invoke(remainingDamage);
 
             if (CurrentHP <= 0)
                 OnDied?.Invoke();
+        }
+
+        public void Heal(int amount)
+        {
+            var oldHP = CurrentHP;
+            CurrentHP = Math.Min(MaxHealth, CurrentHP + amount);
+            var actualHealing = CurrentHP - oldHP;
+            OnHealthChanged?.Invoke(-actualHealing); // Negative for healing
         }
 
         public void Attack(MonsterEntity target)

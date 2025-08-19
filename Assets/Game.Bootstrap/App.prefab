@@ -51,6 +51,7 @@ MonoBehaviour:
   abilityCardDatabase: {fileID: 11400000, guid: 83807217b1923a94e92e42cea602f5e5, type: 2}
   monsterPrefab: {fileID: 8057753359465888455, guid: 8936d3239c3257f4596f94a82480440f, type: 3}
   roomPrefab: {fileID: 1272431741656861670, guid: 32b6ab25d41d7f14f8120d42cd02a983, type: 3}
+  cardPrefab: {fileID: 7397307455940112904, guid: a03dfd3b06e87b245b75e6e3c7cf85f1, type: 3}
   combatTextPrefab: {fileID: 5362606225375500960, guid: fc89fdfab7f04af469449d1b0277558f, type: 3}
 --- !u!1001 &5923611480897633426
 PrefabInstance:

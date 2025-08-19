@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2cbee30436d850648887579c814adbbf
+guid: 2c9ceb6f834c2af47a35b997c8c632e7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -348633075591280822
-    second: HB Frame_0
+      213: -8270840008176036647
+    second: DefendIcon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: HB Frame_0
+      name: DefendIcon_0
       rect:
         serializedVersion: 2
-        x: 37
-        y: 45
-        width: 1236
-        height: 411
+        x: 171
+        y: 127
+        width: 683
+        height: 769
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a470e6c9018692bf0800000000000000
-      internalID: -348633075591280822
+      spriteID: 9d4149655d2183d80800000000000000
+      internalID: -8270840008176036647
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      HB Frame_0: -348633075591280822
+      DefendIcon_0: -8270840008176036647
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KnightDesert
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: KnightDesert
-  maxHealth: 76
+  maxHealth: 15
   attackDamage: 12
   type: 12
   attackDirection: 0

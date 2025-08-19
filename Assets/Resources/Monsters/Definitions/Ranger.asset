@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ranger
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Cryoot
-  maxHealth: 55
+  maxHealth: 12
   attackDamage: 12
   type: 5
   attackDirection: 0

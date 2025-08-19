@@ -14,12 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
   cardName: Basic Attack
   description: Deal {{0:Value}} damage to an <b>Enemy</b>
-  cardArt: {fileID: 0}
+  cardArt: {fileID: -7530385545832523778, guid: 6a5849c08a1be774fba38805df7156a2, type: 3}
   effects:
-  - effectType: 0
-    value: 4
-    targetType: 1
-    duration: 0
   - effectType: 0
     value: 4
     targetType: 1

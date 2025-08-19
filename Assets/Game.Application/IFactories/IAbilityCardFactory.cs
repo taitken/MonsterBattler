@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 
 namespace Game.Application.IFactories
 {
@@ -10,5 +11,10 @@ namespace Game.Application.IFactories
         List<AbilityCard> CreateAllCards();
         Deck CreateStarterDeck();
         Deck CreateDeckFromCardNames(IEnumerable<string> cardNames);
+        
+        // Monster-specific starter deck methods
+        List<AbilityCard> CreateStarterDeckForMonster(MonsterType monsterType);
+        Deck CreateStarterDeckForMonsterEntity(MonsterType monsterType);
+        bool HasStarterDeckForMonster(MonsterType monsterType);
     }
 }

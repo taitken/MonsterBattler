@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KnightTundra
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: KnightTundra
-  maxHealth: 76
+  maxHealth: 5
   attackDamage: 12
   type: 9
   attackDirection: 0

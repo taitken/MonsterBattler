@@ -103,12 +103,12 @@ TextureImporter:
       name: Dropletus_0
       rect:
         serializedVersion: 2
-        x: 139
-        y: 67
-        width: 822
-        height: 862
+        x: 140
+        y: 68
+        width: 820
+        height: 860
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 4bc43a2a071678f40b4a34115c7cae34
     internalID: 0
     vertices: []
     indices: 

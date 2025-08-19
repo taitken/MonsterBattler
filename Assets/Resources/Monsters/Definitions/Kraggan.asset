@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Kraggan
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Kraggan
-  maxHealth: 88
+  maxHealth: 20
   attackDamage: 4
   type: 4
   attackDirection: 1

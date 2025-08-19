@@ -34,5 +34,15 @@ namespace Game.Domain.Entities.Abilities
         
         public bool IsExpired => RemainingDuration <= 0;
         public bool IsPermanent => RemainingDuration < 0;
+        
+        public void ReduceValue(int amount)
+        {
+            Value = Math.Max(0, Value - amount);
+            if (Value <= 0)
+            {
+                OnExpired?.Invoke();
+            }
+            NotifyModelUpdated();
+        }
     }
 }

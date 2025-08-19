@@ -5,6 +5,7 @@ using Game.Application.Enums;
 using Game.Application.Interfaces;
 using Game.Core;
 using Game.Domain.Entities;
+using Game.Domain.Entities.Abilities;
 using Game.Domain.Enums;
 using Game.Presentation;
 using Game.Presentation.Services;
@@ -16,6 +17,25 @@ namespace Assets.Game.Presentation.GameObjects
     public class MonsterView : MonoObject<MonsterEntity>
     {
         [SerializeField] private HealthBarUi healthBar;
+        [SerializeField] private DeckIconPanelUI deckIcon;
+        [SerializeField] private IconPanelUI _iconPanel;
+        
+        public Vector3 DeckIconWorldPosition
+        {
+            get
+            {
+                if (deckIcon != null)
+                {
+                    // Use the actual deck icon position from the panel
+                    return deckIcon.DeckIconPosition;
+                }
+                else
+                {
+                    // Fallback: calculate position relative to monster
+                    return transform.position + new Vector3(-1.2f, -0.5f, 0);
+                }
+            }
+        }
         private Vector3 originalPosition;
         private SpriteRenderer spriteRenderer;
         private IInteractionBarrier _waitBarrier;
@@ -28,14 +48,14 @@ namespace Assets.Game.Presentation.GameObjects
         void Awake()
         {
             originalPosition = transform.position;
-            
+
             spriteRenderer = GetComponent<SpriteRenderer>();
             if (spriteRenderer == null)
             {
                 throw new System.InvalidOperationException(
                     $"SpriteRenderer component not found on {gameObject.name}. MonsterView requires a SpriteRenderer component.");
             }
-            
+
             try
             {
                 _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
@@ -56,7 +76,7 @@ namespace Assets.Game.Presentation.GameObjects
             {
                 throw new System.InvalidOperationException("Cannot bind null model to MonsterView");
             }
-            
+
             try
             {
                 var sprite = await _spriteProvider.GetMonsterSpriteAsync<Sprite>(model.Type);
@@ -75,15 +95,22 @@ namespace Assets.Game.Presentation.GameObjects
                 throw new System.InvalidOperationException(
                     $"Critical error loading sprite for monster {model.MonsterName} ({model.Type}): {ex.Message}", ex);
             }
-            
+
             if (healthBar == null)
             {
                 throw new System.InvalidOperationException(
                     $"HealthBar component not assigned on MonsterView for {model.MonsterName}");
             }
-            
+
             model.OnHealthChanged += UpdateHealthVisuals;
-            healthBar.SetHealth(model.CurrentHP, model.MaxHealth);
+            model.AbilityDeck.OnModelUpdated += UpdateDeckVisuals;
+            model.OnStatusEffectAdded += OnStatusEffectChanged;
+            model.OnStatusEffectRemoved += OnStatusEffectChanged;
+            
+            UpdateHealthVisuals(0);
+            UpdateDeckVisuals();
+            UpdateStatusEffectIcons();
+            
             // Registration is now handled by MonsterViewSpawner
             Debug.Log($"MonsterView {model.MonsterName} (ID: {model.Id}) bound successfully");
         }
@@ -136,6 +163,25 @@ namespace Assets.Game.Presentation.GameObjects
         private void UpdateHealthVisuals(int amount)
         {
             healthBar.SetHealth(model.CurrentHP, model.MaxHealth);
+        }
+
+        private void UpdateDeckVisuals()
+        {
+            Debug.Log($"Setting icon. Cards in deck: {model.AbilityDeck.CardsInDeck}");
+            deckIcon.SetDeckIconText(model.AbilityDeck.CardsInDeck, model.AbilityDeck.CardsInDiscard);
+        }
+
+        private void OnStatusEffectChanged(StatusEffect statusEffect)
+        {
+            UpdateStatusEffectIcons();
+        }
+
+        private void UpdateStatusEffectIcons()
+        {
+            if (_iconPanel != null && model != null)
+            {
+                _iconPanel.UpdateStatusEffects(model.StatusEffects);
+            }
         }
 
         public void PlayHitReaction(int amount)

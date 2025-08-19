@@ -31,7 +31,6 @@ namespace Game.Presentation.Spawners
 
         private void OnRoomSpawned(RoomSpawnedEvent evt)
         {
-            Debug.Log($"Room spawned at position: {evt.Position}");
             var spawnPosition = DetermineRoomSpawnPoint(evt);
             var roomView = _roomViewFactory.Create(evt.Room, spawnPosition);
             

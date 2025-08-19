@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Domain.Enums;
 using Game.Domain.Structs;
+using Game.Domain.Services;
 
 namespace Game.Domain.Entities.Abilities
 {
@@ -11,6 +12,8 @@ namespace Game.Domain.Entities.Abilities
         public string Name { get; private set; }
         public string Description { get; private set; }
         public IReadOnlyList<AbilityEffect> Effects { get; private set; }
+        
+        public string GeneratedDescription => AbilityEffectDescriptionService.GenerateDescription(Effects);
         
         public AbilityCard(string name, string description, 
                           IEnumerable<AbilityEffect> effects)

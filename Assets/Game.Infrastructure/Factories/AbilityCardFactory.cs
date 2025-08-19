@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game.Application.IFactories;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 using Game.Infrastructure.ScriptableObjects;
 
 namespace Game.Infrastructure.Factories
@@ -63,6 +64,30 @@ namespace Game.Infrastructure.Factories
             }
             
             return new Deck(cards);
+        }
+        
+        public List<AbilityCard> CreateStarterDeckForMonster(MonsterType monsterType)
+        {
+            Debug.Log($"Creating starter deck for monster type: {monsterType}");
+            var cards = _database.CreateStarterDeckForMonster(monsterType);
+            Debug.Log($"Created starter deck for {monsterType} with {cards.Count} cards");
+            return cards;
+        }
+        
+        public bool HasStarterDeckForMonster(MonsterType monsterType)
+        {
+            return _database.HasStarterDeckForMonster(monsterType);
+        }
+        
+        public Deck CreateStarterDeckForMonsterEntity(MonsterType monsterType)
+        {
+            Debug.Log($"Creating starter deck entity for monster type: {monsterType}");
+            var starterCards = CreateStarterDeckForMonster(monsterType);
+            if (starterCards.Count == 0)
+            {
+                Debug.LogWarning($"Starter deck for {monsterType} is empty! Monster will have no abilities.");
+            }
+            return new Deck(starterCards);
         }
     }
 }

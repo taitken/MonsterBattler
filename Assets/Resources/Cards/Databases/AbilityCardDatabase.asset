@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdf40cef65a22444c915ac0984e2fb83, type: 3}
   m_Name: AbilityCardDatabase
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardDatabase
-  cards: []
+  cards:
+  - {fileID: 11400000, guid: 77318b78c9c1b494ba735822ca29027d, type: 2}
+  - {fileID: 11400000, guid: ac227b476d908114e9970f48009a3f5b, type: 2}
+  - {fileID: 11400000, guid: 5b4e8ba1917009d4da86a776068172eb, type: 2}
+  starterDecks:
+  - {fileID: 11400000, guid: 86707ede8af564f488a2df312e9f1e6b, type: 2}

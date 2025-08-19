@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Shardilo
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Shardilo
-  maxHealth: 55
+  maxHealth: 20
   attackDamage: 20
   type: 16
   attackDirection: 1

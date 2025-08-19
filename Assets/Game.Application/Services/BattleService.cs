@@ -15,6 +15,7 @@ using Game.Application.Enums;
 using System;
 using Game.Application.DTOs;
 using Game.Application.Repositories;
+using Game.Domain.Entities.Abilities;
 
 namespace Game.Application.Services
 {
@@ -29,6 +30,7 @@ namespace Game.Application.Services
         private readonly IPlayerTeamRepository _playerTeamPersistence;
         private readonly IEnemyEncounterProvider _encounterProvider;
         private readonly IOverworldRepository _overworldPersistenceService;
+        private readonly ICardEffectResolver _cardEffectResolver;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
 
@@ -40,7 +42,8 @@ namespace Game.Application.Services
                              IBattleHistoryRepository battleHistory,
                              IPlayerTeamRepository playerTeamPersistence,
                              IEnemyEncounterProvider encounterProvider,
-                             IOverworldRepository overworldPersistenceService)
+                             IOverworldRepository overworldPersistenceService,
+                             ICardEffectResolver cardEffectResolver)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
@@ -51,6 +54,7 @@ namespace Game.Application.Services
             _playerTeamPersistence = playerTeamPersistence;
             _encounterProvider = encounterProvider;
             _overworldPersistenceService = overworldPersistenceService;
+            _cardEffectResolver = cardEffectResolver;
             _log.Log("BattleService initialized.");
         }
         public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
@@ -224,12 +228,8 @@ namespace Game.Application.Services
                     _log.Log($"{attacker.MonsterName} has no valid targets.");
                     continue;
                 }
-                var actionAnimationToken = BarrierToken.New();
-                _bus.Publish(new ActionSelectedEvent(team, attacker, target, actionAnimationToken));
-                await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.Hit), ct);
 
-                ResolveBasicAttack(attacker, target);
-                await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.End), ct);
+                await ResolveCardAction(attacker, target, attackers, defenders, team, ct);
 
                 await Task.Yield();
             }
@@ -237,8 +237,44 @@ namespace Game.Application.Services
             _bus.Publish(new TurnEndedEvent(team));
         }
 
-        private void ResolveBasicAttack(MonsterEntity attacker, MonsterEntity target)
+        private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target, 
+            List<MonsterEntity> allAllies, List<MonsterEntity> allEnemies, BattleTeam team, CancellationToken ct)
         {
+            // Check if attacker has a deck and can draw cards
+            if (attacker.AbilityDeck == null || !attacker.AbilityDeck.CanDrawCard())
+            {
+                _log?.LogWarning($"{attacker.MonsterName} has no deck or no cards available - falling back to basic attack");
+                await ResolveBasicAttack(attacker, target, team, ct);
+                return;
+            }
+
+            // Draw a card
+            var card = attacker.AbilityDeck.DrawRandomCard();
+            _bus.Publish(new CardDrawnEvent(attacker, card, team));
+
+            // Create animation token and publish card played event
+            var cardAnimationToken = BarrierToken.New();
+            _bus.Publish(new CardPlayedEvent(team, attacker, card, target, cardAnimationToken));
+
+            // Wait for animation hit point
+            await _waitBarrier.WaitAsync(new BarrierKey(cardAnimationToken, (int)AttackPhase.Hit), ct);
+
+            // Resolve card effects
+            _cardEffectResolver.ResolveCardEffects(card, attacker, target, allEnemies, allAllies);
+
+            // Move the card to discard pile
+            attacker.AbilityDeck.PlayCard(card);
+
+            // Wait for animation completion
+            await _waitBarrier.WaitAsync(new BarrierKey(cardAnimationToken, (int)AttackPhase.End), ct);
+        }
+
+        private async Task ResolveBasicAttack(MonsterEntity attacker, MonsterEntity target, BattleTeam team, CancellationToken ct)
+        {
+            var actionAnimationToken = BarrierToken.New();
+            _bus.Publish(new ActionSelectedEvent(team, attacker, target, actionAnimationToken));
+            await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.Hit), ct);
+
             // Domain call (no awaits)
             var beforeHP = target.CurrentHP;
             attacker.Attack(target); // applies damage inside domain
@@ -251,6 +287,8 @@ namespace Game.Application.Services
             {
                 _bus.Publish(new MonsterFaintedEvent(target));
             }
+
+            await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.End), ct);
         }
 
         private BattleOutcome ComputeOutcome(List<MonsterEntity> player, List<MonsterEntity> enemy)

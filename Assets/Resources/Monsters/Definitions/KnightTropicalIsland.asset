@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: KnightTropicalIsland
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: KnightTropicalIsland
-  maxHealth: 76
+  maxHealth: 15
   attackDamage: 12
   type: 11
   attackDirection: 0
