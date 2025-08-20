@@ -16,6 +16,7 @@ using System;
 using Game.Application.DTOs;
 using Game.Application.Repositories;
 using Game.Domain.Entities.Abilities;
+using System.Linq;
 
 namespace Game.Application.Services
 {
@@ -33,6 +34,7 @@ namespace Game.Application.Services
         private readonly ICardEffectResolver _cardEffectResolver;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
+        private readonly Dictionary<MonsterEntity, AbilityCard> _drawnCards = new();
 
         public BattleService(IEventBus bus,
                              IMonsterEntityFactory monsterFactory,
@@ -191,10 +193,17 @@ namespace Game.Application.Services
             {
                 turns++;
                 _log?.Log($"=== TURN {turns} ===");
+                
+                // Draw cards for all monsters at the start of the round
+                await DrawAllCardsForRound(ct);
+                
                 await RunTeamTurnAsync(_player, _enemy, BattleTeam.Player, ct);
                 if (!HasAlive(_enemy)) break;
 
                 await RunTeamTurnAsync(_enemy, _player, BattleTeam.Enemy, ct);
+                
+                // Clear drawn cards at the end of the round
+                _drawnCards.Clear();
             }
 
             var outcome = ComputeOutcome(_player, _enemy);
@@ -237,20 +246,45 @@ namespace Game.Application.Services
             _bus.Publish(new TurnEndedEvent(team));
         }
 
+        private async Task DrawAllCardsForRound(CancellationToken ct)
+        {
+            var allMonsters = GetAlive(_player).Concat(GetAlive(_enemy)).ToList();
+            var monstersWithCards = allMonsters.Where(m => m.AbilityDeck != null && m.AbilityDeck.CanDrawCard()).ToList();
+            
+            if (monstersWithCards.Count == 0) return;
+            
+            // Create barrier token for card drawing completion
+            var cardDrawCompletionToken = BarrierToken.New();
+            
+            // Draw cards and build list for the event
+            var drawnCards = new List<CardsDrawnEvent.DrawnCard>();
+            foreach (var monster in monstersWithCards)
+            {
+                var card = monster.AbilityDeck.DrawRandomCard();
+                _drawnCards[monster] = card;
+                
+                // Determine team for event
+                var team = _player.Contains(monster) ? BattleTeam.Player : BattleTeam.Enemy;
+                drawnCards.Add(new CardsDrawnEvent.DrawnCard(monster, card, team));
+            }
+            
+            // Publish single event with all drawn cards
+            _bus.Publish(new CardsDrawnEvent(drawnCards, cardDrawCompletionToken));
+            
+            // Wait for all card draw animations to complete
+            await _waitBarrier.WaitAsync(new BarrierKey(cardDrawCompletionToken), ct);
+        }
+
         private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target, 
             List<MonsterEntity> allAllies, List<MonsterEntity> allEnemies, BattleTeam team, CancellationToken ct)
         {
-            // Check if attacker has a deck and can draw cards
-            if (attacker.AbilityDeck == null || !attacker.AbilityDeck.CanDrawCard())
+            // Check if attacker has a pre-drawn card
+            if (!_drawnCards.TryGetValue(attacker, out var card))
             {
-                _log?.LogWarning($"{attacker.MonsterName} has no deck or no cards available - falling back to basic attack");
+                _log?.LogWarning($"{attacker.MonsterName} has no pre-drawn card - falling back to basic attack");
                 await ResolveBasicAttack(attacker, target, team, ct);
                 return;
             }
-
-            // Draw a card
-            var card = attacker.AbilityDeck.DrawRandomCard();
-            _bus.Publish(new CardDrawnEvent(attacker, card, team));
 
             // Create animation token and publish card played event
             var cardAnimationToken = BarrierToken.New();
