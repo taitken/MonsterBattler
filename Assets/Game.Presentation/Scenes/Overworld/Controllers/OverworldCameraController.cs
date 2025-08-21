@@ -6,14 +6,11 @@ namespace Game.Presentation.Controllers
     {
         [SerializeField] private float dragSensitivity = 2f;
         [SerializeField] private float smoothTime = 0.1f;
-        [SerializeField] private Vector2 panBounds = new Vector2(20f, 20f); // Optional bounds for panning
-        [SerializeField] private bool usePanBounds = false;
+        [SerializeField] private SpriteRenderer backgroundImage;
         
-        [Header("Zoom Settings")]
-        [SerializeField] private float zoomSensitivity = 1f;
-        [SerializeField] private float minZoom = 0.5f;
-        [SerializeField] private float maxZoom = 2f;
-        [SerializeField] private float zoomSmoothTime = 0.1f;
+        private float _minX, _maxX;
+        private bool _boundsCalculated = false;
+        
         
         private Camera _camera;
         private Vector3 _lastMousePosition;
@@ -21,9 +18,6 @@ namespace Game.Presentation.Controllers
         private Vector3 _velocity = Vector3.zero;
         private bool _isDragging = false;
         
-        private float _targetOrthographicSize;
-        private float _originalOrthographicSize;
-        private float _zoomVelocity = 0f;
 
         void Start()
         {
@@ -34,16 +28,13 @@ namespace Game.Presentation.Controllers
             }
             
             _targetPosition = transform.position;
-            _originalOrthographicSize = _camera.orthographicSize;
-            _targetOrthographicSize = _originalOrthographicSize;
+            CalculateSpriteBounds();
         }
 
         void Update()
         {
             HandleMouseInput();
-            HandleZoomInput();
             SmoothCameraMovement();
-            SmoothZoomMovement();
         }
 
         private void HandleMouseInput()
@@ -61,13 +52,13 @@ namespace Game.Presentation.Controllers
                 Vector3 currentMousePosition = _camera.ScreenToWorldPoint(Input.mousePosition);
                 Vector3 deltaMovement = _lastMousePosition - currentMousePosition;
                 
-                _targetPosition += deltaMovement * dragSensitivity;
+                // Only allow horizontal (X-axis) movement
+                _targetPosition.x += deltaMovement.x * dragSensitivity;
                 
-                // Apply bounds if enabled
-                if (usePanBounds)
+                // Apply sprite bounds if calculated
+                if (_boundsCalculated)
                 {
-                    _targetPosition.x = Mathf.Clamp(_targetPosition.x, -panBounds.x, panBounds.x);
-                    _targetPosition.y = Mathf.Clamp(_targetPosition.y, -panBounds.y, panBounds.y);
+                    _targetPosition.x = Mathf.Clamp(_targetPosition.x, _minX, _maxX);
                 }
                 
                 _lastMousePosition = currentMousePosition;
@@ -80,21 +71,6 @@ namespace Game.Presentation.Controllers
             }
         }
 
-        private void HandleZoomInput()
-        {
-            float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-            if (Mathf.Abs(scrollInput) > 0.01f)
-            {
-                _targetOrthographicSize -= scrollInput * zoomSensitivity;
-                
-                // Convert zoom factor to orthographic size (inverse relationship)
-                float minOrthographicSize = _originalOrthographicSize / maxZoom;
-                float maxOrthographicSize = _originalOrthographicSize / minZoom;
-                
-                _targetOrthographicSize = Mathf.Clamp(_targetOrthographicSize, minOrthographicSize, maxOrthographicSize);
-            }
-        }
-
         private void SmoothCameraMovement()
         {
             // Smoothly move camera to target position
@@ -104,25 +80,57 @@ namespace Game.Presentation.Controllers
             }
         }
 
-        private void SmoothZoomMovement()
-        {
-            // Smoothly zoom camera to target size
-            if (Mathf.Abs(_camera.orthographicSize - _targetOrthographicSize) > 0.01f)
-            {
-                _camera.orthographicSize = Mathf.SmoothDamp(_camera.orthographicSize, _targetOrthographicSize, ref _zoomVelocity, zoomSmoothTime);
-            }
-        }
-
         // Optional method to reset camera to original position
         public void ResetCamera()
         {
             _targetPosition = Vector3.zero;
         }
 
-        // Optional method to focus on a specific point
+        // Optional method to focus on a specific point (X-axis only)
         public void FocusOn(Vector3 position)
         {
-            _targetPosition = new Vector3(position.x, position.y, transform.position.z);
+            _targetPosition = new Vector3(position.x, _targetPosition.y, transform.position.z);
+            
+            // Apply bounds when focusing
+            if (_boundsCalculated)
+            {
+                _targetPosition.x = Mathf.Clamp(_targetPosition.x, _minX, _maxX);
+            }
+        }
+        
+        private void CalculateSpriteBounds()
+        {
+            if (backgroundImage == null || _camera == null)
+            {
+                _boundsCalculated = false;
+                return;
+            }
+            
+            // Get the sprite bounds in world space
+            Bounds spriteBounds = backgroundImage.bounds;
+            
+            // Calculate camera's half-width at current orthographic size
+            float cameraHalfWidth = _camera.orthographicSize * _camera.aspect;
+            
+            // Set bounds so camera can pan to see the edges of the sprite
+            // But prevent camera from going beyond the sprite edges
+            _minX = spriteBounds.min.x + cameraHalfWidth;
+            _maxX = spriteBounds.max.x - cameraHalfWidth;
+            
+            // Ensure minX doesn't exceed maxX (in case sprite is smaller than camera view)
+            if (_minX > _maxX)
+            {
+                float center = (spriteBounds.min.x + spriteBounds.max.x) / 2f;
+                _minX = _maxX = center;
+            }
+            
+            _boundsCalculated = true;
+        }
+        
+        // Call this if the background sprite changes or camera settings change
+        public void RecalculateBounds()
+        {
+            CalculateSpriteBounds();
         }
     }
 }

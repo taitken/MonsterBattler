@@ -45,5 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation::Game.Presentation.Spawners.OverworldSceneSpawner
   roomSpawnParent: {fileID: 0}
-  gridSpacing: {x: 3, y: 3}
-  roomsPerRow: 5
+  gridSpacing: {x: 2.9, y: 2}
+  roomSprites:
+  - {fileID: 3463658362275521134, guid: 35e6c7da6d9f19f42a745a673039864f, type: 3}
+  - {fileID: 5696234589234851955, guid: 710750b1371affe4ebcc55b825769fd5, type: 3}
+  - {fileID: 1098286324429101383, guid: 2934aa18756f1634c85bc47126005bb9, type: 3}
+  - {fileID: -9001266942062728648, guid: 765afa6caf5454a4bae7348a868ddb16, type: 3}
+  - {fileID: 45963078820343027, guid: a2310501f06887247ad87bcf162f2785, type: 3}

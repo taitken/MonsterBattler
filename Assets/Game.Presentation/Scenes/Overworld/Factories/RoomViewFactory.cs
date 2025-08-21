@@ -27,7 +27,7 @@ namespace Game.Presentation.GameObjects.Factories
                 throw new System.InvalidOperationException("Failed to instantiate room prefab");
                 
             // Set scale to 30%
-            obj.transform.localScale = Vector3.one * 0.3f;
+            obj.transform.localScale = Vector3.one * 0.45f;
                 
             var roomView = obj.GetComponent<RoomView>();
             if (roomView == null)

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Game.Presentation.Shared.Views;
 using Game.Application.Messaging.Events.BattleFlow;
@@ -6,7 +7,7 @@ using Game.Presentation.Shared.Factories;
 using Game.Presentation.Core.Interfaces;
 using UnityEngine;
 
-namespace Game.Presentation.Scenes.Battle.Services
+namespace Game.Presentation.Scenes.Battle.Spawners
 {
     public class CardViewManager : MonoBehaviour
     {
@@ -73,6 +74,49 @@ namespace Game.Presentation.Scenes.Battle.Services
                     Destroy(cardView.gameObject);
             }
             _drawnCardViews.Clear();
+        }
+
+        public void DestroyCardForMonster(MonsterEntity monster)
+        {
+            if (_drawnCardViews.TryGetValue(monster, out CardView cardView))
+            {
+                _drawnCardViews.Remove(monster);
+                if (cardView != null)
+                {
+                    Debug.Log($"Fading out card for dead monster: {monster.MonsterName}");
+                    StartCoroutine(FadeOutAndDestroyCard(cardView));
+                }
+            }
+        }
+
+        private IEnumerator FadeOutAndDestroyCard(CardView cardView)
+        {
+            if (cardView == null) yield break;
+
+            // Get or add CanvasGroup for alpha control
+            var canvasGroup = cardView.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+                canvasGroup = cardView.gameObject.AddComponent<CanvasGroup>();
+
+            float fadeDuration = 0.5f;
+            float elapsed = 0f;
+            float startAlpha = canvasGroup.alpha;
+
+            // Fade out the card
+            while (elapsed < fadeDuration && cardView != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / fadeDuration;
+                canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, t);
+                yield return null;
+            }
+
+            // Destroy the card
+            if (cardView != null)
+            {
+                Debug.Log($"Card fade complete, destroying GameObject");
+                Destroy(cardView.gameObject);
+            }
         }
 
         public CardView CreateCardForAction(MonsterEntity caster, Game.Domain.Entities.Abilities.AbilityCard card, IViewRegistryService viewRegistry)

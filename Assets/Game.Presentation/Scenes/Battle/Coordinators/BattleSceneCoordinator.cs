@@ -6,12 +6,13 @@ using Game.Application.Messaging.Events.Spawning;
 using Game.Core;
 using Game.Presentation.Scenes.Battle.Controllers;
 using Game.Presentation.Shared.Factories;
-using Game.Presentation.Scenes.Battle.Services;
+using Game.Presentation.Scenes.Battle.Spawners;
 using Game.Presentation.Shared.Enums;
 using Game.Presentation.Core.Interfaces;
 using UnityEngine;
 using Game.Presentation.Shared.Views;
 using Game.Presentation.Spawners;
+using Game.Presentation.Scenes.Battle.Services;
 
 namespace Game.Presentation.Scenes.Battle.Coordinators
 {
@@ -31,6 +32,7 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
         private IDisposable _battleEndedSubscription;
         private IDisposable _cardPlayedSubscription;
         private IDisposable _cardsDrawnSubscription;
+        private IDisposable _monsterFaintedSubscription;
 
         void Awake()
         {
@@ -43,7 +45,7 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
             
             // Initialize components
             monsterSpawner.Initialize(_waitBarrier, _viewRegistry, _monsterFactory);
-            cardAnimationController.Initialize(_eventBus, _waitBarrier, _viewRegistry);
+            cardAnimationController.Initialize(_waitBarrier, _viewRegistry);
             cardViewManager.Initialize(_cardFactory);
             
             // Subscribe to events
@@ -51,6 +53,7 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
             _battleEndedSubscription = _eventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
             _cardPlayedSubscription = _eventBus.Subscribe<CardPlayedEvent>(OnCardPlayed);
             _cardsDrawnSubscription = _eventBus.Subscribe<CardsDrawnEvent>(OnCardsDrawn);
+            _monsterFaintedSubscription = _eventBus.Subscribe<MonsterFaintedEvent>(OnMonsterFainted);
         }
 
         private void OnMonsterSpawned(MonsterSpawnedEvent evt)
@@ -62,6 +65,12 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
         {
             monsterSpawner.CleanupAllMonsters();
             cardViewManager.ClearAllDrawnCards();
+        }
+
+        private void OnMonsterFainted(MonsterFaintedEvent evt)
+        {
+            // Destroy the card associated with the dead monster
+            cardViewManager.DestroyCardForMonster(evt.Monster);
         }
 
         private void OnCardsDrawn(CardsDrawnEvent evt)
@@ -113,6 +122,7 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
             _battleEndedSubscription?.Dispose();
             _cardPlayedSubscription?.Dispose();
             _cardsDrawnSubscription?.Dispose();
+            _monsterFaintedSubscription?.Dispose();
         }
     }
 }

@@ -14,13 +14,13 @@ namespace Game.Presentation.Scenes.Battle.Controllers
 {
     public class CardAnimationController : MonoBehaviour
     {
-        private IEventBus _eventBus;
+        private const float ATTACK_ANIMATION_SPEED = 2.0f;
+        private const float DEFEND_ANIMATION_SPEED = 2.0f;
         private IInteractionBarrier _waitBarrier;
         private IViewRegistryService _viewRegistry;
         
-        public void Initialize(IEventBus eventBus, IInteractionBarrier waitBarrier, IViewRegistryService viewRegistry)
+        public void Initialize(IInteractionBarrier waitBarrier, IViewRegistryService viewRegistry)
         {
-            _eventBus = eventBus;
             _waitBarrier = waitBarrier;
             _viewRegistry = viewRegistry;
         }
@@ -79,8 +79,14 @@ namespace Game.Presentation.Scenes.Battle.Controllers
                 yield return coroutine;
             }
 
+            var elapsed = 0f;
+            while (elapsed < 1f)
+            {
+                elapsed += Time.deltaTime;
+            }
+
             // Signal completion
-            _waitBarrier.Signal(new BarrierKey(completionToken));
+                _waitBarrier.Signal(new BarrierKey(completionToken));
         }
 
         public IEnumerator AnimateCardAction(CardView cardView, BarrierToken animationToken, CardAnimationType animationType, Vector3? targetPosition)
@@ -89,13 +95,19 @@ namespace Game.Presentation.Scenes.Battle.Controllers
 
             var cardTransform = cardView.transform;
             var startPosition = cardTransform.position;
-            var originalRotation = cardTransform.rotation;
             var floatTarget = startPosition + new Vector3(0, 0.5f, 0);
+            
+            // Bring card to front during animation
+            var originalSortingOrder = BringCardToFront(cardView);
 
             // Phase 1: Float and potentially perform special animation
             if (animationType == CardAnimationType.Attack && targetPosition.HasValue)
             {
                 yield return StartCoroutine(AnimateAttack(cardView, startPosition, floatTarget, targetPosition.Value, animationToken));
+            }
+            else if (animationType == CardAnimationType.Defend)
+            {
+                yield return StartCoroutine(AnimateDefend(cardView, startPosition, animationToken));
             }
             else
             {
@@ -126,6 +138,9 @@ namespace Game.Presentation.Scenes.Battle.Controllers
             // Phase 3: Fade out and destroy the card
             if (cardView != null)
             {
+                // Restore original sorting order before destruction
+                RestoreCardSortingOrder(cardView, originalSortingOrder);
+                
                 var canvasGroup = cardView.GetComponent<CanvasGroup>();
                 if (canvasGroup == null)
                     canvasGroup = cardView.gameObject.AddComponent<CanvasGroup>();
@@ -215,7 +230,7 @@ namespace Game.Presentation.Scenes.Battle.Controllers
             bool attackingLeft = attackDirection.x < 0;
             
             // Phase 1: Wind up (0.3 seconds) - tilt back
-            float windUpDuration = 0.3f;
+            float windUpDuration = 0.3f / ATTACK_ANIMATION_SPEED;
             float elapsed = 0f;
             
             while (elapsed < windUpDuration)
@@ -235,7 +250,7 @@ namespace Game.Presentation.Scenes.Battle.Controllers
             }
             
             // Phase 2: Strike forward (0.2 seconds) - quick rotation and slide toward enemy
-            float strikeDuration = 0.2f;
+            float strikeDuration = 0.2f / ATTACK_ANIMATION_SPEED;
             elapsed = 0f;
             Vector3 strikeStart = cardTransform.position;
             Vector3 strikeEnd = strikeStart + attackDirection * 0.5f; // Slide forward slightly
@@ -264,7 +279,7 @@ namespace Game.Presentation.Scenes.Battle.Controllers
             _waitBarrier.Signal(new BarrierKey(animationToken, (int)AttackPhase.Hit));
             
             // Phase 3: Return to position (0.4 seconds) - settle back to baseline position
-            float returnDuration = 0.4f;
+            float returnDuration = 0.1f / ATTACK_ANIMATION_SPEED;
             elapsed = 0f;
             Vector3 returnStart = cardTransform.position;
             
@@ -290,6 +305,170 @@ namespace Game.Presentation.Scenes.Battle.Controllers
             // Ensure final state - card should be at original position
             cardTransform.position = originalStartPosition;
             cardTransform.rotation = originalRotation;
+        }
+
+        private IEnumerator AnimateDefend(CardView cardView, Vector3 originalStartPosition, BarrierToken animationToken)
+        {
+            if (cardView == null) yield break;
+
+            var cardTransform = cardView.transform;
+            var originalScale = cardTransform.localScale;
+            
+            // Phase 1: Snap to Attention (0.2 seconds) - Quick, rigid movement upward
+            float snapDuration = 0.2f / DEFEND_ANIMATION_SPEED;
+            float elapsed = 0f;
+            Vector3 attentionPosition = originalStartPosition + new Vector3(0, 0.8f, 0);
+            
+            while (elapsed < snapDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / snapDuration;
+                
+                // Sharp ease-out for snappy movement
+                float easedT = 1f - Mathf.Pow(1f - t, 4f);
+                
+                // Rigid upward movement
+                cardTransform.position = Vector3.Lerp(originalStartPosition, attentionPosition, easedT);
+                
+                yield return null;
+            }
+            
+            // Phase 2: Fortification Scale-Up (0.3 seconds) - Become larger and more imposing
+            float fortifyDuration = 0.3f / DEFEND_ANIMATION_SPEED;
+            elapsed = 0f;
+            Vector3 fortifiedScale = originalScale * 1.2f; // 30% larger
+            
+            while (elapsed < fortifyDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / fortifyDuration;
+                
+                // Ease-out for strong defensive presence
+                float easedT = 1f - Mathf.Pow(1f - t, 2f);
+                
+                // Scale up to show defensive strength
+                cardTransform.localScale = Vector3.Lerp(originalScale, fortifiedScale, easedT);
+                
+                yield return null;
+            }
+            
+            // Phase 3: Hold Fortified State (0.4 seconds) - Maintain defensive posture
+            float holdDuration = 0.5f / DEFEND_ANIMATION_SPEED;
+            elapsed = 0f;
+            
+            while (elapsed < holdDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / holdDuration;
+                
+                // Gentle pulsing to show active defense
+                float pulseIntensity = 0.01f; // Small pulse as a percentage
+                float currentPulse = Mathf.Sin(t * 8f) * pulseIntensity;
+                cardTransform.localScale = fortifiedScale * (1f + currentPulse);
+                
+                yield return null;
+            }
+            
+            // Phase 4: Return to Normal (0.1 seconds) - Release defensive stance
+            float returnDuration = 0.1f / DEFEND_ANIMATION_SPEED;
+            elapsed = 0f;
+            Vector3 returnStartPos = cardTransform.position;
+            
+            while (elapsed < returnDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / returnDuration;
+                
+                // Ease-in for smooth return
+                float easedT = Mathf.Pow(t, 0.5f);
+                
+                // Return to original position and scale
+                cardTransform.position = Vector3.Lerp(returnStartPos, originalStartPosition, easedT);
+                cardTransform.localScale = Vector3.Lerp(fortifiedScale, originalScale, easedT);
+                
+                yield return null;
+            }
+            
+            // Signal hit point - shield effect should activate now
+            _waitBarrier.Signal(new BarrierKey(animationToken, (int)AttackPhase.Hit));
+            
+            // Ensure final state
+            cardTransform.position = originalStartPosition;
+            cardTransform.localScale = originalScale;
+        }
+
+        private int BringCardToFront(CardView cardView)
+        {
+            // Try to get Canvas component first (for UI cards)
+            var canvas = cardView.GetComponent<Canvas>();
+            if (canvas != null)
+            {
+                int originalOrder = canvas.sortingOrder;
+                canvas.sortingOrder = 1000; // High value to ensure it's on top
+                return originalOrder;
+            }
+            
+            // Try to get SpriteRenderer component (for world space cards)
+            var spriteRenderer = cardView.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                int originalOrder = spriteRenderer.sortingOrder;
+                spriteRenderer.sortingOrder = 1000;
+                return originalOrder;
+            }
+            
+            // Try to get child components
+            var childCanvas = cardView.GetComponentInChildren<Canvas>();
+            if (childCanvas != null)
+            {
+                int originalOrder = childCanvas.sortingOrder;
+                childCanvas.sortingOrder = 1000;
+                return originalOrder;
+            }
+            
+            var childSpriteRenderer = cardView.GetComponentInChildren<SpriteRenderer>();
+            if (childSpriteRenderer != null)
+            {
+                int originalOrder = childSpriteRenderer.sortingOrder;
+                childSpriteRenderer.sortingOrder = 1000;
+                return originalOrder;
+            }
+            
+            return 0; // Default if no sorting component found
+        }
+
+        private void RestoreCardSortingOrder(CardView cardView, int originalSortingOrder)
+        {
+            // Restore Canvas sorting order
+            var canvas = cardView.GetComponent<Canvas>();
+            if (canvas != null)
+            {
+                canvas.sortingOrder = originalSortingOrder;
+                return;
+            }
+            
+            // Restore SpriteRenderer sorting order
+            var spriteRenderer = cardView.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingOrder = originalSortingOrder;
+                return;
+            }
+            
+            // Restore child component sorting orders
+            var childCanvas = cardView.GetComponentInChildren<Canvas>();
+            if (childCanvas != null)
+            {
+                childCanvas.sortingOrder = originalSortingOrder;
+                return;
+            }
+            
+            var childSpriteRenderer = cardView.GetComponentInChildren<SpriteRenderer>();
+            if (childSpriteRenderer != null)
+            {
+                childSpriteRenderer.sortingOrder = originalSortingOrder;
+                return;
+            }
         }
     }
 }

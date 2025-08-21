@@ -24,7 +24,7 @@ namespace Game.Presentation.Scenes.Battle.Services
                         return CardAnimationType.None; // Not implemented yet
                     
                     case EffectType.Defend:
-                        return CardAnimationType.None; // Not implemented yet
+                        return CardAnimationType.Defend;
                     
                     // Add more cases as needed
                     default:

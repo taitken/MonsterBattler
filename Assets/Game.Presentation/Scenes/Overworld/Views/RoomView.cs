@@ -26,6 +26,13 @@ namespace Game.Presentation.GameObjects.OverworldMap
             Debug.Log("Room awake");
             originalPosition = transform.position;
             _spriteRenderer = GetComponent<SpriteRenderer>();
+            
+            // Ensure rooms render in front of background (higher sorting order)
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.sortingOrder = 10; // Background should be 0 or negative
+            }
+            
             _eventBus = ServiceLocator.Get<IEventBus>();
             _overworldService = ServiceLocator.Get<IOverworldService>();
             _originalColor = _spriteRenderer.color;

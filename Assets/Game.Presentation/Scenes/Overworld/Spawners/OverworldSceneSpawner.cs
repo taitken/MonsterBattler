@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.Spawning;
 using Game.Core;
@@ -13,13 +14,16 @@ namespace Game.Presentation.Spawners
     public class OverworldSceneSpawner : MonoBehaviour
     {
         [SerializeField] private Transform roomSpawnParent;
-        [SerializeField] private Vector2 gridSpacing = new Vector2(3f, 3f);
-        [SerializeField] private int roomsPerRow = 5;
+        [SerializeField] private Vector2 gridSpacing;
+        [SerializeField] private List<Sprite> roomSprites;
+        [SerializeField] private Vector2 positionVariation = new Vector2(0.3f, 0.2f); // X and Y variation ranges
+        private const int ROOMS_PER_LAYER = 4;
         
         private IEventBus _eventBus;
         private IDisposable _roomEventSubscription;
         private IRoomViewFactory _roomViewFactory;
         private List<RoomView> spawnedRooms = new();
+        private const float GRID_OFFSET = 2f;
         private int roomCount = 0;
 
         void Awake()
@@ -40,6 +44,9 @@ namespace Game.Presentation.Spawners
                 roomView.transform.SetParent(roomSpawnParent);
             }
             
+            // Assign random sprite
+            AssignRandomSprite(roomView, evt.Room);
+            
             spawnedRooms.Add(roomView);
             roomCount++;
         }
@@ -58,11 +65,11 @@ namespace Game.Presentation.Spawners
 
         private Vector3 CalculateGridPosition(int index)
         {
-            int row = index / roomsPerRow;
-            int col = index % roomsPerRow;
+            int row = index / ROOMS_PER_LAYER;
+            int col = index % ROOMS_PER_LAYER;
             
             Vector3 basePosition = roomSpawnParent != null ? roomSpawnParent.position : Vector3.zero;
-            Vector3 gridOffset = new Vector3(col * gridSpacing.x, -row * gridSpacing.y, 0);
+            Vector3 gridOffset = new Vector3(col * gridSpacing.x - GRID_OFFSET, -row * gridSpacing.y, 0);
             
             return basePosition + gridOffset;
         }
@@ -78,16 +85,18 @@ namespace Game.Presentation.Spawners
             var startingRoom = overworld.GetStartingRoom();
             if (startingRoom == null) return;
             
-            Vector2 originOffset = new Vector2(startingRoom.X, startingRoom.Y);
+            // Group rooms by layer for proper centering
+            var roomsByLayer = new Dictionary<int, List<RoomEntity>>();
+            foreach (var room in overworld.Rooms)
+            {
+                if (!roomsByLayer.ContainsKey(room.Layer))
+                    roomsByLayer[room.Layer] = new List<RoomEntity>();
+                roomsByLayer[room.Layer].Add(room);
+            }
             
             foreach (var room in overworld.Rooms)
             {
-                // Convert room grid coordinates to world position, normalized so starting room is at (0,0)
-                Vector3 worldPosition = new Vector3(
-                    (room.X - originOffset.x) * gridSpacing.x, 
-                    (room.Y - originOffset.y) * gridSpacing.y, 
-                    0
-                );
+                Vector3 worldPosition = CalculateLayerBasedPosition(room, roomsByLayer);
                 
                 // Add spawn parent offset if it exists
                 if (roomSpawnParent != null)
@@ -97,6 +106,82 @@ namespace Game.Presentation.Spawners
                 
                 SpawnRoom(room, worldPosition);
             }
+        }
+        
+        private Vector3 CalculateLayerBasedPosition(RoomEntity room, Dictionary<int, List<RoomEntity>> roomsByLayer)
+        {
+            // X position based on layer (horizontal progression) with offset
+            float xPos = room.Layer * gridSpacing.x - GRID_OFFSET;
+            
+            // Y position: center the rooms in each layer vertically
+            var layerRooms = roomsByLayer[room.Layer];
+            int roomsInLayer = layerRooms.Count;
+            
+            // Calculate vertical offset to center this layer
+            float layerHeight = (roomsInLayer - 1) * gridSpacing.y;
+            float layerStartY = layerHeight / 2f; // Start from top of centered layer
+            
+            // Find this room's position within the layer
+            int roomIndexInLayer = room.PositionInLayer;
+            float yPos = layerStartY - (roomIndexInLayer * gridSpacing.y);
+            
+            // Add organic variation (except for starting room and boss room)
+            if (!room.IsStartingRoom && room.Layer != 14)
+            {
+                // Use room ID as seed for consistent randomization
+                UnityEngine.Random.State originalState = UnityEngine.Random.state;
+                UnityEngine.Random.InitState(room.Id.GetHashCode());
+                
+                float xVariation = UnityEngine.Random.Range(-positionVariation.x, positionVariation.x);
+                float yVariation = UnityEngine.Random.Range(-positionVariation.y, positionVariation.y);
+                
+                xPos += xVariation;
+                yPos += yVariation;
+                
+                // Restore original random state
+                UnityEngine.Random.state = originalState;
+            }
+            
+            return new Vector3(xPos, yPos, 0);
+        }
+        
+        private void AssignRandomSprite(RoomView roomView, RoomEntity room)
+        {
+            if (roomSprites == null || roomSprites.Count == 0)
+                return;
+                
+            var spriteRenderer = roomView.GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+                return;
+            
+            Sprite selectedSprite;
+            
+            // Always use first sprite for starting room or final boss room (layer 14)
+            if (room.IsStartingRoom || room.Layer == 14)
+            {
+                selectedSprite = roomSprites[0];
+            }
+            // 60% chance for first sprite on other rooms
+            else if (UnityEngine.Random.Range(0f, 100f) < 60f)
+            {
+                selectedSprite = roomSprites[0];
+            }
+            else
+            {
+                // Randomly select from remaining sprites (if any)
+                if (roomSprites.Count > 1)
+                {
+                    int randomIndex = UnityEngine.Random.Range(1, roomSprites.Count);
+                    selectedSprite = roomSprites[randomIndex];
+                }
+                else
+                {
+                    // Fallback to first sprite if only one exists
+                    selectedSprite = roomSprites[0];
+                }
+            }
+            
+            spriteRenderer.sprite = selectedSprite;
         }
 
         public void ClearAllRooms()
