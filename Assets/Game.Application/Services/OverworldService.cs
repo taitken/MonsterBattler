@@ -71,17 +71,9 @@ namespace Game.Application.Services
                 return;
             }
 
-            var room = _currentOverworld.GetRoomById(roomId);
-            if (room != null)
-            {
-                room.MarkAsCompleted();
-                _persistence.SaveCurrentOverworld(_currentOverworld);
-                _log?.Log($"Marked room {roomId} as completed");
-            }
-            else
-            {
-                _log?.LogWarning($"Room with ID {roomId} not found in current overworld");
-            }
+            _currentOverworld.MarkRoomAsCompleted(roomId);
+            _persistence.SaveCurrentOverworld(_currentOverworld);
+            _log?.Log($"Marked room {roomId} as completed and updated last completed room");
         }
 
         public bool IsRoomAccessible(Guid roomId)
@@ -103,13 +95,11 @@ namespace Game.Application.Services
                 return true;
             }
 
-            // Check if any adjacent room is completed
-            foreach (var room in _currentOverworld.Rooms)
+            // Room is accessible if it's directly connected to the last completed room
+            var lastCompletedRoom = _currentOverworld.GetLastCompletedRoom();
+            if (lastCompletedRoom != null && IsDirectlyConnected(lastCompletedRoom, targetRoom))
             {
-                if (room.IsCompleted && IsDirectlyConnected(room, targetRoom))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -117,10 +107,7 @@ namespace Game.Application.Services
 
         private bool IsDirectlyConnected(RoomEntity roomA, RoomEntity roomB)
         {
-            return (roomA.NorthRoomId == roomB.Id) ||
-                   (roomA.SouthRoomId == roomB.Id) ||
-                   (roomA.EastRoomId == roomB.Id) ||
-                   (roomA.WestRoomId == roomB.Id);
+            return roomA.GetAllConnectedRoomIds().Contains(roomB.Id);
         }
 
     }

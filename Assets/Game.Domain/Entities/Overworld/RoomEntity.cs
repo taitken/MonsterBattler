@@ -1,5 +1,7 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Game.Domain.Enums;
 
 namespace Game.Domain.Entities.Overworld
@@ -16,17 +18,19 @@ namespace Game.Domain.Entities.Overworld
         public int Layer => X;
         public int PositionInLayer => Y;
         
-        // Room connections (null means no connection in that direction)
-        public Guid? NorthRoomId { get; set; }
-        public Guid? SouthRoomId { get; set; }
-        public Guid? EastRoomId { get; set; }
-        public Guid? WestRoomId { get; set; }
+        // Room connections - using lists to support multiple connections per direction
+        public List<Guid> EastRoomIds { get; private set; }
+        public List<Guid> WestRoomIds { get; private set; }
 
         public RoomEntity(int layer, int positionInLayer, bool isStartingRoom = false)
         {
             X = layer;  // X represents layer
             Y = positionInLayer;  // Y represents position within layer
             IsStartingRoom = isStartingRoom;
+            
+            // Initialize connection lists
+            EastRoomIds = new List<Guid>();
+            WestRoomIds = new List<Guid>();
             
             // Randomly select a biome
             var biomes = (Biome[])Enum.GetValues(typeof(Biome));
@@ -47,33 +51,61 @@ namespace Game.Domain.Entities.Overworld
         {
             return direction switch
             {
-                Direction.North => NorthRoomId.HasValue,
-                Direction.South => SouthRoomId.HasValue,
-                Direction.East => EastRoomId.HasValue,
-                Direction.West => WestRoomId.HasValue,
+                Direction.East => EastRoomIds.Count > 0,
+                Direction.West => WestRoomIds.Count > 0,
                 _ => false
             };
         }
 
-        public void SetConnection(Direction direction, Guid roomId)
+        public void AddConnection(Direction direction, Guid roomId)
         {
             switch (direction)
             {
-                case Direction.North: NorthRoomId = roomId; break;
-                case Direction.South: SouthRoomId = roomId; break;
-                case Direction.East: EastRoomId = roomId; break;
-                case Direction.West: WestRoomId = roomId; break;
+                case Direction.East:
+                    if (!EastRoomIds.Contains(roomId))
+                        EastRoomIds.Add(roomId);
+                    break;
+                case Direction.West:
+                    if (!WestRoomIds.Contains(roomId))
+                        WestRoomIds.Add(roomId);
+                    break;
             }
+        }
+
+        public void RemoveConnection(Direction direction, Guid roomId)
+        {
+            switch (direction)
+            {
+                case Direction.East:
+                    EastRoomIds.Remove(roomId);
+                    break;
+                case Direction.West:
+                    WestRoomIds.Remove(roomId);
+                    break;
+            }
+        }
+
+        public List<Guid> GetConnections(Direction direction)
+        {
+            return direction switch
+            {
+                Direction.East => new List<Guid>(EastRoomIds),
+                Direction.West => new List<Guid>(WestRoomIds),
+                _ => new List<Guid>()
+            };
+        }
+
+        public List<Guid> GetAllConnectedRoomIds()
+        {
+            var allConnections = new List<Guid>();
+            allConnections.AddRange(EastRoomIds);
+            allConnections.AddRange(WestRoomIds);
+            return allConnections.Distinct().ToList();
         }
 
         public int GetConnectionCount()
         {
-            int count = 0;
-            if (NorthRoomId.HasValue) count++;
-            if (SouthRoomId.HasValue) count++;
-            if (EastRoomId.HasValue) count++;
-            if (WestRoomId.HasValue) count++;
-            return count;
+            return EastRoomIds.Count + WestRoomIds.Count;
         }
     }
 }

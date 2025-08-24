@@ -8,10 +8,12 @@ namespace Game.Domain.Entities.Overworld
     public class OverworldEntity : BaseEntity
     {
         public List<RoomEntity> Rooms { get; private set; }
+        public Guid? LastCompletedRoomId { get; private set; }
         
         public OverworldEntity()
         {
             Rooms = new List<RoomEntity>();
+            LastCompletedRoomId = null;
         }
 
         public void AddRoom(RoomEntity newRoom)
@@ -33,6 +35,26 @@ namespace Game.Domain.Entities.Overworld
         public RoomEntity GetRoomById(Guid roomId)
         {
             return Rooms.FirstOrDefault(r => r.Id == roomId);
+        }
+
+        public void MarkRoomAsCompleted(Guid roomId)
+        {
+            var room = GetRoomById(roomId);
+            if (room != null)
+            {
+                room.MarkAsCompleted();
+                LastCompletedRoomId = roomId;
+                NotifyModelUpdated();
+            }
+        }
+
+        public RoomEntity GetLastCompletedRoom()
+        {
+            if (LastCompletedRoomId.HasValue)
+            {
+                return GetRoomById(LastCompletedRoomId.Value);
+            }
+            return null;
         }
     }
 }

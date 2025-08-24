@@ -11,191 +11,373 @@ namespace Game.Application.Services
 {
     public class RandomOverworldGenerator : IOverworldGenerator
     {
+        #region Constants & Fields
+        
         private readonly IRandomService _random;
         private readonly ILoggerService _log;
         private const int TOTAL_LAYERS = 15;
         private const int MAX_LANES = 4;
+        private const float CROSS_PATH_CONNECTION_CHANCE = 0.40f;
+        
+        #endregion
 
+        #region Constructor
+        
         public RandomOverworldGenerator(IRandomService random, ILoggerService log)
         {
             _random = random;
             _log = log;
         }
+        
+        #endregion
 
+        #region Public Methods
+        
         public OverworldEntity GenerateOverworld()
         {
             var overworld = new OverworldEntity();
             _log?.Log($"Generating layer-based overworld with {TOTAL_LAYERS} layers");
 
-            // Generate layer structure: List of layers, each layer contains rooms
+            var layers = GenerateAllLayers();
+            AddRoomsToOverworld(overworld, layers);
+            ConnectFinalLayerToBoss(layers);
+            
+            _log?.Log($"Generated overworld with {layers.Sum(l => l.Count)} total rooms");
+            ValidateOverworldConnectivity(overworld);
+            
+            return overworld;
+        }
+        
+        #endregion
+
+        #region Layer Generation
+        
+        private List<List<RoomEntity>> GenerateAllLayers()
+        {
             var layers = new List<List<RoomEntity>>();
             
             // Layer 0: Starting room
-            var startingRoom = new RoomEntity(0, 0, true); // Layer 0, Position 0
+            var startingRoom = new RoomEntity(0, 0, true);
             layers.Add(new List<RoomEntity> { startingRoom });
-            overworld.AddRoom(startingRoom);
             
             // Generate intermediate layers (1 to TOTAL_LAYERS-2)
             for (int layer = 1; layer < TOTAL_LAYERS - 1; layer++)
             {
                 var layerRooms = GenerateLayer(layer, layers[layer - 1]);
                 layers.Add(layerRooms);
-                foreach (var room in layerRooms)
-                {
-                    overworld.AddRoom(room);
-                }
             }
             
             // Final layer: Boss room
-            var bossRoom = new RoomEntity(TOTAL_LAYERS - 1, 0); // Final layer, Position 0
+            var bossRoom = new RoomEntity(TOTAL_LAYERS - 1, 0);
             layers.Add(new List<RoomEntity> { bossRoom });
-            overworld.AddRoom(bossRoom);
             
-            // Connect all rooms in the final intermediate layer to the boss room
-            var finalIntermediateLayer = layers[TOTAL_LAYERS - 2];
-            foreach (var room in finalIntermediateLayer)
-            {
-                ConnectRooms(room, bossRoom);
-            }
-            
-            _log?.Log($"Generated overworld with {layers.Sum(l => l.Count)} total rooms");
-            
-            // Validate connectivity
-            ValidateOverworldConnectivity(overworld);
-            
-            return overworld;
+            return layers;
         }
 
         private List<RoomEntity> GenerateLayer(int layerIndex, List<RoomEntity> previousLayer)
         {
             var layerRooms = new List<RoomEntity>();
-            var roomConnectionCounts = new Dictionary<RoomEntity, int>();
+            int roomCount = DetermineRoomCount(layerIndex);
             
-            // Initialize connection count tracking for previous layer
-            foreach (var room in previousLayer)
-            {
-                roomConnectionCounts[room] = 0;
-            }
-            
-            // Determine number of rooms in this layer
-            // First and last layers have 1 room, intermediate layers have 2-5 rooms
-            int roomCount;
-            if (layerIndex == 1 || layerIndex == TOTAL_LAYERS - 2) // First intermediate or last intermediate layer
-            {
-                // Allow more flexibility for connecting layers
-                roomCount = _random.Range(2, 3);
-            }
-            else
-            {
-                // Regular intermediate layers: 2-5 rooms
-                roomCount = _random.Range(2, MAX_LANES + 1);
-            }
-            
-            // Create rooms for this layer
+            // Create all rooms for this layer first
             for (int position = 0; position < roomCount; position++)
             {
                 var newRoom = new RoomEntity(layerIndex, position);
                 layerRooms.Add(newRoom);
             }
             
-            // Connect rooms from previous layer to this layer
-            ConnectLayersWithConstraints(previousLayer, layerRooms, roomConnectionCounts);
+            // Connect this layer to the previous layer
+            ConnectLayerToPreviousLayer(previousLayer, layerRooms);
             
             return layerRooms;
         }
-        
-        private void ConnectLayersWithConstraints(List<RoomEntity> previousLayer, List<RoomEntity> currentLayer, Dictionary<RoomEntity, int> connectionCounts)
+
+        private int DetermineRoomCount(int layerIndex)
         {
-            var currentLayerConnections = new Dictionary<RoomEntity, int>();
-            foreach (var room in currentLayer)
+            // First and last intermediate layers have fewer rooms for better connectivity
+            if (layerIndex == 1 || layerIndex == TOTAL_LAYERS - 2)
             {
-                currentLayerConnections[room] = 0;
+                return _random.Range(2, 3);
             }
             
-            // First pass: ensure every room in current layer has at least one incoming connection
-            foreach (var currentRoom in currentLayer)
+            // Regular intermediate layers: 2-5 rooms
+            return _random.Range(2, MAX_LANES + 1);
+        }
+
+        private void AddRoomsToOverworld(OverworldEntity overworld, List<List<RoomEntity>> layers)
+        {
+            foreach (var layer in layers)
             {
-                if (currentLayerConnections[currentRoom] == 0)
+                foreach (var room in layer)
                 {
-                    // Randomly pick a room from previous layer to connect from
-                    var sourceRoom = previousLayer[_random.Range(0, previousLayer.Count)];
-                    ConnectRooms(sourceRoom, currentRoom);
-                    connectionCounts[sourceRoom]++;
-                    currentLayerConnections[currentRoom]++;
+                    overworld.AddRoom(room);
                 }
             }
+        }
+
+        private void ConnectFinalLayerToBoss(List<List<RoomEntity>> layers)
+        {
+            var finalIntermediateLayer = layers[TOTAL_LAYERS - 2];
+            var bossRoom = layers[TOTAL_LAYERS - 1][0];
             
-            // Second pass: ensure every room in previous layer has at least one outgoing connection
-            foreach (var sourceRoom in previousLayer)
+            foreach (var room in finalIntermediateLayer)
             {
-                if (connectionCounts[sourceRoom] == 0)
-                {
-                    // This room has no forward connections, connect it to a random room in current layer
-                    var targetRoom = currentLayer[_random.Range(0, currentLayer.Count)];
-                    ConnectRooms(sourceRoom, targetRoom);
-                    connectionCounts[sourceRoom]++;
-                    currentLayerConnections[targetRoom]++;
-                }
+                ConnectRooms(room, bossRoom);
             }
+        }
+        
+        #endregion
+
+        #region Layer Connection Logic
+        
+        private void ConnectLayerToPreviousLayer(List<RoomEntity> previousLayer, List<RoomEntity> currentLayer)
+        {
+            _log?.Log($"Connecting layer {currentLayer[0].Layer} ({currentLayer.Count} rooms) to layer {previousLayer[0].Layer} ({previousLayer.Count} rooms)");
+
+            // Sort both layers by position to ensure consistent ordering
+            var sortedPreviousLayer = previousLayer.OrderBy(r => r.PositionInLayer).ToList();
+            var sortedCurrentLayer = currentLayer.OrderBy(r => r.PositionInLayer).ToList();
+
+            // Create base non-crossing connections
+            ConnectLayersWithoutCrossing(sortedPreviousLayer, sortedCurrentLayer);
             
-            // Third pass: add additional connections while respecting constraints (1-3 per room)
-            foreach (var sourceRoom in previousLayer)
+            // Optionally add cross-path connections for variety
+            TryAddCrossPathConnection(sortedPreviousLayer, sortedCurrentLayer, currentLayer[0].Layer);
+        }
+
+        private void ConnectLayersWithoutCrossing(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer)
+        {
+            var sourceRoomsWithConnections = new HashSet<Guid>();
+            var targetRoomsWithConnections = new HashSet<Guid>();
+            
+            // Create evenly distributed connections with crossing validation
+            CreatePrimaryConnections(sortedPreviousLayer, sortedCurrentLayer, sourceRoomsWithConnections, targetRoomsWithConnections);
+            
+            // Ensure all rooms have at least one connection
+            EnsureAllSourcesConnected(sortedPreviousLayer, sortedCurrentLayer, sourceRoomsWithConnections, targetRoomsWithConnections);
+            EnsureAllTargetsConnected(sortedPreviousLayer, sortedCurrentLayer, sourceRoomsWithConnections, targetRoomsWithConnections);
+        }
+
+        private void CreatePrimaryConnections(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer, HashSet<Guid> sourceRoomsWithConnections, HashSet<Guid> targetRoomsWithConnections)
+        {
+            for (int sourceIndex = 0; sourceIndex < sortedPreviousLayer.Count; sourceIndex++)
             {
-                // Each room should have 1-3 forward connections
-                int targetConnections = _random.Range(1, Math.Min(4, currentLayer.Count + 1));
+                var sourceRoom = sortedPreviousLayer[sourceIndex];
                 
-                while (connectionCounts[sourceRoom] < targetConnections)
+                // Calculate ideal target using even distribution
+                int idealTargetIndex = CalculateEvenDistributionTarget(sourceIndex, sortedPreviousLayer.Count, sortedCurrentLayer.Count);
+                
+                // Find the best non-crossing target
+                int actualTargetIndex = FindNonCrossingTarget(sourceRoom, idealTargetIndex, sortedPreviousLayer, sortedCurrentLayer);
+                
+                var targetRoom = sortedCurrentLayer[actualTargetIndex];
+                ConnectRooms(sourceRoom, targetRoom);
+                
+                sourceRoomsWithConnections.Add(sourceRoom.Id);
+                targetRoomsWithConnections.Add(targetRoom.Id);
+                
+                _log?.Log($"Primary connection: ({sourceRoom.Layer},{sourceRoom.PositionInLayer}) -> ({targetRoom.Layer},{targetRoom.PositionInLayer}) (ideal: {idealTargetIndex}, actual: {actualTargetIndex})");
+            }
+        }
+
+        private void EnsureAllSourcesConnected(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer, HashSet<Guid> sourceRoomsWithConnections, HashSet<Guid> targetRoomsWithConnections)
+        {
+            foreach (var sourceRoom in sortedPreviousLayer)
+            {
+                if (!sourceRoomsWithConnections.Contains(sourceRoom.Id))
                 {
-                    // Try to connect to a room we're not already connected to
-                    var availableTargets = currentLayer.Where(r => !IsConnected(sourceRoom, r)).ToList();
-                    if (availableTargets.Count == 0) break;
+                    var fallbackTarget = sortedCurrentLayer.Last();
+                    ConnectRooms(sourceRoom, fallbackTarget);
+                    sourceRoomsWithConnections.Add(sourceRoom.Id);
+                    targetRoomsWithConnections.Add(fallbackTarget.Id);
                     
-                    var targetRoom = availableTargets[_random.Range(0, availableTargets.Count)];
-                    ConnectRooms(sourceRoom, targetRoom);
-                    connectionCounts[sourceRoom]++;
-                    currentLayerConnections[targetRoom]++;
+                    _log?.Log($"Fallback source connection: ({sourceRoom.Layer},{sourceRoom.PositionInLayer}) -> ({fallbackTarget.Layer},{fallbackTarget.PositionInLayer})");
+                }
+            }
+        }
+
+        private void EnsureAllTargetsConnected(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer, HashSet<Guid> sourceRoomsWithConnections, HashSet<Guid> targetRoomsWithConnections)
+        {
+            foreach (var targetRoom in sortedCurrentLayer)
+            {
+                if (!targetRoomsWithConnections.Contains(targetRoom.Id))
+                {
+                    var fallbackSource = sortedPreviousLayer.Last();
+                    ConnectRooms(fallbackSource, targetRoom);
+                    sourceRoomsWithConnections.Add(fallbackSource.Id);
+                    targetRoomsWithConnections.Add(targetRoom.Id);
+                    
+                    _log?.Log($"Fallback target connection: ({fallbackSource.Layer},{fallbackSource.PositionInLayer}) -> ({targetRoom.Layer},{targetRoom.PositionInLayer})");
+                }
+            }
+        }
+
+        private void TryAddCrossPathConnection(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer, int layerIndex)
+        {
+            if (_random.Range(0f, 1f) >= CROSS_PATH_CONNECTION_CHANCE) 
+                return;
+
+            var candidateSources = FindCrossPathCandidates(sortedPreviousLayer, sortedCurrentLayer);
+            _log?.Log($"Layer {layerIndex}: Found {candidateSources.Count} candidate sources for cross-path connections");
+            
+            if (candidateSources.Count == 0) 
+                return;
+
+            var randomSource = candidateSources[_random.Range(0, candidateSources.Count)];
+            var validTargets = FindValidCrossPathTargets(randomSource, sortedPreviousLayer, sortedCurrentLayer);
+            
+            _log?.Log($"Source ({randomSource.Layer},{randomSource.PositionInLayer}) has {validTargets.Count} non-crossing targets");
+            
+            if (validTargets.Count > 0)
+            {
+                var selectedTarget = SelectBalancedTarget(validTargets);
+                ConnectRooms(randomSource, selectedTarget);
+                _log?.Log($"Added cross-path connection for layer {layerIndex}: ({randomSource.Layer},{randomSource.PositionInLayer}) -> ({selectedTarget.Layer},{selectedTarget.PositionInLayer})");
+            }
+        }
+
+        private List<RoomEntity> FindCrossPathCandidates(List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer)
+        {
+            var candidateSources = new List<RoomEntity>();
+            
+            foreach (var source in sortedPreviousLayer)
+            {
+                var hasValidTargets = sortedCurrentLayer.Any(target => 
+                    !IsConnected(source, target) && 
+                    !WouldCreateCrossing(source, target, sortedPreviousLayer, sortedCurrentLayer));
+                    
+                if (hasValidTargets)
+                {
+                    candidateSources.Add(source);
                 }
             }
             
-            // Validate single-choice constraint (no more than 2 consecutive single-choice rooms)
-            ValidateSingleChoiceConstraint(previousLayer, connectionCounts);
-            
-            // Debug: Log connection counts
-            _log?.Log($"Layer connections - Previous layer: {previousLayer.Count} rooms, Current layer: {currentLayer.Count} rooms");
-            foreach (var room in previousLayer)
-            {
-                _log?.Log($"Room at ({room.Layer},{room.PositionInLayer}) has {connectionCounts[room]} forward connections");
-            }
+            return candidateSources;
+        }
+
+        private List<RoomEntity> FindValidCrossPathTargets(RoomEntity source, List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer)
+        {
+            return sortedCurrentLayer.Where(target => 
+                !IsConnected(source, target) &&
+                !WouldCreateCrossing(source, target, sortedPreviousLayer, sortedCurrentLayer)
+            ).ToList();
+        }
+
+        private RoomEntity SelectBalancedTarget(List<RoomEntity> validTargets)
+        {
+            return validTargets
+                .OrderBy(r => r.WestRoomIds.Count)
+                .ThenBy(r => _random.Range(0, 100))
+                .First();
         }
         
-        private void ValidateSingleChoiceConstraint(List<RoomEntity> layer, Dictionary<RoomEntity, int> connectionCounts)
-        {
-            // This is a simplified constraint check - in a full implementation you'd track
-            // the path history to ensure no more than 2 consecutive single-choice rooms
-            // For now, ensure at least some rooms have multiple choices
-            var singleChoiceRooms = layer.Where(r => connectionCounts[r] == 1).ToList();
-            
-            // If more than half the rooms have single choices, add some connections
-            while (singleChoiceRooms.Count > layer.Count / 2)
-            {
-                var roomToImprove = singleChoiceRooms[_random.Range(0, singleChoiceRooms.Count)];
-                // This would need the current layer context to add connections
-                // For now, we'll trust the random generation to create good distribution
-                break;
-            }
-        }
+        #endregion
+
+        #region Connection Utilities
         
         private void ConnectRooms(RoomEntity sourceRoom, RoomEntity targetRoom)
         {
-            // Use East connection to represent "forward" progress
-            sourceRoom.SetConnection(Direction.East, targetRoom.Id);
-            targetRoom.SetConnection(Direction.West, sourceRoom.Id);
+            sourceRoom.AddConnection(Direction.East, targetRoom.Id);
+            targetRoom.AddConnection(Direction.West, sourceRoom.Id);
         }
         
         private bool IsConnected(RoomEntity sourceRoom, RoomEntity targetRoom)
         {
-            return sourceRoom.EastRoomId == targetRoom.Id;
+            return sourceRoom.GetConnections(Direction.East).Contains(targetRoom.Id);
         }
+        
+        #endregion
+
+        #region Distribution & Crossing Logic
+        
+        private int CalculateEvenDistributionTarget(int sourceIndex, int sourceCount, int targetCount)
+        {
+            float sourceRatio = (float)sourceIndex / Math.Max(1, sourceCount - 1);
+            float targetPosition = sourceRatio * Math.Max(1, targetCount - 1);
+            return Math.Min(targetCount - 1, Math.Max(0, (int)Math.Round(targetPosition)));
+        }
+
+        private int FindNonCrossingTarget(RoomEntity sourceRoom, int idealTargetIndex, List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer)
+        {
+            // Expand search from ideal target outward
+            for (int distance = 0; distance < sortedCurrentLayer.Count; distance++)
+            {
+                var candidateIndices = GetCandidateIndices(idealTargetIndex, distance, sortedCurrentLayer.Count);
+                
+                foreach (int candidateIndex in candidateIndices)
+                {
+                    var candidateTarget = sortedCurrentLayer[candidateIndex];
+                    
+                    if (!WouldCreateCrossing(sourceRoom, candidateTarget, sortedPreviousLayer, sortedCurrentLayer))
+                    {
+                        return candidateIndex;
+                    }
+                }
+            }
+            
+            // Fallback (should rarely happen)
+            _log?.Log($"WARNING: No non-crossing target found for source ({sourceRoom.Layer},{sourceRoom.PositionInLayer}), using fallback");
+            return sortedCurrentLayer.Count - 1;
+        }
+
+        private List<int> GetCandidateIndices(int idealIndex, int distance, int maxCount)
+        {
+            var candidates = new List<int>();
+            
+            if (distance == 0)
+            {
+                candidates.Add(idealIndex);
+            }
+            else
+            {
+                if (idealIndex + distance < maxCount)
+                    candidates.Add(idealIndex + distance);
+                    
+                if (idealIndex - distance >= 0)
+                    candidates.Add(idealIndex - distance);
+            }
+            
+            return candidates;
+        }
+
+        private bool WouldCreateCrossing(RoomEntity sourceRoom, RoomEntity targetRoom, List<RoomEntity> sortedPreviousLayer, List<RoomEntity> sortedCurrentLayer)
+        {
+            int sourceIndex = sortedPreviousLayer.FindIndex(r => r.Id == sourceRoom.Id);
+            int targetIndex = sortedCurrentLayer.FindIndex(r => r.Id == targetRoom.Id);
+            
+            if (sourceIndex == -1 || targetIndex == -1)
+                return true;
+            
+            // Check all existing connections for crossing
+            for (int i = 0; i < sortedPreviousLayer.Count; i++)
+            {
+                var otherSource = sortedPreviousLayer[i];
+                
+                foreach (var eastId in otherSource.EastRoomIds)
+                {
+                    var otherTarget = sortedCurrentLayer.FirstOrDefault(r => r.Id == eastId);
+                    if (otherTarget == null) continue;
+                    
+                    int otherSourceIndex = i;
+                    int otherTargetIndex = sortedCurrentLayer.FindIndex(r => r.Id == otherTarget.Id);
+                    
+                    // Check for crossing: source order != target order means lines cross
+                    bool sourceOrder = sourceIndex < otherSourceIndex;
+                    bool targetOrder = targetIndex < otherTargetIndex;
+                    
+                    if (targetIndex != otherTargetIndex && sourceOrder != targetOrder)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        #endregion
+
+        #region Validation
         
         private void ValidateOverworldConnectivity(OverworldEntity overworld)
         {
@@ -215,10 +397,7 @@ namespace Game.Application.Services
             while (roomQueue.Count > 0)
             {
                 var currentRoom = roomQueue.Dequeue();
-                
-                // Check all connections from this room
-                var connectedRoomIds = new[] { currentRoom.EastRoomId, currentRoom.WestRoomId, currentRoom.NorthRoomId, currentRoom.SouthRoomId }
-                    .Where(id => id.HasValue).Select(id => id.Value);
+                var connectedRoomIds = currentRoom.GetAllConnectedRoomIds();
                 
                 foreach (var connectedId in connectedRoomIds)
                 {
@@ -245,5 +424,7 @@ namespace Game.Application.Services
                 }
             }
         }
+        
+        #endregion
     }
 }

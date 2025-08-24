@@ -14,17 +14,24 @@ namespace Game.Presentation.Spawners
     public class OverworldSceneSpawner : MonoBehaviour
     {
         [SerializeField] private Transform roomSpawnParent;
+        [SerializeField] private Transform connectionLineParent;
         [SerializeField] private Vector2 gridSpacing;
         [SerializeField] private List<Sprite> roomSprites;
         [SerializeField] private Vector2 positionVariation = new Vector2(0.3f, 0.2f); // X and Y variation ranges
+        [SerializeField] private Material connectionLineMaterial;
         private const int ROOMS_PER_LAYER = 4;
         
         private IEventBus _eventBus;
         private IDisposable _roomEventSubscription;
         private IRoomViewFactory _roomViewFactory;
         private List<RoomView> spawnedRooms = new();
+        private List<ConnectionLineRenderer> connectionLines = new();
         private const float GRID_OFFSET = 2f;
         private int roomCount = 0;
+        
+        // Track overworld for connection creation
+        private OverworldEntity _currentOverworld;
+        private int _expectedRoomCount;
 
         void Awake()
         {
@@ -49,6 +56,12 @@ namespace Game.Presentation.Spawners
             
             spawnedRooms.Add(roomView);
             roomCount++;
+            
+            // Check if all rooms are spawned, then create connection lines
+            if (_currentOverworld != null && spawnedRooms.Count == _expectedRoomCount)
+            {
+                CreateConnectionLines(_currentOverworld);
+            }
         }
 
         private Vector3 DetermineRoomSpawnPoint(RoomSpawnedEvent evt)
@@ -81,6 +94,10 @@ namespace Game.Presentation.Spawners
 
         public void SpawnRoomsFromOverworld(OverworldEntity overworld)
         {
+            // Store overworld and expected count for connection line creation
+            _currentOverworld = overworld;
+            _expectedRoomCount = overworld.Rooms.Count;
+            
             // Find the starting room to use as origin (0,0)
             var startingRoom = overworld.GetStartingRoom();
             if (startingRoom == null) return;
@@ -106,6 +123,8 @@ namespace Game.Presentation.Spawners
                 
                 SpawnRoom(room, worldPosition);
             }
+            
+            // Connection lines will be created in OnRoomSpawned when all rooms are ready
         }
         
         private Vector3 CalculateLayerBasedPosition(RoomEntity room, Dictionary<int, List<RoomEntity>> roomsByLayer)
@@ -184,6 +203,64 @@ namespace Game.Presentation.Spawners
             spriteRenderer.sprite = selectedSprite;
         }
 
+        private void CreateConnectionLines(OverworldEntity overworld)
+        {
+            // Clear existing connection lines
+            ClearConnectionLines();
+            
+            foreach (var room in overworld.Rooms)
+            {
+                var roomView = GetRoomViewByEntity(room);
+                if (roomView == null) continue;
+                var roomPosition = roomView.transform.position;
+                
+                // Draw all East connections for this room
+                foreach (var eastRoomId in room.EastRoomIds)
+                {
+                    var connectedRoom = overworld.GetRoomById(eastRoomId);
+                    var connectedRoomView = GetRoomViewByEntity(connectedRoom);
+                    if (connectedRoomView != null)
+                    {
+                        CreateConnectionLine(roomPosition, connectedRoomView.transform.position);
+                    }
+                }
+            }
+        }
+        
+        private void CreateConnectionLine(Vector3 startPosition, Vector3 endPosition)
+        {
+            var lineObject = new GameObject("Connection Line");
+            
+            // Parent the line to the connection line parent if specified
+            if (connectionLineParent != null)
+            {
+                lineObject.transform.SetParent(connectionLineParent);
+            }
+            
+            var connectionLine = lineObject.AddComponent<ConnectionLineRenderer>();
+            connectionLine.SetConnection(startPosition, endPosition);
+            
+            connectionLines.Add(connectionLine);
+        }
+        
+        private RoomView GetRoomViewByEntity(RoomEntity roomEntity)
+        {
+            if (roomEntity == null) return null;
+            return spawnedRooms.FirstOrDefault(rv => rv.model != null && rv.model.Id == roomEntity.Id);
+        }
+        
+        private void ClearConnectionLines()
+        {
+            foreach (var connectionLine in connectionLines)
+            {
+                if (connectionLine != null)
+                {
+                    Destroy(connectionLine.gameObject);
+                }
+            }
+            connectionLines.Clear();
+        }
+
         public void ClearAllRooms()
         {
             foreach (var roomView in spawnedRooms)
@@ -194,7 +271,14 @@ namespace Game.Presentation.Spawners
                 }
             }
             spawnedRooms.Clear();
+            
+            // Also clear connection lines
+            ClearConnectionLines();
+            
+            // Reset tracking variables
             roomCount = 0;
+            _currentOverworld = null;
+            _expectedRoomCount = 0;
         }
         
         public void RefreshAllRoomAccessibility()
