@@ -95,11 +95,15 @@ namespace Game.Application.Services
                 return true;
             }
 
-            // Room is accessible if it's directly connected to the last completed room
+            // Room is accessible only if it's eastward from the last completed room
             var lastCompletedRoom = _currentOverworld.GetLastCompletedRoom();
-            if (lastCompletedRoom != null && IsDirectlyConnected(lastCompletedRoom, targetRoom))
+            if (lastCompletedRoom != null)
             {
-                return true;
+                // Check if target room is directly connected AND to the east
+                if (IsDirectlyConnectedEastward(lastCompletedRoom, targetRoom))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -108,6 +112,19 @@ namespace Game.Application.Services
         private bool IsDirectlyConnected(RoomEntity roomA, RoomEntity roomB)
         {
             return roomA.GetAllConnectedRoomIds().Contains(roomB.Id);
+        }
+
+        private bool IsDirectlyConnectedEastward(RoomEntity fromRoom, RoomEntity toRoom)
+        {
+            // First check if they are directly connected
+            if (!fromRoom.GetAllConnectedRoomIds().Contains(toRoom.Id))
+            {
+                return false;
+            }
+
+            // Then check if the target room is eastward (higher X coordinate)
+            // Also allow same layer (X) connections for rooms in the same layer
+            return toRoom.X >= fromRoom.X && fromRoom.EastRoomIds.Contains(toRoom.Id);
         }
 
     }

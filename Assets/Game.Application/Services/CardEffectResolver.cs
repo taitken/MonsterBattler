@@ -57,9 +57,9 @@ namespace Game.Application.Services
             switch (effect.Type)
             {
                 case EffectType.Damage:
-                    target.TakeDamage(effect.Value);
+                    var amountBlocked = target.TakeDamage(effect.Value);
                     var damageDealt = beforeHP - target.CurrentHP;
-                    _bus.Publish(new DamageAppliedEvent(caster, target, damageDealt));
+                    _bus.Publish(new DamageAppliedEvent(caster, target, damageDealt, amountBlocked));
                     _log?.Log($"{caster.MonsterName} deals {damageDealt} damage to {target.MonsterName}");
                     break;
 

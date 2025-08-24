@@ -44,10 +44,11 @@ namespace Game.Domain.Entities
             AbilityDeck = abilityDeck;
         }
 
-        public void TakeDamage(int amount)
+        public int TakeDamage(int amount)
         {
             // Apply defend shields first
             var remainingDamage = amount;
+            var totalBlocked = 0;
             var defendEffects = _statusEffects.Where(e => e.Type == EffectType.Defend).ToList();
             
             foreach (var defendEffect in defendEffects)
@@ -56,6 +57,7 @@ namespace Game.Domain.Entities
                 
                 var blocked = Math.Min(defendEffect.Value, remainingDamage);
                 remainingDamage -= blocked;
+                totalBlocked += blocked;
                 defendEffect.ReduceValue(blocked);
             }
             
@@ -65,6 +67,9 @@ namespace Game.Domain.Entities
 
             if (CurrentHP <= 0)
                 OnDied?.Invoke();
+                
+            // Return the total amount that was blocked
+            return totalBlocked;
         }
 
         public void Heal(int amount)
@@ -75,10 +80,10 @@ namespace Game.Domain.Entities
             OnHealthChanged?.Invoke(-actualHealing); // Negative for healing
         }
 
-        public void Attack(MonsterEntity target)
+        public int Attack(MonsterEntity target)
         {
             OnAttack?.Invoke();
-            target.TakeDamage(AttackDamage);
+            return target.TakeDamage(AttackDamage);
         }
 
         public bool IsDead => CurrentHP <= 0;

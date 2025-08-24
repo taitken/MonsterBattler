@@ -26,7 +26,8 @@ namespace Game.Presentation.VfxControllers
         private IDisposable _subTurnStart;
         private IDisposable _subTurnEnd;
         private IDisposable _subBattleEnded;
-        private string DAMAGE_COLOUR = "#B22222";
+        private string DAMAGE_COLOUR = "#FF4444";
+        private string BLOCK_COLOUR = "#4488FF";
 
         void Awake()
         {
@@ -66,9 +67,29 @@ namespace Game.Presentation.VfxControllers
         {
             if (_viewRegistry.TryGet(e.Target.Id, out MonsterView targetView))
             {
-                ColorUtility.TryParseHtmlString(DAMAGE_COLOUR, out Color redDamageColor);
-                _combatTextFactory.Create(redDamageColor, $"{e.Amount}", _rootCanvas, targetView.transform.position + new Vector3(0, 1f, 0));
-                targetView.PlayHitReaction(e.Amount);
+                Vector3 basePosition = targetView.transform.position + new Vector3(0, 1f, 0);
+                
+                // Show damage text in red (if any damage was dealt)
+                if (e.Amount > 0)
+                {
+                    ColorUtility.TryParseHtmlString(DAMAGE_COLOUR, out Color redDamageColor);
+                    _combatTextFactory.Create(redDamageColor, $"{e.Amount}", _rootCanvas, basePosition);
+                }
+                
+                // Show blocked amount in blue (if any damage was blocked)
+                if (e.AmountBlocked > 0)
+                {
+                    ColorUtility.TryParseHtmlString(BLOCK_COLOUR, out Color blueDamageColor);
+                    Vector3 blockPosition = basePosition + new Vector3(0.5f, 0.3f, 0); // Offset slightly
+                    _combatTextFactory.Create(blueDamageColor, $"{e.AmountBlocked}", _rootCanvas, blockPosition);
+                }
+                
+                // Play hit reaction based on total attempted damage
+                int totalDamage = e.Amount + e.AmountBlocked;
+                if (totalDamage > 0)
+                {
+                    targetView.PlayHitReaction(totalDamage);
+                }
             }
         }
 

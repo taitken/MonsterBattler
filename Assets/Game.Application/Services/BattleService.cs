@@ -311,11 +311,11 @@ namespace Game.Application.Services
 
             // Domain call (no awaits)
             var beforeHP = target.CurrentHP;
-            attacker.Attack(target); // applies damage inside domain
+            var amountBlocked = attacker.Attack(target); // applies damage inside domain
 
             var afterHP = target.CurrentHP;
             var damage = beforeHP - afterHP;
-            _bus.Publish(new DamageAppliedEvent(attacker, target, damage));
+            _bus.Publish(new DamageAppliedEvent(attacker, target, damage, amountBlocked));
 
             if (target.IsDead)
             {

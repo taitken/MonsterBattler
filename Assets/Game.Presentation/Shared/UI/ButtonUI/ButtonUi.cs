@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System;
 using Game.Application.Messaging;
 using Game.Core;
@@ -16,7 +17,7 @@ namespace Game.Presentation.UI.ButtonUI
 {
     [AddComponentMenu("UI/Button UI (with events)")]
     [DisallowMultipleComponent]
-    public class ButtonUI : MonoBehaviour
+    public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("Sprites")]
         public Sprite cornerSprite;
@@ -39,6 +40,13 @@ namespace Game.Presentation.UI.ButtonUI
         [SubclassOf(typeof(ICommand))]
         public CommandEntry[] messages;
 
+        [Header("Hover Effects")]
+        public Color hoverColor = new Color(0.6f, 0.2f, 0.2f, 1f);
+        [Range(1.0f, 1.3f)]
+        public float hoverScale = 1.1f;
+        [Range(0.05f, 0.5f)]
+        public float hoverTransitionSpeed = 0.1f;
+
         // refs
         private ButtonLabel _currentLabel;
         private IEventBus _eventBus;
@@ -47,6 +55,9 @@ namespace Game.Presentation.UI.ButtonUI
         private Button _clickButton; // CHANGED: the actual button we click (child)
 
         private bool _needsRebuild;
+        private Color _originalColor;
+        private Vector3 _originalScale;
+        private Coroutine _hoverTransition;
 
         private void Awake()
         {
@@ -59,6 +70,13 @@ namespace Game.Presentation.UI.ButtonUI
             // CHANGED: ensure a rebuild happens at play start after hierarchy is live
             DoRebuild();
             SetText(inputText);
+            
+            // Store original values for hover effects
+            if (_backgroundImage != null)
+            {
+                _originalColor = _backgroundImage.color;
+                _originalScale = transform.localScale;
+            }
         }
 
         private void OnEnable()
@@ -128,6 +146,13 @@ namespace Game.Presentation.UI.ButtonUI
             BuildFrame(frameRoot);
             EnsureLabel(frameRoot); // CHANGED: make sure label exists & is on top
             SnapChildrenToPixels(frameRoot);
+            
+            // Store original values for hover effects after background is created
+            if (_backgroundImage != null)
+            {
+                _originalColor = _backgroundImage.color;
+                _originalScale = transform.localScale;
+            }
         }
 
         public void SetText(string text)
@@ -154,7 +179,7 @@ namespace Game.Presentation.UI.ButtonUI
             if (_backgroundImage != null)
             {
                 StopAllCoroutines();
-                StartCoroutine(FlashColor(_backgroundImage, Color.red, 0.15f));
+                StartCoroutine(FlashColor(_backgroundImage, hoverColor, 0.05f));
             }
 
             foreach (var message in messages)
@@ -358,6 +383,53 @@ namespace Game.Presentation.UI.ButtonUI
             var fr = transform.Find("FrameRoot");
             if (fr != null) Destroy(fr.gameObject);
 #endif
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_backgroundImage == null) return;
+            
+            if (_hoverTransition != null)
+                StopCoroutine(_hoverTransition);
+                
+            _hoverTransition = StartCoroutine(TransitionToHover(true));
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (_backgroundImage == null) return;
+            
+            if (_hoverTransition != null)
+                StopCoroutine(_hoverTransition);
+                
+            _hoverTransition = StartCoroutine(TransitionToHover(false));
+        }
+
+        private IEnumerator TransitionToHover(bool isHovering)
+        {
+            Color targetColor = isHovering ? hoverColor : _originalColor;
+            Vector3 targetScale = isHovering ? _originalScale * hoverScale : _originalScale;
+            
+            Color startColor = _backgroundImage.color;
+            Vector3 startScale = transform.localScale;
+            
+            float elapsed = 0f;
+            
+            while (elapsed < hoverTransitionSpeed)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / hoverTransitionSpeed;
+                t = Mathf.SmoothStep(0f, 1f, t);
+                
+                _backgroundImage.color = Color.Lerp(startColor, targetColor, t);
+                transform.localScale = Vector3.Lerp(startScale, targetScale, t);
+                
+                yield return null;
+            }
+            
+            _backgroundImage.color = targetColor;
+            transform.localScale = targetScale;
+            _hoverTransition = null;
         }
     }
 }
