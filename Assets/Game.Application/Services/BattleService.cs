@@ -165,7 +165,7 @@ namespace Game.Application.Services
             {
                 _log?.LogError($"Error generating enemy team: {ex.Message}");
                 // Fallback to single enemy
-                var fallbackEnemy = new List<MonsterEntity>() { _monsterFactory.Create(MonsterType.Knight) };
+                var fallbackEnemy = new List<MonsterEntity>() { _monsterFactory.Create(MonsterType.Knight, BattleTeam.Enemy) };
                 _log?.Log("Created fallback Knight enemy due to error");
                 return fallbackEnemy;
             }
@@ -176,7 +176,7 @@ namespace Game.Application.Services
             var returnList = new List<MonsterEntity>();
             foreach (var enemyType in enemyTypes)
             {
-                var enemy = _monsterFactory.Create(enemyType);
+                var enemy = _monsterFactory.Create(enemyType, BattleTeam.Enemy);
                 returnList.Add(enemy);
                 _log?.Log($"Created enemy: {enemy.MonsterName} ({enemyType})");
             }
@@ -294,7 +294,7 @@ namespace Game.Application.Services
             await _waitBarrier.WaitAsync(new BarrierKey(cardAnimationToken, (int)AttackPhase.Hit), ct);
 
             // Resolve card effects
-            _cardEffectResolver.ResolveCardEffects(card, attacker, target, allEnemies, allAllies);
+            await _cardEffectResolver.ResolveCardEffectsAsync(card, attacker, target, allEnemies, allAllies, _waitBarrier, ct);
 
             // Move the card to discard pile
             attacker.AbilityDeck.PlayCard(card);

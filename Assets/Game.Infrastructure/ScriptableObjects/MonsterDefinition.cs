@@ -15,7 +15,6 @@ namespace Game.Infrastructure.ScriptableObjects
         public int maxHealth;
         public int attackDamage;
         public MonsterType type;
-        public AttackDirection attackDirection;
 
     }
 }

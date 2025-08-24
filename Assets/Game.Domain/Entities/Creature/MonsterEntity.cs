@@ -13,7 +13,7 @@ namespace Game.Domain.Entities
         public int AttackDamage { get; private set; }
         public MonsterType Type { get; private set; }
         public string MonsterName { get; private set; }
-        public AttackDirection AttackDirection { get; private set; }
+        public BattleTeam BattleTeam { get; private set; }
         public Deck AbilityDeck { get; private set; }
         public IReadOnlyList<StatusEffect> StatusEffects => _statusEffects.AsReadOnly();
         
@@ -31,7 +31,7 @@ namespace Game.Domain.Entities
             int attackDamage,
             MonsterType type,
             string monsterName,
-            AttackDirection attackDirection,
+            BattleTeam battleTeam,
             Deck abilityDeck = null
         )
         {
@@ -40,7 +40,7 @@ namespace Game.Domain.Entities
             AttackDamage = attackDamage;
             Type = type;
             MonsterName = monsterName;
-            AttackDirection = attackDirection;
+            BattleTeam = battleTeam;
             AbilityDeck = abilityDeck;
         }
 

@@ -116,7 +116,7 @@ namespace Game.Presentation.Shared.Views
 
         public async void PlayAttackAnimation(BarrierToken token)
         {
-            Vector3 attackPosition = originalPosition + (model.AttackDirection == AttackDirection.Right ? new Vector3(0.3f, 0, 0) : new Vector3(-0.3f, 0, 0));
+            Vector3 attackPosition = originalPosition + (model.BattleTeam == BattleTeam.Player ? new Vector3(0.3f, 0, 0) : new Vector3(-0.3f, 0, 0));
             FlashColor(BLUE, 0.2f);
             await MoveTo(attackPosition, 0.04f);
             _waitBarrier.Signal(new BarrierKey(token, (int)AttackPhase.Hit));

@@ -34,6 +34,17 @@ namespace Game.Presentation.Core.Services
                 tcs.TrySetResult(true);
         }
 
+        public void SignalAfterDelay(BarrierKey key, float delaySeconds)
+        {
+            _ = SignalAfterDelayAsync(key, delaySeconds);
+        }
+        
+        private async Task SignalAfterDelayAsync(BarrierKey key, float delaySeconds)
+        {
+            await Task.Delay((int)(delaySeconds * 1000));
+            Signal(key);
+        }
+
         public bool TryCancel(BarrierKey token)
         {
             if (_pending.TryRemove(token, out var tcs))

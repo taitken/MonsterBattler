@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Game.Domain.Enums;
 using Game.Domain.Entities.Abilities;
+using Game.Infrastructure.DTOs;
 
 namespace Game.Infrastructure.ScriptableObjects
 {
-    [CreateAssetMenu(fileName = "New Starter Deck", menuName = "Cards/Starter Deck Configuration")]
-    public class StarterDeckConfiguration : ScriptableObject
+    [CreateAssetMenu(fileName = "New Enemy Deck", menuName = "Cards/Enemy Deck Configuration")]
+    public class EnemyDeckConfiguration : ScriptableObject
     {
-        [Header("Monster Type")]
-        public MonsterType monsterType;
         
         [Header("Deck Composition")]
         public List<CardEntry> cardEntries = new();
@@ -36,21 +34,5 @@ namespace Game.Infrastructure.ScriptableObjects
             }
             return cards;
         }
-        
-        void OnValidate()
-        {
-            if (string.IsNullOrWhiteSpace(name) && monsterType != MonsterType.Goald)
-            {
-                name = $"{monsterType}_StarterDeck";
-            }
-        }
-    }
-    
-    [System.Serializable]
-    public struct CardEntry
-    {
-        public AbilityCardData cardData;
-        [Range(1, 10)]
-        public int quantity;
     }
 }

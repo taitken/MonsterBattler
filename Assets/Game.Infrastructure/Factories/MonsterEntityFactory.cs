@@ -17,7 +17,7 @@ namespace Game.Infrastructure.Spawning
             _loggerService = loggerService;
             _abilityCardFactory = abilityCardFactory;
         }
-        public MonsterEntity Create(MonsterType type)
+        public MonsterEntity Create(MonsterType type, BattleTeam team)
         {
             _loggerService?.Log($"Creating MonsterEntity of type: {type}");
             
@@ -36,17 +36,19 @@ namespace Game.Infrastructure.Spawning
                 throw new System.InvalidOperationException(
                     $"Invalid monsterName for monster {type}. Name cannot be null or empty.");
             }
-            
-            
+
+
             // Create starter deck if ability card factory is available
-            var starterDeck = _abilityCardFactory?.CreateStarterDeckForMonsterEntity(type);
+            var starterDeck = team == BattleTeam.Player ?
+                _abilityCardFactory?.CreateStarterDeckForMonsterEntity(type) :
+                _abilityCardFactory?.CreateStarterDeckForEnemy();
             
             var model = new MonsterEntity(
                 maxHealth: definition.maxHealth,
                 attackDamage: definition.attackDamage,
                 type: definition.type,
                 monsterName: definition.monsterName,
-                attackDirection: definition.attackDirection,
+                battleTeam: team,
                 abilityDeck: starterDeck
             );
             

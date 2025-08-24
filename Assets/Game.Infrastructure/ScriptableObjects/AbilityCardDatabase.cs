@@ -11,33 +11,36 @@ namespace Game.Infrastructure.ScriptableObjects
     {
         [Header("Card Collection")]
         public List<AbilityCardData> cards = new();
-        
+
         [Header("Starter Deck Configurations")]
         public List<StarterDeckConfiguration> starterDecks = new();
-        
+
+        [Header("Enemy Deck Configurations")]
+        public List<EnemyDeckConfiguration> enemyDecks = new();
+
         public IReadOnlyList<AbilityCardData> Cards => cards.AsReadOnly();
-        
+
         public AbilityCardData GetCard(string cardName)
         {
             return cards.FirstOrDefault(card => card.cardName == cardName);
         }
-        
+
         public AbilityCardData GetCardById(string cardId)
         {
             return cards.FirstOrDefault(card => card.name == cardId);
         }
-        
+
         public List<AbilityCard> CreateAllCardEntities()
         {
             return cards.Select(cardData => cardData.ToEntity()).ToList();
         }
-        
+
         public List<AbilityCard> CreateStarterDeck()
         {
             var starterCards = cards.Take(3).ToList();
             return starterCards.Select(cardData => cardData.ToEntity()).ToList();
         }
-        
+
         public List<AbilityCard> CreateStarterDeckForMonster(MonsterType monsterType)
         {
             var starterDeckConfig = GetStarterDeckConfiguration(monsterType);
@@ -46,16 +49,30 @@ namespace Game.Infrastructure.ScriptableObjects
                 Debug.Log($"Found starter deck configuration for {monsterType} with {starterDeckConfig.TotalCardCount} cards", starterDeckConfig);
                 return starterDeckConfig.CreateDeck();
             }
-            
-            Debug.LogWarning($"No starter deck configuration found for {monsterType}. Available configurations: [{string.Join(", ", starterDecks.Select(d => d.monsterType))}]. Falling back to generic starter deck.", this);
+            Debug.LogWarning($"No starter deck configuration found for enemy. Available configurations: [{string.Join(", ", starterDecks.Select(d => d.monsterType))}]. Falling back to generic starter deck.", this);
             return CreateStarterDeck();
         }
-        
+
+        public List<AbilityCard> CreateEnemyDeck()
+        {
+            var enemyDeckConfig = GetRandomEnemyDeckConfiguration();
+            if (enemyDeckConfig != null)
+            {
+                Debug.Log($"Retrieved enemy deck config with {enemyDeckConfig.TotalCardCount} cards", enemyDeckConfig);
+                return enemyDeckConfig.CreateDeck();
+            }
+            return null;
+        }
+        public EnemyDeckConfiguration GetRandomEnemyDeckConfiguration()
+        {
+            return enemyDecks[Random.Range(0, enemyDecks.Count - 1)];
+        }
+
         public StarterDeckConfiguration GetStarterDeckConfiguration(MonsterType monsterType)
         {
             return starterDecks.FirstOrDefault(deck => deck.monsterType == monsterType);
         }
-        
+
         public bool HasStarterDeckForMonster(MonsterType monsterType)
         {
             var hasConfig = GetStarterDeckConfiguration(monsterType) != null;
@@ -65,7 +82,7 @@ namespace Game.Infrastructure.ScriptableObjects
             }
             return hasConfig;
         }
-        
+
         void OnValidate()
         {
             // Validate cards
@@ -76,23 +93,23 @@ namespace Game.Infrastructure.ScriptableObjects
                     Debug.LogWarning($"Card at index {i} has no name assigned", cards[i]);
                 }
             }
-            
+
             // Validate starter deck configurations
             var duplicateMonsterTypes = starterDecks
                 .GroupBy(deck => deck.monsterType)
                 .Where(group => group.Count() > 1)
                 .Select(group => group.Key);
-                
+
             foreach (var duplicate in duplicateMonsterTypes)
             {
                 Debug.LogWarning($"Multiple starter deck configurations found for {duplicate}. Only the first will be used.", this);
             }
-            
+
             // Log missing starter decks for all monster types
             var allMonsterTypes = System.Enum.GetValues(typeof(MonsterType)).Cast<MonsterType>();
             var configuredTypes = starterDecks.Select(deck => deck.monsterType).ToHashSet();
             var missingTypes = allMonsterTypes.Where(type => !configuredTypes.Contains(type));
-            
+
             if (missingTypes.Any())
             {
                 Debug.LogWarning($"Missing starter deck configurations for: {string.Join(", ", missingTypes)}", this);

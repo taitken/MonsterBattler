@@ -15,6 +15,7 @@ namespace Game.Application.IFactories
         // Monster-specific starter deck methods
         List<AbilityCard> CreateStarterDeckForMonster(MonsterType monsterType);
         Deck CreateStarterDeckForMonsterEntity(MonsterType monsterType);
+        Deck CreateStarterDeckForEnemy();
         bool HasStarterDeckForMonster(MonsterType monsterType);
     }
 }

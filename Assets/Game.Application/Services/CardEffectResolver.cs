@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
@@ -26,8 +29,8 @@ namespace Game.Application.Services
             _rng = rng;
         }
 
-        public void ResolveCardEffects(AbilityCard card, MonsterEntity caster, MonsterEntity primaryTarget, 
-            List<MonsterEntity> allEnemies, List<MonsterEntity> allAllies)
+        public async Task ResolveCardEffectsAsync(AbilityCard card, MonsterEntity caster, MonsterEntity primaryTarget, 
+            List<MonsterEntity> allEnemies, List<MonsterEntity> allAllies, IInteractionBarrier waitBarrier, CancellationToken ct = default)
         {
             if (card == null)
                 throw new ArgumentNullException(nameof(card));
@@ -36,18 +39,33 @@ namespace Game.Application.Services
 
             _log?.Log($"{caster.MonsterName} plays card: {card.Name}");
 
-            foreach (var effect in card.Effects)
+            for (int effectIndex = 0; effectIndex < card.Effects.Count; effectIndex++)
             {
+                var effect = card.Effects[effectIndex];
                 var targets = GetValidTargetsForEffect(effect, caster, primaryTarget, allEnemies, allAllies);
                 
+                // Create barrier token for this effect if there are multiple effects
+                BarrierToken? effectToken = null;
+                if (card.Effects.Count > 1)
+                {
+                    effectToken = BarrierToken.New();
+                }
+                
+                // Resolve effect for all targets
                 foreach (var target in targets)
                 {
-                    ResolveEffect(effect, caster, target);
+                    ResolveEffect(effect, caster, target, effectToken);
+                }
+                
+                // Wait for presentation layer to signal completion before next effect
+                if (effectToken.HasValue && effectIndex < card.Effects.Count - 1)
+                {
+                    await waitBarrier.WaitAsync(new BarrierKey(effectToken.Value), ct);
                 }
             }
         }
 
-        public void ResolveEffect(AbilityEffect effect, MonsterEntity caster, MonsterEntity target)
+        public void ResolveEffect(AbilityEffect effect, MonsterEntity caster, MonsterEntity target, BarrierToken? effectToken = null)
         {
             if (target == null || target.IsDead)
                 return;
@@ -59,19 +77,20 @@ namespace Game.Application.Services
                 case EffectType.Damage:
                     var amountBlocked = target.TakeDamage(effect.Value);
                     var damageDealt = beforeHP - target.CurrentHP;
-                    _bus.Publish(new DamageAppliedEvent(caster, target, damageDealt, amountBlocked));
+                    _bus.Publish(new DamageAppliedEvent(caster, target, damageDealt, amountBlocked, effectToken));
                     _log?.Log($"{caster.MonsterName} deals {damageDealt} damage to {target.MonsterName}");
                     break;
 
                 case EffectType.Heal:
                     var healAmount = Math.Min(effect.Value, target.MaxHealth - target.CurrentHP);
                     target.Heal(healAmount);
-                    _bus.Publish(new DamageAppliedEvent(caster, target, -healAmount)); // Negative damage for healing
+                    _bus.Publish(new DamageAppliedEvent(caster, target, -healAmount, 0, effectToken)); // Negative damage for healing
                     _log?.Log($"{caster.MonsterName} heals {target.MonsterName} for {healAmount} HP");
                     break;
 
                 case EffectType.Defend:
                     target.AddStatusEffect(new StatusEffect(effect.Type, effect.Value, effect.Duration, "Defend"));
+                    _bus.Publish(new EffectAppliedEvent(caster, target, effect, effect.Value, effectToken));
                     _log?.Log($"{target.MonsterName} gains defense from {caster.MonsterName}'s card");
                     break;
 

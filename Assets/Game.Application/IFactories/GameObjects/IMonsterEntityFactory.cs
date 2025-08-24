@@ -5,6 +5,6 @@ namespace Game.Application.IFactories
 {
     public interface IMonsterEntityFactory
     {
-        MonsterEntity Create(MonsterType type);
+        MonsterEntity Create(MonsterType type, BattleTeam team);
     }
 }

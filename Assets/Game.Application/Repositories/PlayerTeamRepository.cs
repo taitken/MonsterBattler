@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
 using Game.Application.IFactories;
-using Game.Application.Interfaces;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
@@ -33,7 +31,7 @@ namespace Game.Application.Repositories
             var teamCopies = new List<MonsterEntity>();
             foreach (var monster in _playerTeam)
             {
-                var copy = _monsterFactory.Create(monster.Type);
+                var copy = _monsterFactory.Create(monster.Type, BattleTeam.Player);
                 // Preserve the persistent state (current HP, etc.)
                 copy.SetCurrentHP(monster.CurrentHP);
                 teamCopies.Add(copy);
@@ -56,7 +54,7 @@ namespace Game.Application.Repositories
             // Store copies to avoid reference issues
             foreach (var monster in monsters)
             {
-                var copy = _monsterFactory.Create(monster.Type);
+                var copy = _monsterFactory.Create(monster.Type, BattleTeam.Player);
                 copy.SetCurrentHP(monster.CurrentHP);
                 _playerTeam.Add(copy);
             }
@@ -84,9 +82,9 @@ namespace Game.Application.Repositories
             _playerTeam.Clear();
             
             // Create default starting team
-            var goald = _monsterFactory.Create(MonsterType.Ashwick);
-            var kraggan = _monsterFactory.Create(MonsterType.Dropletus);
-            var flimboon = _monsterFactory.Create(MonsterType.Shardilo);
+            var goald = _monsterFactory.Create(MonsterType.Ashwick, BattleTeam.Player);
+            var kraggan = _monsterFactory.Create(MonsterType.Dropletus, BattleTeam.Player);
+            var flimboon = _monsterFactory.Create(MonsterType.Shardilo, BattleTeam.Player);
             
             _playerTeam.Add(goald);
             _playerTeam.Add(kraggan);

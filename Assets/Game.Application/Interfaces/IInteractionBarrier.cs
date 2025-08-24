@@ -9,6 +9,7 @@ namespace Game.Application.Interfaces
     {
         Task WaitAsync(BarrierKey key, CancellationToken ct = default);
         void Signal(BarrierKey key);
+        void SignalAfterDelay(BarrierKey key, float delaySeconds);
         bool TryCancel(BarrierKey key);
     }
 }

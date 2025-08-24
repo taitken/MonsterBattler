@@ -22,6 +22,7 @@ namespace Game.Presentation.VfxControllers
         private IInteractionBarrier _waitBarrier;
         private IDisposable _subActionSelected;
         private IDisposable _subDamageApplied;
+        private IDisposable _subEffectApplied;
         private IDisposable _subFainted;
         private IDisposable _subTurnStart;
         private IDisposable _subTurnEnd;
@@ -44,6 +45,7 @@ namespace Game.Presentation.VfxControllers
         {
             _subActionSelected = _bus.Subscribe<ActionSelectedEvent>(OnActionSelected);
             _subDamageApplied = _bus.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+            _subEffectApplied = _bus.Subscribe<EffectAppliedEvent>(OnEffectApplied);
             _subFainted = _bus.Subscribe<MonsterFaintedEvent>(OnMonsterFainted);
             _subTurnStart = _bus.Subscribe<TurnStartedEvent>(OnTurnStarted);
             _subTurnEnd = _bus.Subscribe<TurnEndedEvent>(OnTurnEnded);
@@ -90,7 +92,24 @@ namespace Game.Presentation.VfxControllers
                 {
                     targetView.PlayHitReaction(totalDamage);
                 }
+                
+                // Signal completion after delay if there's a wait token (for staggered multi-hit timing)
+                if (e.WaitToken.HasValue)
+                {
+                    _waitBarrier.SignalAfterDelay(new BarrierKey(e.WaitToken.Value), 0.3f);
+                }
             }
+        }
+
+        private void OnEffectApplied(EffectAppliedEvent e)
+        {
+            // Signal completion after delay if there's a wait token
+            if (e.WaitToken.HasValue)
+            {
+                _waitBarrier.SignalAfterDelay(new BarrierKey(e.WaitToken.Value), 0.1f);
+            }
+            
+            // TODO: Add visual effects for different effect types (shield icons, etc.)
         }
 
         private void OnMonsterFainted(MonsterFaintedEvent e)
@@ -126,6 +145,7 @@ namespace Game.Presentation.VfxControllers
         {
             _subActionSelected?.Dispose();
             _subDamageApplied?.Dispose();
+            _subEffectApplied?.Dispose();
             _subFainted?.Dispose();
             _subTurnStart?.Dispose();
             _subTurnEnd?.Dispose();
