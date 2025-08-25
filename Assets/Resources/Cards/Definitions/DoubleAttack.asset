@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16eb075e5d2c4854e8283aa0d6e6a981, type: 3}
   m_Name: DoubleAttack
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
-  cardName: Basic Attack
+  cardName: Double Attack
   description: Deal {{0:Value}} damage to an <b>Enemy</b>
   cardArt: {fileID: -7530385545832523778, guid: 6a5849c08a1be774fba38805df7156a2, type: 3}
   effects:
