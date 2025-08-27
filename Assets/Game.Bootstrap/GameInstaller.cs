@@ -9,6 +9,7 @@ using Game.Core;
 using Game.Core.Logger;
 using Game.Core.Randomness;
 using Game.Infrastructure.Factories;
+using Game.Infrastructure.Providers;
 using Game.Infrastructure.Randomness;
 using Game.Infrastructure.ScriptableObjects;
 using Game.Infrastructure.Services;
@@ -28,6 +29,7 @@ namespace Game.Bootstrap
         [SerializeField] private MonsterDatabase monsterDatabase;
         [SerializeField] private EnemyEncounterDatabase enemyEncounterDatabase;
         [SerializeField] private AbilityCardDatabase abilityCardDatabase;
+        [SerializeField] private ResourceIconDatabase resourceIconDatabase;
         
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
@@ -64,7 +66,8 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<IBattleHistoryRepository, BattleHistoryRepository>();
             services.RegisterAsSingleton<IOverworldRepository, OverworldRepository>();
             services.RegisterAsSingleton<IOverworldGenerator, RandomOverworldGenerator>();
-            services.RegisterAsSingleton<IPlayerTeamRepository, PlayerTeamRepository>();
+            services.RegisterAsSingleton<IPlayerDataRepository, PlayerDataRepository>();
+            services.RegisterAsSingleton<IPauseService, PauseService>();
 
             // Presentation Services
             services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
@@ -103,6 +106,7 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<IMonsterSpriteProvider>(() => new MonsterSpriteAdapter(monsterDatabase));
             services.RegisterAsSingleton<IEnemyEncounterProvider>(() => new EnemyEncounterAdapter(enemyEncounterDatabase));
             services.RegisterAsSingleton<ICardArtProvider>(() => new CardArtAdapter(abilityCardDatabase));
+            services.RegisterAsSingleton<IResourceIconProvider>(() => new ResourceIconProvider(resourceIconDatabase));
         }
 
         void Update()

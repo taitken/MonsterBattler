@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 413bb4284b1d49f43b325c68db4d8cd9, type: 3}
+  m_Name: ResourceIconDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.ResourceIconDatabase
+  resources:
+  - type: 0
+    sprite: {fileID: 1616610148988317576, guid: 18ae13511e7c0444e9a3a6c4c55550ab, type: 3}
+  - type: 1
+    sprite: {fileID: 2033716663667115786, guid: 91906c4ad862782479f7fceb290faff6, type: 3}
+  - type: 2
+    sprite: {fileID: -632122146342402490, guid: 14ac0a50f9e443544b200352ca8108c8, type: 3}
+  - type: 3
+    sprite: {fileID: -7552967972222127651, guid: a83f4615e16712442a5671a3b436825f, type: 3}

@@ -6,6 +6,7 @@ using Game.Core;
 using Game.Core.Logger;
 using Game.Domain.Enums;
 using Game.Presentation.UI;
+using Game.Presentation.Scenes.Battle.Controllers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,9 @@ namespace Assets.Game.Presentation.Scenes
             _navigationService = ServiceLocator.Get<INavigationService>();
             _backgroundProvider = ServiceLocator.Get<IBiomeBackgroundProvider>();
             _overworldService = ServiceLocator.Get<IOverworldRepository>();
+            
+            // Add controllers for pause functionality
+            gameObject.AddComponent<BattleInputController>();
         }
         async void Start()
         {

@@ -14,8 +14,8 @@ namespace Game.Presentation.VfxControllers
 
     public sealed class BattleVfxController : MonoBehaviour
     {
-        private VictoryText _victoryText;
         private RectTransform _rootCanvas;
+        private VictoryText _victoryText;
         private IEventBus _bus;
         private IViewRegistryService _viewRegistry;
         private ICombatTextFactory _combatTextFactory;
@@ -36,7 +36,7 @@ namespace Game.Presentation.VfxControllers
             _viewRegistry = ServiceLocator.Get<IViewRegistryService>();
             _combatTextFactory = ServiceLocator.Get<ICombatTextFactory>();
             _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
-            _rootCanvas = GetComponent<RectTransform>();
+            _rootCanvas = GetComponentInParent<RectTransform>();
             _victoryText = GetComponentInChildren<VictoryText>();
             _victoryText.gameObject.SetActive(false);
         }
@@ -71,29 +71,25 @@ namespace Game.Presentation.VfxControllers
             {
                 Vector3 basePosition = targetView.transform.position + new Vector3(0, 1f, 0);
                 
-                // Show damage text in red (if any damage was dealt)
                 if (e.Amount > 0)
                 {
                     ColorUtility.TryParseHtmlString(DAMAGE_COLOUR, out Color redDamageColor);
                     _combatTextFactory.Create(redDamageColor, $"{e.Amount}", _rootCanvas, basePosition);
                 }
                 
-                // Show blocked amount in blue (if any damage was blocked)
                 if (e.AmountBlocked > 0)
                 {
                     ColorUtility.TryParseHtmlString(BLOCK_COLOUR, out Color blueDamageColor);
-                    Vector3 blockPosition = basePosition + new Vector3(0.5f, 0.3f, 0); // Offset slightly
+                    Vector3 blockPosition = basePosition + new Vector3(0.5f, 0.3f, 0);
                     _combatTextFactory.Create(blueDamageColor, $"{e.AmountBlocked}", _rootCanvas, blockPosition);
                 }
                 
-                // Play hit reaction based on total attempted damage
                 int totalDamage = e.Amount + e.AmountBlocked;
                 if (totalDamage > 0)
                 {
                     targetView.PlayHitReaction(totalDamage);
                 }
                 
-                // Signal completion after delay if there's a wait token (for staggered multi-hit timing)
                 if (e.WaitToken.HasValue)
                 {
                     _waitBarrier.SignalAfterDelay(new BarrierKey(e.WaitToken.Value), 0.3f);
