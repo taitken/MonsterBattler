@@ -14,7 +14,6 @@ namespace Game.Application.Repositories
     {
         private readonly IMonsterEntityFactory _monsterFactory;
         private readonly ILoggerService _logger;
-        
         private List<MonsterEntity> _playerTeam;
         private PlayerResources _playerResources;
         private int _battlesWon;

@@ -28,7 +28,7 @@ namespace Game.Application.Services
         private readonly ILoggerService _log;
         private readonly IRandomService _rng;
         private readonly IBattleHistoryRepository _battleHistory;
-        private readonly IPlayerTeamRepository _playerTeamPersistence;
+        private readonly IPlayerDataRepository _playerTeamPersistence;
         private readonly IEnemyEncounterProvider _encounterProvider;
         private readonly IOverworldRepository _overworldPersistenceService;
         private readonly ICardEffectResolver _cardEffectResolver;
@@ -42,7 +42,7 @@ namespace Game.Application.Services
                              IRandomService rng,
                              IInteractionBarrier waitBarrier,
                              IBattleHistoryRepository battleHistory,
-                             IPlayerTeamRepository playerTeamPersistence,
+                             IPlayerDataRepository playerTeamPersistence,
                              IEnemyEncounterProvider encounterProvider,
                              IOverworldRepository overworldPersistenceService,
                              ICardEffectResolver cardEffectResolver)

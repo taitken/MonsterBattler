@@ -17,7 +17,7 @@ namespace Game.Domain.Entities
         {
             _resources = new Dictionary<ResourceType, int>
             {
-                { ResourceType.Gold, 100 }, // Starting gold
+                { ResourceType.Gold, 100 }, 
                 { ResourceType.Experience, 0 },
                 { ResourceType.Health, 100 },
                 { ResourceType.Mana, 50 }

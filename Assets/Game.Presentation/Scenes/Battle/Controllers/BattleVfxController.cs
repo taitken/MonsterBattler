@@ -15,7 +15,6 @@ namespace Game.Presentation.VfxControllers
     public sealed class BattleVfxController : MonoBehaviour
     {
         private RectTransform _rootCanvas;
-        private VictoryText _victoryText;
         private IEventBus _bus;
         private IViewRegistryService _viewRegistry;
         private ICombatTextFactory _combatTextFactory;
@@ -37,8 +36,6 @@ namespace Game.Presentation.VfxControllers
             _combatTextFactory = ServiceLocator.Get<ICombatTextFactory>();
             _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
             _rootCanvas = GetComponentInParent<RectTransform>();
-            _victoryText = GetComponentInChildren<VictoryText>();
-            _victoryText.gameObject.SetActive(false);
         }
 
         void OnEnable()
@@ -49,7 +46,6 @@ namespace Game.Presentation.VfxControllers
             _subFainted = _bus.Subscribe<MonsterFaintedEvent>(OnMonsterFainted);
             _subTurnStart = _bus.Subscribe<TurnStartedEvent>(OnTurnStarted);
             _subTurnEnd = _bus.Subscribe<TurnEndedEvent>(OnTurnEnded);
-            _subBattleEnded = _bus.Subscribe<BattleEndedEvent>(OnBattleEnded);
         }
 
         private void OnActionSelected(ActionSelectedEvent e)
@@ -126,15 +122,6 @@ namespace Game.Presentation.VfxControllers
         {
             // Optional: clear tints/banners
             // UiTurnBanner.Hide();
-        }
-
-        private async void OnBattleEnded(BattleEndedEvent e)
-        {
-            _victoryText.gameObject.SetActive(true);
-            var waitKey = BarrierToken.New();
-            _victoryText.Play(waitKey);
-            await _waitBarrier.WaitAsync(new BarrierKey(waitKey));
-            _bus.Publish(new BattleFlowCompleteCommand(e.Result));
         }
 
         void OnDisable()

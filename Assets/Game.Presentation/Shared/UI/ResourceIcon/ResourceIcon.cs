@@ -1,5 +1,6 @@
 using Game.Application.Interfaces;
 using Game.Core;
+using Game.Domain.Entities;
 using Game.Domain.Enums;
 using TMPro;
 using UnityEngine;

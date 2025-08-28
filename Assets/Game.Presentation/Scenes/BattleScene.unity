@@ -535,6 +535,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1435278058118218342, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2788194235610294169, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
       propertyPath: m_Name
       value: BattleSceneUIController
@@ -620,8 +624,13 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 2037549700886875803, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
-    m_RemovedGameObjects: []
+    - {fileID: 0}
+    m_RemovedGameObjects:
+    - {fileID: 8918092942082186027, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+    - {fileID: 2009593583423258110, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+    - {fileID: 6461124433545221028, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+    - {fileID: 3508941567431178384, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+    - {fileID: 4464699601302924340, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4865b239780f49e41bbc56a640f61190, type: 3}

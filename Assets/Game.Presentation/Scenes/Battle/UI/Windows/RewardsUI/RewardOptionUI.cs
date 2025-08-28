@@ -1,9 +1,13 @@
+using System;
+using Game.Application.Repositories;
+using Game.Core;
+using Game.Domain.Enums;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
-public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     private float hoverScale = 1.005f;
     private Color hoverTintColor = new(1f, 0.90f, 0.61f, 1f);  
@@ -13,16 +17,28 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private Color _originalColor;
     private RectTransform _rectTransform;
     private Image _image;
+    private IPlayerDataRepository _playerDataRepo;
+    private ResourceType _rewardType;
+    private int _rewardAmount;
+    
+    public event Action<RewardOptionUI> OnRewardClaimed;
     
     void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _image = GetComponent<Image>();
+        _playerDataRepo = ServiceLocator.Get<IPlayerDataRepository>();
         
         // Store original values
         _originalScale = _rectTransform.localScale;
         if (_image != null)
             _originalColor = _image.color;
+    }
+    
+    public void Initialize(ResourceType rewardType, int amount)
+    {
+        _rewardType = rewardType;
+        _rewardAmount = amount;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -98,5 +114,18 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         _rectTransform.localScale = _originalScale;
         if (_image != null)
             _image.color = _originalColor;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // Grant the reward
+        var playerResources = _playerDataRepo.GetPlayerResources();
+        playerResources.AddResource(_rewardType, _rewardAmount);
+        
+        // Notify parent that this reward was claimed
+        OnRewardClaimed?.Invoke(this);
+        
+        // Hide this reward option
+        gameObject.SetActive(false);
     }
 }
