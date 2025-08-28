@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.9360587, b: 0.7122642, a: 1}
+  m_Color: {r: 0.7607843, g: 0.8352941, b: 0.99215686, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
-  m_EffectColor: {r: 0.8396226, g: 0.81506765, b: 0.7168476, a: 1}
+  m_EffectColor: {r: 0.7176471, g: 0.7882353, b: 0.93333334, a: 1}
   m_EffectDistance: {x: 1, y: -1}
   m_UseGraphicAlpha: 0
 --- !u!114 &355720724949120757

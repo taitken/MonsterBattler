@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using Game.Domain.Enums;
-using Game.Domain.Structs;
 using Game.Presentation.UI.ButtonUI;
 
 public class RewardsWindow : MonoBehaviour
@@ -10,18 +8,37 @@ public class RewardsWindow : MonoBehaviour
     [SerializeField] private Canvas _canvas;
     [SerializeField] private RewardOptionUI _rewardOptionPrefab;
     [SerializeField] private ButtonUI _continueButton;
+    [SerializeField] private RewardOptionUI _referenceRewardOption; // The positioned instance in the scene
     private Transform _contentParent;
-    
-    private List<RewardOptionUI> _currentRewardOptions = new List<RewardOptionUI>();
+        private List<RewardOptionUI> _currentRewardOptions = new List<RewardOptionUI>();
+    private Vector3 _referencePosition;
+    private bool _hasInitialized = false;
 
     void Awake()
     {
         // If no content parent is set, use the canvas as the parent
         if (_contentParent == null && _canvas != null)
             _contentParent = _canvas.transform;
+            
+        InitializeReferencePosition();
+    }
+    
+    private void InitializeReferencePosition()
+    {
+        if (!_hasInitialized && _referenceRewardOption != null)
+        {
+            // Store the reference position from the positioned instance
+            _referencePosition = _referenceRewardOption.transform.localPosition;
+            
+            // Destroy the reference instance
+            DestroyImmediate(_referenceRewardOption.gameObject);
+            _referenceRewardOption = null;
+            
+            _hasInitialized = true;
+        }
     }
 
-    public void InitializeRewards(BattleResult battleResult)
+    public void InitializeRewards()
     {
         ClearExistingRewards();
         CreateRewardOptions();
@@ -60,22 +77,17 @@ public class RewardsWindow : MonoBehaviour
             rewardOption.OnRewardClaimed += OnRewardClaimed;
             _currentRewardOptions.Add(rewardOption);
             
-            // Position them vertically with even spacing
-            var rectTransform = rewardOption.GetComponent<RectTransform>();
-            if (rectTransform != null)
-            {
-                // Position: top (0.75), middle (0.5), bottom (0.25) of parent
-                float yPosition = 0.65f - (i * 0.15f);
-                rectTransform.anchorMin = new Vector2(0.5f, yPosition);
-                rectTransform.anchorMax = new Vector2(0.5f, yPosition);
-                rectTransform.anchoredPosition = Vector2.zero;
-            }
+            // Position them using the reference position with 0.05f margin between each
+            var transform = rewardOption.transform;
+            Vector3 newPosition = _referencePosition;
+            newPosition.y -= i * 130f; // Move each option down by 0.05f units
+            transform.localPosition = newPosition;
         }
     }
 
-    public void Show(BattleResult battleResult)
+    public void Show()
     {
-        InitializeRewards(battleResult);
+        InitializeRewards();
         gameObject.SetActive(true);
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
 using Game.Application.Repositories;
@@ -13,18 +14,16 @@ public class BattleSceneUIController : MonoBehaviour
     [SerializeField] private RewardsWindow _rewardsWindow;
     
     private IEventBus _eventBus;
-    private IBattleHistoryRepository _battleHistory;
     private IDisposable _battleEventEnded;
     private BattleResult? _currentBattleResult;
 
     void Awake()
     {
         _eventBus = ServiceLocator.Get<IEventBus>();
-        _battleHistory = ServiceLocator.Get<IBattleHistoryRepository>();
         _battleEventEnded = _eventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
         
         var pauseUIController = gameObject.AddComponent<BattlePauseUIController>();
-        pauseUIController.Initialize(_rewardsWindow);
+        pauseUIController.Initialize();
     }
 
     void OnDestroy()
@@ -37,12 +36,16 @@ public class BattleSceneUIController : MonoBehaviour
         _rewardsWindow?.Hide();
     }
 
-    private void OnBattleEnded(BattleEndedEvent @event)
+    private async void OnBattleEnded(BattleEndedEvent @event)
     {
         if (@event.Result.Outcome == BattleOutcome.PlayerVictory)
         {
             _currentBattleResult = @event.Result;
-            _rewardsWindow?.Show(@event.Result);
+            
+            // Wait 2 seconds for battle animations to finish
+            await Task.Delay(2000);
+            
+            _rewardsWindow?.Show();
             _rewardsWindow?.SetupContinueButton(OnContinueClicked);
         }
     }

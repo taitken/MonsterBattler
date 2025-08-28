@@ -130,6 +130,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: RewardsWindow
       objectReference: {fileID: 0}
+    - target: {fileID: 3740492322095630850, guid: ff83ef5c8bd5079498e788e8a8ded1ce, type: 3}
+      propertyPath: _canvas
+      value: 
+      objectReference: {fileID: 6515106111454708102}
+    - target: {fileID: 3740492322095630850, guid: ff83ef5c8bd5079498e788e8a8ded1ce, type: 3}
+      propertyPath: _continueButton
+      value: 
+      objectReference: {fileID: 6933711987753914427}
     - target: {fileID: 6157632487412323055, guid: ff83ef5c8bd5079498e788e8a8ded1ce, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -226,6 +234,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af12322f96194a648bf047f861e4cb55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation::RewardsWindow
+--- !u!114 &6933711987753914427 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5998953696209528182, guid: ff83ef5c8bd5079498e788e8a8ded1ce, type: 3}
+  m_PrefabInstance: {fileID: 3709258325144466765}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95cc83a21436e0f41865986211710589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Presentation::Game.Presentation.UI.Combat.StretchableButtonFrame
 --- !u!224 &7353710600032659362 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6157632487412323055, guid: ff83ef5c8bd5079498e788e8a8ded1ce, type: 3}

@@ -16,7 +16,7 @@ namespace Game.Presentation.Scenes.Battle.Controllers
         /// <summary>
         /// Initialize the controller with a specific rewards window
         /// </summary>
-        public void Initialize(RewardsWindow rewardsWindow)
+        public void Initialize()
         {
 
         }
