@@ -83,7 +83,7 @@ namespace Game.Presentation.Adapters
             }
         }
 
-        // Called per command type; resolves all handler instances from ServiceLocator and invokes Handle
+        // Called per command type; resolves all handler instances using ServiceLocator and invokes Handle
         private void Dispatch<T>(T command) where T : ICommand
         {
             Debug.Log("Dispatching command: " + typeof(T).Name);
@@ -93,8 +93,7 @@ namespace Game.Presentation.Adapters
             {
                 try
                 {
-                    var handler = handlerTypes[i].GetConstructor(Type.EmptyTypes)
-                        ?.Invoke(Array.Empty<object>());
+                    var handler = CreateHandlerInstance(handlerTypes[i]);
                     ((ICommandHandler<T>)handler).Handle(command);
                 }
                 catch (Exception ex)
@@ -102,6 +101,26 @@ namespace Game.Presentation.Adapters
                     Debug.LogException(ex);
                 }
             }
+        }
+
+        private object CreateHandlerInstance(Type handlerType)
+        {
+            var constructors = handlerType.GetConstructors();
+            var constructor = constructors[0]; // Take the first (and likely only) constructor
+            
+            var parameters = constructor.GetParameters();
+            var args = new object[parameters.Length];
+            
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var paramType = parameters[i].ParameterType;
+                args[i] = typeof(ServiceLocator)
+                    .GetMethod("Get")
+                    .MakeGenericMethod(paramType)
+                    .Invoke(null, null);
+            }
+            
+            return constructor.Invoke(args);
         }
 
         public void Dispose()

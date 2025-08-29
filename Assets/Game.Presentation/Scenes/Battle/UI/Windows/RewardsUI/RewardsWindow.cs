@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Game.Application.Interfaces;
+using Game.Core;
 using Game.Domain.Enums;
+using Game.Domain.Structs;
 using Game.Presentation.UI.ButtonUI;
 
 public class RewardsWindow : MonoBehaviour
@@ -38,10 +41,18 @@ public class RewardsWindow : MonoBehaviour
         }
     }
 
-    public void InitializeRewards()
+    public void ShowWithRewards(IEnumerable<Reward> rewards, System.Action onContinueClicked)
     {
         ClearExistingRewards();
-        CreateRewardOptions();
+        CreateRewardOptions(rewards);
+        SetupContinueButton(onContinueClicked);
+        gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+        ClearExistingRewards();
     }
 
     private void ClearExistingRewards()
@@ -54,59 +65,37 @@ public class RewardsWindow : MonoBehaviour
         _currentRewardOptions.Clear();
     }
 
-    private void CreateRewardOptions()
+    private void CreateRewardOptions(IEnumerable<Reward> rewards)
     {
-        if (_rewardOptionPrefab == null || _contentParent == null)
+        if (_rewardOptionPrefab == null || _contentParent == null || rewards == null)
             return;
-            
-        // Define different reward options
-        var rewardOptions = new[]
-        {
-            (ResourceType.Gold, 50),
-            (ResourceType.Experience, 25), 
-            (ResourceType.Health, 20)
-        };
-        
-        for (int i = 0; i < rewardOptions.Length; i++)
+
+        int i = 0;
+        foreach (var reward in rewards)
         {
             var rewardOption = Instantiate(_rewardOptionPrefab, _contentParent);
-            var (rewardType, amount) = rewardOptions[i];
             
             // Initialize the reward option
-            rewardOption.Initialize(rewardType, amount);
+            rewardOption.Initialize(reward);
             rewardOption.OnRewardClaimed += OnRewardClaimed;
             _currentRewardOptions.Add(rewardOption);
             
-            // Position them using the reference position with 0.05f margin between each
+            // Position them using the reference position with spacing between each
             var transform = rewardOption.transform;
             Vector3 newPosition = _referencePosition;
-            newPosition.y -= i * 130f; // Move each option down by 0.05f units
+            newPosition.y -= i * 130f;
             transform.localPosition = newPosition;
+            
+            i++;
         }
-    }
-
-    public void Show()
-    {
-        InitializeRewards();
-        gameObject.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-        ClearExistingRewards();
     }
     
     private void OnRewardClaimed(RewardOptionUI claimedReward)
     {
-        // Remove the claimed reward from our list
         _currentRewardOptions.Remove(claimedReward);
     }
     
-    /// <summary>
-    /// Sets up the continue button with an external callback
-    /// </summary>
-    public void SetupContinueButton(System.Action onContinueClicked)
+    private void SetupContinueButton(System.Action onContinueClicked)
     {
         if (_continueButton != null)
         {

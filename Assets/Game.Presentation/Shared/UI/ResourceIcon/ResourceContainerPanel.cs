@@ -10,6 +10,7 @@ public class ResourceContainerPanel : MonoBehaviour
     [SerializeField] private ResourceIconUI _experienceIcon;
     [SerializeField] private ResourceIconUI _healthIcon;
     [SerializeField] private ResourceIconUI _manaIcon;
+    [SerializeField] private ResourceIconUI _cardIcon;
 
     private IPlayerDataRepository _playerDataRepo;
 
@@ -42,6 +43,8 @@ public class ResourceContainerPanel : MonoBehaviour
             _healthIcon.UpdateValue(resources.Health.ToString());
         if (_manaIcon != null)
             _manaIcon.UpdateValue(resources.Mana.ToString());
+        if (_cardIcon != null)
+            _cardIcon.UpdateValue(resources.Card.ToString());
     }
 
     private void UpdateResourceIcons(ResourceType resourceType, int value)
@@ -59,6 +62,9 @@ public class ResourceContainerPanel : MonoBehaviour
                 break;
             case ResourceType.Mana:
                 _manaIcon?.UpdateValue(value.ToString());
+                break;
+            case ResourceType.Card:
+                _cardIcon?.UpdateValue(value.ToString());
                 break;
         }
     }

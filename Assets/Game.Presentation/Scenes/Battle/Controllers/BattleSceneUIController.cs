@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
-using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
 using Game.Domain.Structs;
@@ -42,11 +41,10 @@ public class BattleSceneUIController : MonoBehaviour
         {
             _currentBattleResult = @event.Result;
             
-            // Wait 2 seconds for battle animations to finish
-            await Task.Delay(2000);
+            // Wait 1.5 seconds for battle animations to finish
+            await Task.Delay(1500);
             
-            _rewardsWindow?.Show();
-            _rewardsWindow?.SetupContinueButton(OnContinueClicked);
+            _rewardsWindow?.ShowWithRewards(@event.Rewards, OnContinueClicked);
         }
     }
     

@@ -1,7 +1,13 @@
 using System;
+using Game.Application.Interfaces;
+using Game.Application.Messaging;
+using Game.Application.Messaging.Commands;
 using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
+using Game.Domain.Structs;
+using Game.Presentation.Core.Helpers;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -9,36 +15,45 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    private float hoverScale = 1.005f;
-    private Color hoverTintColor = new(1f, 0.90f, 0.61f, 1f);  
-    private float transitionDuration = 0.1f;
-    
+    [SerializeField] private Image _iconImage;
+    [SerializeField] private TextMeshProUGUI _text;
+
+    private const float HoverScale = 1.005f;
+    private const float TransitionDuration = 0.1f;
+    private const float LightenFactor = 0.5f;
+    private Color _hoverTintColor;
     private Vector3 _originalScale;
     private Color _originalColor;
     private RectTransform _rectTransform;
-    private Image _image;
-    private IPlayerDataRepository _playerDataRepo;
-    private ResourceType _rewardType;
-    private int _rewardAmount;
+    private Image _backgroundImage;
+    private IEventBus _eventBus;
+    private IResourceIconProvider _resourceIconProvider;
+    private Reward _reward;
     
     public event Action<RewardOptionUI> OnRewardClaimed;
-    
+
     void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
-        _image = GetComponent<Image>();
-        _playerDataRepo = ServiceLocator.Get<IPlayerDataRepository>();
-        
+        _backgroundImage = GetComponent<Image>();
+        _eventBus = ServiceLocator.Get<IEventBus>();
+        _resourceIconProvider = ServiceLocator.Get<IResourceIconProvider>();
+
         // Store original values
         _originalScale = _rectTransform.localScale;
-        if (_image != null)
-            _originalColor = _image.color;
+        if (_backgroundImage != null)
+        {
+            _originalColor = _backgroundImage.color;
+            _hoverTintColor = ColorHelper.Lighten(_originalColor, LightenFactor);
+        }
+            
     }
-    
-    public void Initialize(ResourceType rewardType, int amount)
+
+    public void Initialize(Reward reward)
     {
-        _rewardType = rewardType;
-        _rewardAmount = amount;
+        _reward = reward;
+        _iconImage.sprite = _resourceIconProvider.GetResourceSprite(reward.Type);
+        _text.SetText(reward.DisplayText);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -59,13 +74,13 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         float elapsedTime = 0f;
         Vector3 startScale = _rectTransform.localScale;
-        Color startColor = _image != null ? _image.color : Color.white;
-        Vector3 targetScale = _originalScale * hoverScale;
+        Color startColor = _backgroundImage != null ? _backgroundImage.color : Color.white;
+        Vector3 targetScale = _originalScale * HoverScale;
 
-        while (elapsedTime < transitionDuration)
+        while (elapsedTime < TransitionDuration)
         {
             elapsedTime += Time.unscaledDeltaTime; // Use unscaled time in case game is paused
-            float progress = elapsedTime / transitionDuration;
+            float progress = elapsedTime / TransitionDuration;
             
             // Smooth transition using easing
             float easedProgress = Mathf.SmoothStep(0f, 1f, progress);
@@ -74,28 +89,28 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             _rectTransform.localScale = Vector3.Lerp(startScale, targetScale, easedProgress);
             
             // Color transition
-            if (_image != null)
-                _image.color = Color.Lerp(startColor, hoverTintColor, easedProgress);
+            if (_backgroundImage != null)
+                _backgroundImage.color = Color.Lerp(startColor, _hoverTintColor, easedProgress);
             
             yield return null;
         }
 
         // Ensure final values are set
         _rectTransform.localScale = targetScale;
-        if (_image != null)
-            _image.color = hoverTintColor;
+        if (_backgroundImage != null)
+            _backgroundImage.color = _hoverTintColor;
     }
 
     private System.Collections.IEnumerator TransitionToNormal()
     {
         float elapsedTime = 0f;
         Vector3 startScale = _rectTransform.localScale;
-        Color startColor = _image != null ? _image.color : Color.white;
+        Color startColor = _backgroundImage != null ? _backgroundImage.color : Color.white;
 
-        while (elapsedTime < transitionDuration)
+        while (elapsedTime < TransitionDuration)
         {
             elapsedTime += Time.unscaledDeltaTime; // Use unscaled time in case game is paused
-            float progress = elapsedTime / transitionDuration;
+            float progress = elapsedTime / TransitionDuration;
             
             // Smooth transition using easing
             float easedProgress = Mathf.SmoothStep(0f, 1f, progress);
@@ -104,23 +119,22 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             _rectTransform.localScale = Vector3.Lerp(startScale, _originalScale, easedProgress);
             
             // Color transition
-            if (_image != null)
-                _image.color = Color.Lerp(startColor, _originalColor, easedProgress);
+            if (_backgroundImage != null)
+                _backgroundImage.color = Color.Lerp(startColor, _originalColor, easedProgress);
             
             yield return null;
         }
 
         // Ensure final values are set
         _rectTransform.localScale = _originalScale;
-        if (_image != null)
-            _image.color = _originalColor;
+        if (_backgroundImage != null)
+            _backgroundImage.color = _originalColor;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Grant the reward
-        var playerResources = _playerDataRepo.GetPlayerResources();
-        playerResources.AddResource(_rewardType, _rewardAmount);
+        // Publish reward claimed command
+        _eventBus.Publish(new RewardClaimedCommand(_reward));
         
         // Notify parent that this reward was claimed
         OnRewardClaimed?.Invoke(this);

@@ -21,7 +21,6 @@ public class ResourceIconUI : MonoBehaviour
     {
         _resourceIconProvider = ServiceLocator.Get<IResourceIconProvider>();
         UpdateIcon();
-        UpdateValue(0.ToString());
     }
 
     private void UpdateIcon()
@@ -33,6 +32,6 @@ public class ResourceIconUI : MonoBehaviour
 
     public void UpdateValue(string newValue)
     {
-        _valueText.text = newValue;
+        _valueText.SetText(newValue);
     }
 }

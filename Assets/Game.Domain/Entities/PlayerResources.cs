@@ -20,7 +20,8 @@ namespace Game.Domain.Entities
                 { ResourceType.Gold, 100 }, 
                 { ResourceType.Experience, 0 },
                 { ResourceType.Health, 100 },
-                { ResourceType.Mana, 50 }
+                { ResourceType.Mana, 50 },
+                { ResourceType.Card, 0 }
             };
         }
 
@@ -102,5 +103,6 @@ namespace Game.Domain.Entities
         public int Experience => GetResource(ResourceType.Experience);
         public int Health => GetResource(ResourceType.Health);
         public int Mana => GetResource(ResourceType.Mana);
+        public int Card => GetResource(ResourceType.Card);
     }
 }

@@ -91,6 +91,7 @@ namespace Game.Bootstrap
         {
             services.RegisterAsTransient<IRandomService, UnityRandomService>();
             services.RegisterAsTransient<IFadeController, FadeController>();
+            services.RegisterAsTransient<IRewardGeneratorService, RewardGeneratorService>();
         }
 
         private void RegisterFactories(ServiceContainer services)

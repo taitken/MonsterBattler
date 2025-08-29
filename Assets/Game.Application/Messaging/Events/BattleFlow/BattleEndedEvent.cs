@@ -8,7 +8,13 @@ namespace Game.Application.Messaging.Events.BattleFlow
 {
     public readonly struct BattleEndedEvent : IDomainEvent
     {
-        public BattleEndedEvent(BattleResult result) => Result = result;
+        public BattleEndedEvent(BattleResult result, IEnumerable<Reward> rewards = null)
+        {
+            Result = result;
+            Rewards = rewards ?? new List<Reward>();
+        }
+        
         public BattleResult Result { get; }
+        public IEnumerable<Reward> Rewards { get; }
     }
 }

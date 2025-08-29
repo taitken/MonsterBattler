@@ -1,7 +1,6 @@
 using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
-using Game.Core;
 using Game.Domain.Enums;
 
 
@@ -12,10 +11,10 @@ namespace Game.Application.Handlers
         private readonly IEventBus _bus;
         private readonly INavigationService _nav;
 
-        public EnterRoomHandler()
+        public EnterRoomHandler(IEventBus bus, INavigationService navigationService)
         {
-            _bus = ServiceLocator.Get<IEventBus>();
-            _nav = ServiceLocator.Get<INavigationService>();
+            _bus = bus;
+            _nav = navigationService;
         }
 
         public void Handle(EnterRoomCommand command)

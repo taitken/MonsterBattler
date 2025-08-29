@@ -5,6 +5,7 @@ namespace Game.Domain.Enums
         Gold,
         Experience,
         Health,
-        Mana
+        Mana,
+        Card
     }
 }

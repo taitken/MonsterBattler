@@ -32,6 +32,7 @@ namespace Game.Application.Services
         private readonly IEnemyEncounterProvider _encounterProvider;
         private readonly IOverworldRepository _overworldPersistenceService;
         private readonly ICardEffectResolver _cardEffectResolver;
+        private readonly IRewardGeneratorService _rewardGenerator;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
         private readonly Dictionary<MonsterEntity, AbilityCard> _drawnCards = new();
@@ -45,7 +46,8 @@ namespace Game.Application.Services
                              IPlayerDataRepository playerTeamPersistence,
                              IEnemyEncounterProvider encounterProvider,
                              IOverworldRepository overworldPersistenceService,
-                             ICardEffectResolver cardEffectResolver)
+                             ICardEffectResolver cardEffectResolver,
+                             IRewardGeneratorService rewardGenerator)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
@@ -57,6 +59,7 @@ namespace Game.Application.Services
             _encounterProvider = encounterProvider;
             _overworldPersistenceService = overworldPersistenceService;
             _cardEffectResolver = cardEffectResolver;
+            _rewardGenerator = rewardGenerator;
             _log.Log("BattleService initialized.");
         }
         public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
@@ -107,7 +110,13 @@ namespace Game.Application.Services
                 _log?.Log("Player team state saved to persistence");
 
                 _log?.Log($"Battle ended: {result.Outcome}, turns={result.TurnCount}");
-                _bus.Publish(new BattleEndedEvent(result));
+                
+                // Generate rewards only on victory
+                var rewards = result.Outcome == BattleOutcome.PlayerVictory 
+                    ? _rewardGenerator.GenerateBattleRewards() 
+                    : null;
+                    
+                _bus.Publish(new BattleEndedEvent(result, rewards));
             }
             catch (System.OperationCanceledException)
             {
