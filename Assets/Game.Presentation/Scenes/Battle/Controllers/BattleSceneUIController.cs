@@ -11,7 +11,7 @@ using UnityEngine;
 public class BattleSceneUIController : MonoBehaviour
 {
     [SerializeField] private RewardsWindow _rewardsWindow;
-    
+    [SerializeField] private RuneSlotMachineUI _slotMachine;
     private IEventBus _eventBus;
     private IDisposable _battleEventEnded;
     private BattleResult? _currentBattleResult;
@@ -33,6 +33,7 @@ public class BattleSceneUIController : MonoBehaviour
     void Start()
     {
         _rewardsWindow?.Hide();
+        _slotMachine.StartSpin(new int[] { 1, 6, 3 });
     }
 
     private async void OnBattleEnded(BattleEndedEvent @event)

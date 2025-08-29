@@ -21,7 +21,7 @@ namespace Game.Infrastructure.Spawning
         {
             _loggerService?.Log($"Creating MonsterEntity of type: {type}");
             
-            var definition = Resources.Load<MonsterDefinition>($"Monsters/Definitions/{type}");
+            var definition = Resources.Load<MonsterDefinition>($"Battle/Monsters/Definitions/{type}");
             
             if (definition == null)
             {

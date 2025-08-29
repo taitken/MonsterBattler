@@ -17,6 +17,7 @@ namespace Game.Infrastructure.ScriptableObjects
         
         [Header("Effects")]
         public List<AbilityEffectData> effects = new();
+        public List<RuneType> runes = new();
         
         [Header("Audio")]
         public AudioClip playSound;
@@ -33,11 +34,12 @@ namespace Game.Infrastructure.ScriptableObjects
                     effectData.duration
                 ));
             }
-            
+
             return new AbilityCard(
                 name: cardName,
                 description: description,
-                effects: abilityEffects
+                effects: abilityEffects,
+                runes: runes
             );
         }
     }

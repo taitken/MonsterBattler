@@ -30,6 +30,7 @@ namespace Game.Bootstrap
         [SerializeField] private EnemyEncounterDatabase enemyEncounterDatabase;
         [SerializeField] private AbilityCardDatabase abilityCardDatabase;
         [SerializeField] private ResourceIconDatabase resourceIconDatabase;
+        [SerializeField] private RuneIconDatabase runeIconDatabase;
         
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
@@ -108,6 +109,7 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<IEnemyEncounterProvider>(() => new EnemyEncounterAdapter(enemyEncounterDatabase));
             services.RegisterAsSingleton<ICardArtProvider>(() => new CardArtAdapter(abilityCardDatabase));
             services.RegisterAsSingleton<IResourceIconProvider>(() => new ResourceIconProvider(resourceIconDatabase));
+            services.RegisterAsSingleton<IRuneIconProvider>(() => new RuneIconProvider(runeIconDatabase));
         }
 
         void Update()

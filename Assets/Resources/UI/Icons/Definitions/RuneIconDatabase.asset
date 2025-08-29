@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c5005153b64a6489ee6092dbe0d2ae, type: 3}
+  m_Name: RuneIconDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.RuneIconDatabase
+  runes:
+  - type: 0
+    sprite: {fileID: 1038117704174374415, guid: c18b18795c99f9b4c8f84455a5466266, type: 3}
+  - type: 1
+    sprite: {fileID: 3646607987773183987, guid: 7a7bb58ed3c483b488047182cc7bbfe1, type: 3}
+  - type: 2
+    sprite: {fileID: -876860263887415114, guid: 3bb6516855bdfb243ba318610bba7732, type: 3}
+  - type: 3
+    sprite: {fileID: 3853910404117482550, guid: 396a1e01bc62d64479f214afb8685b38, type: 3}
+  - type: 4
+    sprite: {fileID: -2939875888564631629, guid: b8e1942855453b645894290dd59a28c2, type: 3}
+  - type: 5
+    sprite: {fileID: -8550771918569206762, guid: 30d1e7390e297074f863f17d1f6bd2f3, type: 3}
