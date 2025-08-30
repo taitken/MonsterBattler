@@ -16,6 +16,7 @@ using System;
 using Game.Application.DTOs;
 using Game.Application.Repositories;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Entities.Battle;
 using System.Linq;
 
 namespace Game.Application.Services
@@ -36,6 +37,7 @@ namespace Game.Application.Services
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
         private readonly Dictionary<MonsterEntity, AbilityCard> _drawnCards = new();
+        private RuneSlotMachineEntity _runeSlotMachine;
 
         public BattleService(IEventBus bus,
                              IMonsterEntityFactory monsterFactory,
@@ -81,8 +83,12 @@ namespace Game.Application.Services
                 if (_enemy.Count == 0)
                     throw new System.InvalidOperationException("No enemy monsters were spawned");
 
+                // Create rune slot machine for this battle
+                _runeSlotMachine = new RuneSlotMachineEntity(_player);
+                _log?.Log("Rune slot machine created with player monster runes");
+
                 _log?.Log("Publishing BattleStartedEvent...");
-                _bus.Publish(new BattleStartedEvent(_player, _enemy));
+                _bus.Publish(new BattleStartedEvent(_player, _enemy, _runeSlotMachine));
                 _log?.Log("Battle started, waiting for monster views to be created...");
 
                 // Create barrier token for spawn completion
@@ -117,6 +123,9 @@ namespace Game.Application.Services
                     : null;
                     
                 _bus.Publish(new BattleEndedEvent(result, rewards));
+                
+                // Clean up rune slot machine
+                _runeSlotMachine = null;
             }
             catch (System.OperationCanceledException)
             {
@@ -262,8 +271,21 @@ namespace Game.Application.Services
             
             if (monstersWithCards.Count == 0) return;
             
-            // Create barrier token for card drawing completion
+            // Create barrier tokens for both animations
             var cardDrawCompletionToken = BarrierToken.New();
+            var slotMachineCompletionToken = BarrierToken.New();
+            
+            // Generate random slot machine values based on available faces per tumbler
+            var slotMachineValues = new int[3];
+            var tumblerFaces = _runeSlotMachine.GetAllTumblerFaces();
+            for (int i = 0; i < 3; i++)
+            {
+                var availableFaceCount = tumblerFaces[i].Count;
+                slotMachineValues[i] = _rng.Range(0, Math.Max(1, availableFaceCount)); // 0-based index
+            }
+            
+            // Update slot machine state with the spin
+            _runeSlotMachine.Spin(slotMachineValues);
             
             // Draw cards and build list for the event
             var drawnCards = new List<CardsDrawnEvent.DrawnCard>();
@@ -277,11 +299,13 @@ namespace Game.Application.Services
                 drawnCards.Add(new CardsDrawnEvent.DrawnCard(monster, card, team));
             }
             
-            // Publish single event with all drawn cards
+            // Publish both events simultaneously
             _bus.Publish(new CardsDrawnEvent(drawnCards, cardDrawCompletionToken));
+            _bus.Publish(new SlotMachineSpinEvent(slotMachineValues, slotMachineCompletionToken));
             
-            // Wait for all card draw animations to complete
+            // Wait for both animations to complete
             await _waitBarrier.WaitAsync(new BarrierKey(cardDrawCompletionToken), ct);
+            await _waitBarrier.WaitAsync(new BarrierKey(slotMachineCompletionToken), ct);
         }
 
         private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target, 

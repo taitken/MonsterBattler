@@ -20,4 +20,5 @@ MonoBehaviour:
     value: 3
     targetType: 4
     duration: 0
+  runes: 03000000
   playSound: {fileID: 0}

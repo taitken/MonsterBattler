@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Game.Domain.Enums;
 using Game.Infrastructure.DTOs;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Game.Infrastructure.ScriptableObjects
         public int maxHealth;
         public int attackDamage;
         public MonsterType type;
+        public List<RuneType> runes;
 
     }
 }

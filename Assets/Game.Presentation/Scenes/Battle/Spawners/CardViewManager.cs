@@ -119,7 +119,7 @@ namespace Game.Presentation.Scenes.Battle.Spawners
             }
         }
 
-        public CardView CreateCardForAction(MonsterEntity caster, Game.Domain.Entities.Abilities.AbilityCard card, IViewRegistryService viewRegistry)
+        public CardView CreateCardForAction(MonsterEntity caster, Domain.Entities.Abilities.AbilityCard card, IViewRegistryService viewRegistry)
         {
             // Fallback method for creating cards when pre-drawn card is not available
             viewRegistry.TryGet(caster.Id, out MonsterView casterView);
@@ -129,7 +129,7 @@ namespace Game.Presentation.Scenes.Battle.Spawners
                 return null;
             }
             
-            var finalCardPosition = casterView.transform.position + new Vector3(0, 4f, 0);
+            var finalCardPosition = casterView.transform.position + new Vector3(0, 3f, 0);
             return _cardFactory.Create(card, finalCardPosition);
         }
 

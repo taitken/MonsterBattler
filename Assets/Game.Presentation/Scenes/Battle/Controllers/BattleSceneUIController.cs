@@ -14,12 +14,16 @@ public class BattleSceneUIController : MonoBehaviour
     [SerializeField] private RuneSlotMachineUI _slotMachine;
     private IEventBus _eventBus;
     private IDisposable _battleEventEnded;
+    private IDisposable _battleStartedSubscription;
+    private IDisposable _slotMachineSpinSubscription;
     private BattleResult? _currentBattleResult;
 
     void Awake()
     {
         _eventBus = ServiceLocator.Get<IEventBus>();
         _battleEventEnded = _eventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
+        _battleStartedSubscription = _eventBus.Subscribe<BattleStartedEvent>(OnBattleStarted);
+        _slotMachineSpinSubscription = _eventBus.Subscribe<SlotMachineSpinEvent>(OnSlotMachineSpinRequested);
         
         var pauseUIController = gameObject.AddComponent<BattlePauseUIController>();
         pauseUIController.Initialize();
@@ -28,12 +32,13 @@ public class BattleSceneUIController : MonoBehaviour
     void OnDestroy()
     {
         _battleEventEnded.Dispose();
+        _battleStartedSubscription.Dispose();
+        _slotMachineSpinSubscription.Dispose();
     }
 
     void Start()
     {
         _rewardsWindow?.Hide();
-        _slotMachine.StartSpin(new int[] { 1, 6, 3 });
     }
 
     private async void OnBattleEnded(BattleEndedEvent @event)
@@ -60,5 +65,17 @@ public class BattleSceneUIController : MonoBehaviour
         }
         
         _rewardsWindow?.Hide();
+    }
+    
+    private void OnBattleStarted(BattleStartedEvent battleEvent)
+    {
+        // Pass the rune slot machine entity to the UI component for setup
+        _slotMachine?.PopulateWithRuneData(battleEvent.RuneSlotMachine);
+    }
+    
+    private void OnSlotMachineSpinRequested(SlotMachineSpinEvent spinEvent)
+    {
+        // Start the slot machine animation with the provided values and completion token
+        _slotMachine?.StartSpin(spinEvent.WheelValues, spinEvent.CompletionToken);
     }
 }

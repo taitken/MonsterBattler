@@ -6,12 +6,13 @@ namespace Game.Domain.Entities.Abilities
 {
     public class Deck : BaseEntity
     {
-        private readonly List<AbilityCard> _cards = new();
+        private readonly List<AbilityCard> _drawPile = new();
         private readonly List<AbilityCard> _discardPile = new();
         private readonly Random _random;
 
-        public IReadOnlyList<AbilityCard> AvailableCards => _cards.AsReadOnly();
-        public int CardsInDeck => _cards.Count;
+        public IReadOnlyList<AbilityCard> AllCards => _drawPile.Concat(_discardPile).ToList().AsReadOnly();
+        public IReadOnlyList<AbilityCard> AvailableCards => _drawPile.AsReadOnly();
+        public int CardsInDeck => _drawPile.Count;
         public int CardsInDiscard => _discardPile.Count;
 
         public event Action OnDeckShuffled;
@@ -23,7 +24,7 @@ namespace Game.Domain.Entities.Abilities
             if (cards == null)
                 throw new ArgumentNullException(nameof(cards));
 
-            _cards.AddRange(cards);
+            _drawPile.AddRange(cards);
             _random = random ?? new Random();
             Shuffle();
         }
@@ -32,27 +33,27 @@ namespace Game.Domain.Entities.Abilities
         {
             if (card == null)
                 throw new ArgumentNullException(nameof(card));
-            if (!_cards.Contains(card))
+            if (!_drawPile.Contains(card))
                 throw new InvalidOperationException("Card not in deck");
 
-            _cards.Remove(card);
+            _drawPile.Remove(card);
             _discardPile.Add(card);
             OnCardPlayed?.Invoke(card);
 
-            if (_cards.Count == 0 && _discardPile.Count > 0)
+            if (_drawPile.Count == 0 && _discardPile.Count > 0)
             {
                 ReshuffleDiscardIntoDeck();
             }
             NotifyModelUpdated();
         }
 
-        public bool IsCardAvailable(AbilityCard card) => _cards.Contains(card);
+        public bool IsCardAvailable(AbilityCard card) => _drawPile.Contains(card);
 
-        public IEnumerable<AbilityCard> GetAvailableCards() => _cards.AsEnumerable();
+        public IEnumerable<AbilityCard> GetAvailableCards() => _drawPile.AsEnumerable();
 
         public AbilityCard DrawCard()
         {
-            if (_cards.Count == 0)
+            if (_drawPile.Count == 0)
             {
                 if (_discardPile.Count > 0)
                 {
@@ -64,7 +65,7 @@ namespace Game.Domain.Entities.Abilities
                 }
             }
 
-            var card = _cards[0];
+            var card = _drawPile[0];
             OnCardDrawn?.Invoke(card);
             NotifyModelUpdated();
             return card;
@@ -72,7 +73,7 @@ namespace Game.Domain.Entities.Abilities
 
         public AbilityCard DrawRandomCard()
         {
-            if (_cards.Count == 0)
+            if (_drawPile.Count == 0)
             {
                 if (_discardPile.Count > 0)
                 {
@@ -84,18 +85,18 @@ namespace Game.Domain.Entities.Abilities
                 }
             }
 
-            int randomIndex = _random.Next(_cards.Count);
-            var card = _cards[randomIndex];
+            int randomIndex = _random.Next(_drawPile.Count);
+            var card = _drawPile[randomIndex];
             OnCardDrawn?.Invoke(card);
             NotifyModelUpdated();
             return card;
         }
 
-        public bool CanDrawCard() => _cards.Count > 0 || _discardPile.Count > 0;
+        public bool CanDrawCard() => _drawPile.Count > 0 || _discardPile.Count > 0;
 
         private void ReshuffleDiscardIntoDeck()
         {
-            _cards.AddRange(_discardPile);
+            _drawPile.AddRange(_discardPile);
             _discardPile.Clear();
             Shuffle();
             OnDeckShuffled?.Invoke();
@@ -103,10 +104,10 @@ namespace Game.Domain.Entities.Abilities
 
         private void Shuffle()
         {
-            for (int i = _cards.Count - 1; i > 0; i--)
+            for (int i = _drawPile.Count - 1; i > 0; i--)
             {
                 int j = _random.Next(i + 1);
-                (_cards[i], _cards[j]) = (_cards[j], _cards[i]);
+                (_drawPile[i], _drawPile[j]) = (_drawPile[j], _drawPile[i]);
             }
         }
     }

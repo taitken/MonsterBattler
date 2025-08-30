@@ -16,6 +16,7 @@ namespace Game.Domain.Entities
         public BattleTeam BattleTeam { get; private set; }
         public Deck AbilityDeck { get; private set; }
         public IReadOnlyList<StatusEffect> StatusEffects => _statusEffects.AsReadOnly();
+        public List<RuneType> Runes { get; private set; }
         
         private readonly List<StatusEffect> _statusEffects = new();
         
@@ -32,6 +33,7 @@ namespace Game.Domain.Entities
             MonsterType type,
             string monsterName,
             BattleTeam battleTeam,
+            List<RuneType> runes,
             Deck abilityDeck = null
         )
         {
@@ -40,7 +42,7 @@ namespace Game.Domain.Entities
             AttackDamage = attackDamage;
             Type = type;
             MonsterName = monsterName;
-            BattleTeam = battleTeam;
+            Runes = runes;
             AbilityDeck = abilityDeck;
         }
 

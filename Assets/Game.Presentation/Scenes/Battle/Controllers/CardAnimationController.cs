@@ -51,7 +51,7 @@ namespace Game.Presentation.Scenes.Battle.Controllers
                 var deckIconPosition = monsterView.DeckIconWorldPosition;
                 
                 // Calculate final card position with uniform Y
-                var baseCardPosition = monsterView.transform.position + new Vector3(0, 4f, 0);
+                var baseCardPosition = monsterView.transform.position + new Vector3(0, 3.5f, 0);
                 if (!uniformCardY.HasValue)
                 {
                     uniformCardY = baseCardPosition.y; // Use first card's Y as reference

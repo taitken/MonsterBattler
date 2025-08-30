@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Game.Application.IFactories;
 using Game.Core.Logger;
 using Game.Domain.Entities;
@@ -48,6 +49,7 @@ namespace Game.Infrastructure.Spawning
                 attackDamage: definition.attackDamage,
                 type: definition.type,
                 monsterName: definition.monsterName,
+                runes: new List<RuneType>(definition.runes), // Create defensive copy
                 battleTeam: team,
                 abilityDeck: starterDeck
             );

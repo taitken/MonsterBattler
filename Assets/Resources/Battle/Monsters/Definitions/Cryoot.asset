@@ -16,4 +16,4 @@ MonoBehaviour:
   maxHealth: 20
   attackDamage: 12
   type: 1
-  attackDirection: 1
+  runes: 01000000

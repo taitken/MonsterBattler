@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Game.Application.DTOs;
+using Game.Core;
+using Game.Application.Interfaces;
+using Game.Domain.Entities.Battle;
+using Game.Domain.Enums;
 
 public class RuneSlotMachineUI : MonoBehaviour
 {
@@ -16,16 +21,16 @@ public class RuneSlotMachineUI : MonoBehaviour
     [SerializeField] private RuneIconGroupUI _thirdRuneIconGroup;
     
     [Header("Animation Settings")]
-    [SerializeField] private float _spinDuration = 2f;
-    [SerializeField] private float _spinSpeed = 500f;
-    [SerializeField] private Ease _spinEase = Ease.OutQuart;
-    [SerializeField] private float _staggerDelay = 0.2f;
+    private float _spinDuration = .7f;
+    private float _spinSpeed = 2500f;
+    private Ease _spinEase = Ease.OutQuart;
+    private float _staggerDelay = 0.2f;
     
     [Header("Pizzazz Settings")]
-    [SerializeField] private float _windupDistance = 30f; // How far up to move before spinning down
-    [SerializeField] private float _windupDuration = 0.3f; // Duration of windup animation
+    private float _windupDistance = 30f; // How far up to move before spinning down
+    private float _windupDuration = 0.3f; // Duration of windup animation
     private float _overshootDistance = 20f; // How far past final position to overshoot
-    [SerializeField] private float _settleDuration = 0.4f; // Duration of settle back animation
+    private float _settleDuration = 0.2f; // Duration of settle back animation
 
     private const int TOTAL_GROUPS_PER_CONTAINER = 6;
     private const int EXTRA_GROUPS_TO_CREATE = 5;
@@ -36,14 +41,21 @@ public class RuneSlotMachineUI : MonoBehaviour
     private List<RuneIconGroupUI> _secondContainerGroups = new List<RuneIconGroupUI>();
     private List<RuneIconGroupUI> _thirdContainerGroups = new List<RuneIconGroupUI>();
     
+    // Store starting positions for each container
+    private Vector3 _firstContainerStartingPosition;
+    private Vector3 _secondContainerStartingPosition;
+    private Vector3 _thirdContainerStartingPosition;
+    
     private bool _isSpinning = false;
+    private IInteractionBarrier _interactionBarrier;
 
     void Start()
     {
+        _interactionBarrier = ServiceLocator.Get<IInteractionBarrier>();
         InitializeSlotMachine();
     }
 
-    public void StartSpin(int[] targetIndices = null)
+    public void StartSpin(int[] targetIndices = null, BarrierToken? completionToken = null)
     {
         if (_isSpinning) return;
         
@@ -57,7 +69,7 @@ public class RuneSlotMachineUI : MonoBehaviour
             }
         }
         
-        StartCoroutine(SpinSlotMachine(targetIndices));
+        StartCoroutine(SpinSlotMachine(targetIndices, completionToken));
     }
 
     private void InitializeSlotMachine()
@@ -66,6 +78,16 @@ public class RuneSlotMachineUI : MonoBehaviour
         InitializeContainer(_firstContainer, _firstRuneIconGroup, _firstContainerGroups);
         InitializeContainer(_secondContainer, _secondRuneIconGroup, _secondContainerGroups);
         InitializeContainer(_thirdContainer, _thirdRuneIconGroup, _thirdContainerGroups);
+        
+        // Capture starting positions after initialization
+        CaptureStartingPositions();
+    }
+    
+    private void CaptureStartingPositions()
+    {
+        _firstContainerStartingPosition = _firstContainer.anchoredPosition;
+        _secondContainerStartingPosition = _secondContainer.anchoredPosition;
+        _thirdContainerStartingPosition = _thirdContainer.anchoredPosition;
     }
 
     private void InitializeContainer(RectTransform container, RuneIconGroupUI referenceGroup, List<RuneIconGroupUI> groupList)
@@ -117,148 +139,140 @@ public class RuneSlotMachineUI : MonoBehaviour
         }
     }
 
-    private IEnumerator SpinSlotMachine(int[] targetIndices)
+    private IEnumerator SpinSlotMachine(int[] targetIndices, BarrierToken? completionToken = null)
     {
         _isSpinning = true;
         
-        // Start spinning all three containers with staggered timing, each targeting specific indices
-        StartContainerSpin(_firstContainerGroups, 0f, targetIndices[0]);
+        // Start spinning all three containers with staggered timing
+        StartCoroutine(SpinContainerToTarget(_firstContainer, _firstContainerStartingPosition, 0f, targetIndices[0]));
         yield return new WaitForSeconds(_staggerDelay);
         
-        StartContainerSpin(_secondContainerGroups, 0f, targetIndices[1]);
+        StartCoroutine(SpinContainerToTarget(_secondContainer, _secondContainerStartingPosition, 0f, targetIndices[1]));
         yield return new WaitForSeconds(_staggerDelay);
         
-        StartContainerSpin(_thirdContainerGroups, 0f, targetIndices[2]);
+        StartCoroutine(SpinContainerToTarget(_thirdContainer, _thirdContainerStartingPosition, 0f, targetIndices[2]));
         
-        // Wait for all spins to complete (including windup, spinning, and settle)
+        // Wait for all spins to complete
         float totalAnimationTime = _windupDuration + _spinDuration + _settleDuration;
         yield return new WaitForSeconds(totalAnimationTime + (_staggerDelay * 2));
         
         _isSpinning = false;
+        
+        // Signal completion if barrier token was provided
+        if (completionToken.HasValue && _interactionBarrier != null)
+        {
+            _interactionBarrier.Signal(new BarrierKey(completionToken.Value));
+        }
     }
 
-    private void StartContainerSpin(List<RuneIconGroupUI> groups, float delay, int targetIndex)
-    {
-        StartCoroutine(AnimateContainerSpin(groups, delay, targetIndex));
-    }
-    
-    private IEnumerator AnimateContainerSpin(List<RuneIconGroupUI> groups, float delay, int targetIndex)
+    private IEnumerator SpinContainerToTarget(RectTransform container, Vector3 startingPosition, float delay, int targetIndex)
     {
         yield return new WaitForSeconds(delay);
         
-        // Store original positions before any animation
-        Vector3[] originalPositions = new Vector3[groups.Count];
-        for (int i = 0; i < groups.Count; i++)
-        {
-            originalPositions[i] = groups[i].GetComponent<RectTransform>().anchoredPosition;
-        }
-        
-        // 1. WINDUP: Move everything up slightly for dramatic effect
-        var windupSequence = DOTween.Sequence();
-        for (int i = 0; i < groups.Count; i++)
-        {
-            int index = i;
-            Vector3 windupPos = originalPositions[index];
-            windupPos.y += _windupDistance;
-            
-            windupSequence.Join(groups[index].GetComponent<RectTransform>().DOLocalMoveY(windupPos.y, _windupDuration)
-                .SetEase(Ease.OutBack));
-        }
-        yield return windupSequence.WaitForCompletion();
-        
-        // 2. MAIN SPINNING ANIMATION
-        const int FULL_ROTATIONS = 2; // Changed to 2 rotations, third is handled by target positioning
         float containerHeight = GROUP_SPACING * TOTAL_GROUPS_PER_CONTAINER;
+        float resetYPosition = startingPosition.y - containerHeight; // When to reset container to top
         
-        // Calculate timing: both rotations are equal speed now
-        float rotationDuration = _spinDuration * 0.3f; // 40% each for 2 rotations, 20% for target positioning
+        // 1. WINDUP: Move container up slightly for dramatic effect
+        Vector3 windupPos = container.anchoredPosition;
+        windupPos.y += _windupDistance;
+        yield return container.DOLocalMoveY(windupPos.y, _windupDuration).SetEase(Ease.OutBack).WaitForCompletion();
         
-        for (int rotation = 0; rotation < FULL_ROTATIONS; rotation++)
+        // 2. SIMULATE SPINNING: Continuous downward movement with resets for spin duration
+        float spinStartTime = Time.time;
+        while (Time.time - spinStartTime < _spinDuration)
         {
-            // Store initial positions for this rotation
-            Vector3[] startPositions = new Vector3[groups.Count];
-            for (int i = 0; i < groups.Count; i++)
+            // Move container down
+            Vector3 currentPos = container.anchoredPosition;
+            currentPos.y -= _spinSpeed * Time.deltaTime;
+            
+            // If container went too far down, reset to top
+            if (currentPos.y <= resetYPosition)
             {
-                startPositions[i] = groups[i].GetComponent<RectTransform>().anchoredPosition;
+                currentPos.y += containerHeight;
             }
             
-            // All rotations use linear easing for consistent speed
-            Ease rotationEase = Ease.Linear;
+            container.anchoredPosition = currentPos;
+            yield return null;
+        }
+        
+        // 3. RESET TO STARTING POSITION
+        container.anchoredPosition = startingPosition;
+        
+        // 4. MOVE TO TARGET POSITION with overshoot
+        float targetOffset = (targetIndex - 1) * GROUP_SPACING;
+        Vector3 targetPosWithOvershoot = startingPosition;
+        targetPosWithOvershoot.y -= targetOffset + _overshootDistance;
+        
+        yield return container.DOLocalMoveY(targetPosWithOvershoot.y, 0.3f).SetEase(_spinEase).WaitForCompletion();
+        
+        // 5. SETTLE: Bounce back to correct position without overshoot
+        Vector3 finalPos = startingPosition;
+        finalPos.y -= targetOffset;
+        
+        yield return container.DOLocalMoveY(finalPos.y, _settleDuration).SetEase(Ease.OutBounce).WaitForCompletion();
+    }
+
+    public void PopulateWithRuneData(RuneSlotMachineEntity runeSlotMachine)
+    {
+        if (runeSlotMachine == null) return;
+
+        var tumblerFacesData = runeSlotMachine.GetAllTumblerFaces();
+        
+        // Update first tumbler faces (including buffers)
+        if (tumblerFacesData.Length > 0)
+        {
+            PopulateAllGroupsInContainer(_firstContainerGroups, tumblerFacesData[0]);
+        }
+        
+        // Update second tumbler faces (including buffers)
+        if (tumblerFacesData.Length > 1)
+        {
+            PopulateAllGroupsInContainer(_secondContainerGroups, tumblerFacesData[1]);
+        }
+        
+        // Update third tumbler faces (including buffers)
+        if (tumblerFacesData.Length > 2)
+        {
+            PopulateAllGroupsInContainer(_thirdContainerGroups, tumblerFacesData[2]);
+        }
+    }
+    
+    private void PopulateAllGroupsInContainer(List<RuneIconGroupUI> allGroups, List<RuneFace> faces)
+    {
+        if (faces.Count == 0) return;
+        
+        for (int i = 0; i < allGroups.Count; i++)
+        {
+            // Calculate which face this group should show (with wraparound for buffers)
+            int faceIndex;
             
-            // Calculate target position for this rotation
-            var sequence = DOTween.Sequence();
-            for (int i = 0; i < groups.Count; i++)
+            if (i < BUFFER_ICONS_COUNT)
             {
-                int index = i;
-                Vector3 targetPos = startPositions[index];
-                targetPos.y -= containerHeight; // Normal rotation distance for all rotations
-                
-                sequence.Join(groups[index].GetComponent<RectTransform>().DOLocalMoveY(targetPos.y, rotationDuration)
-                    .SetEase(rotationEase));
+                // Buffer icons at the start should show the last faces
+                faceIndex = faces.Count - (BUFFER_ICONS_COUNT - i);
+            }
+            else if (i >= BUFFER_ICONS_COUNT + faces.Count)
+            {
+                // Buffer icons at the end should show the first faces
+                faceIndex = (i - BUFFER_ICONS_COUNT) % faces.Count;
+            }
+            else
+            {
+                // Regular icons
+                faceIndex = i - BUFFER_ICONS_COUNT;
             }
             
-            yield return sequence.WaitForCompletion();
-            
-            // Reset positions for continuous loop (except on the last rotation)
-            if (rotation < FULL_ROTATIONS)
-            {
-                for (int i = 0; i < groups.Count; i++)
-                {
-                    Vector3 resetPos = groups[i].GetComponent<RectTransform>().anchoredPosition;
-                    resetPos.y += containerHeight;
-                    groups[i].GetComponent<RectTransform>().anchoredPosition = resetPos;
-                }
-            }
+            faceIndex = ((faceIndex % faces.Count) + faces.Count) % faces.Count; // Ensure positive modulo
+            allGroups[i].UpdateSprite(faces[faceIndex].GetRunesForDisplay());
         }
-        
-        // 3. FINAL TARGETED ROTATION with overshoot
-        float targetRotationDuration = _spinDuration * 0.4f; // Remaining 20% of spin duration
-        
-        // Calculate target positions with overshoot for the final rotation
-        Vector3[] targetPositionsWithOvershoot = new Vector3[groups.Count];
-        // Since we reset after step 2, we're back at original positions
-        // Move down by containerHeight (one full rotation) plus target offset
-        float additionalOffset = (targetIndex - 1) * GROUP_SPACING;
-        
-        for (int i = 0; i < groups.Count; i++)
+    }
+    
+    private void UpdateTumblerFaces(List<RuneIconGroupUI> tumblerGroups, List<RuneFace> faces)
+    {
+        for (int i = 0; i < tumblerGroups.Count && i < faces.Count; i++)
         {
-            Vector3 currentPos = groups[i].GetComponent<RectTransform>().anchoredPosition;
-            targetPositionsWithOvershoot[i] = currentPos;
-            targetPositionsWithOvershoot[i].y -= containerHeight - additionalOffset + _overshootDistance;
+            tumblerGroups[i].UpdateSprite(faces[i].GetRunesForDisplay());
         }
-        
-        // Animate to target positions with overshoot
-        var targetSequence = DOTween.Sequence();
-        for (int i = 0; i < groups.Count; i++)
-        {
-            int index = i;
-            targetSequence.Join(groups[index].GetComponent<RectTransform>().DOLocalMoveY(targetPositionsWithOvershoot[index].y, targetRotationDuration)
-                .SetEase(_spinEase));
-        }
-        
-        yield return targetSequence.WaitForCompletion();
-        
-        // 4. SETTLE: Bounce back to correct positions without overshoot
-        Vector3[] correctFinalPositions = new Vector3[groups.Count];
-        
-        for (int i = 0; i < groups.Count; i++)
-        {
-            // Remove overshoot from current positions
-            correctFinalPositions[i] = groups[i].GetComponent<RectTransform>().anchoredPosition;
-            correctFinalPositions[i].y -= _overshootDistance - 10f;
-        }
-        
-        // Settle back to the correct positions
-        var settleSequence = DOTween.Sequence();
-        for (int i = 0; i < groups.Count; i++)
-        {
-            int index = i;
-            
-            settleSequence.Join(groups[index].GetComponent<RectTransform>().DOLocalMoveY(correctFinalPositions[index].y, _settleDuration)
-                .SetEase(Ease.OutBounce));
-        }
-        
-        yield return settleSequence.WaitForCompletion();
     }
 
     // Public method to trigger spin (can be called from buttons, etc.)
