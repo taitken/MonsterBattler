@@ -74,3 +74,4 @@ GeneratedAssets/
 Assets/TextMesh Pro/
 *.zip
 Dist/
+.VSCodeCounter/
