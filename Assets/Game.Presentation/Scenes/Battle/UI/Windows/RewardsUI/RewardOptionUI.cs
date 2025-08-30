@@ -2,6 +2,7 @@ using System;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Commands;
+using Game.Application.Messaging.Events.Rewards;
 using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
@@ -133,8 +134,16 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Publish reward claimed command
-        _eventBus.Publish(new RewardClaimedCommand(_reward));
+        if (_reward.Type == ResourceType.Card)
+        {
+            // For card rewards, publish event to show card selection window
+            _eventBus.Publish(new CardRewardSelectedEvent(_reward));
+        }
+        else
+        {
+            // For non-card rewards, directly claim the reward
+            _eventBus.Publish(new RewardClaimedCommand(_reward));
+        }
         
         // Notify parent that this reward was claimed
         OnRewardClaimed?.Invoke(this);

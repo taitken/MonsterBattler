@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
+using Game.Application.Messaging.Events.Rewards;
 using Game.Core;
 using Game.Domain.Enums;
 using Game.Domain.Structs;
@@ -11,11 +12,13 @@ using UnityEngine;
 public class BattleSceneUIController : MonoBehaviour
 {
     [SerializeField] private RewardsWindow _rewardsWindow;
+    [SerializeField] private CardSelectWindow _cardSelectWindow;
     [SerializeField] private RuneSlotMachineUI _slotMachine;
     private IEventBus _eventBus;
     private IDisposable _battleEventEnded;
     private IDisposable _battleStartedSubscription;
     private IDisposable _slotMachineSpinSubscription;
+    private IDisposable _cardRewardSelectedSubscription;
     private BattleResult? _currentBattleResult;
 
     void Awake()
@@ -24,6 +27,7 @@ public class BattleSceneUIController : MonoBehaviour
         _battleEventEnded = _eventBus.Subscribe<BattleEndedEvent>(OnBattleEnded);
         _battleStartedSubscription = _eventBus.Subscribe<BattleStartedEvent>(OnBattleStarted);
         _slotMachineSpinSubscription = _eventBus.Subscribe<SlotMachineSpinEvent>(OnSlotMachineSpinRequested);
+        _cardRewardSelectedSubscription = _eventBus.Subscribe<CardRewardSelectedEvent>(OnCardRewardSelected);
         
         var pauseUIController = gameObject.AddComponent<BattlePauseUIController>();
         pauseUIController.Initialize();
@@ -34,11 +38,13 @@ public class BattleSceneUIController : MonoBehaviour
         _battleEventEnded.Dispose();
         _battleStartedSubscription.Dispose();
         _slotMachineSpinSubscription.Dispose();
+        _cardRewardSelectedSubscription.Dispose();
     }
 
     void Start()
     {
         _rewardsWindow?.Hide();
+        _cardSelectWindow?.Hide();
     }
 
     private async void OnBattleEnded(BattleEndedEvent @event)
@@ -77,5 +83,10 @@ public class BattleSceneUIController : MonoBehaviour
     {
         // Start the slot machine animation with the provided values and completion token
         _slotMachine?.StartSpin(spinEvent.WheelValues, spinEvent.CompletionToken);
+    }
+    
+    private void OnCardRewardSelected(CardRewardSelectedEvent cardRewardEvent)
+    {
+        _cardSelectWindow?.Show();
     }
 }
