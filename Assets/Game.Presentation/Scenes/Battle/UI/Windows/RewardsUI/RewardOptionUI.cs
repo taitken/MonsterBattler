@@ -6,8 +6,9 @@ using Game.Application.Messaging.Events.Rewards;
 using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
-using Game.Domain.Structs;
+using Game.Domain.Entities.Rewards;
 using Game.Presentation.Core.Helpers;
+using Game.Presentation.Scenes.Battle.UI.Windows.RewardsUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,6 +31,7 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private IEventBus _eventBus;
     private IResourceIconProvider _resourceIconProvider;
     private Reward _reward;
+    private RewardClickHandler _clickHandler;
     
     public event Action<RewardOptionUI> OnRewardClaimed;
 
@@ -53,6 +55,7 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public void Initialize(Reward reward)
     {
         _reward = reward;
+        _clickHandler = new RewardClickHandler(_eventBus, this);
         _iconImage.sprite = _resourceIconProvider.GetResourceSprite(reward.Type);
         _text.SetText(reward.DisplayText);
     }
@@ -134,17 +137,11 @@ public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_reward.Type == ResourceType.Card)
-        {
-            // For card rewards, publish event to show card selection window
-            _eventBus.Publish(new CardRewardSelectedEvent(_reward));
-        }
-        else
-        {
-            // For non-card rewards, directly claim the reward
-            _eventBus.Publish(new RewardClaimedCommand(_reward));
-        }
-        
+        _reward.Accept(_clickHandler);
+    }
+
+    public void NotifyRewardClaimed()
+    {
         // Notify parent that this reward was claimed
         OnRewardClaimed?.Invoke(this);
         

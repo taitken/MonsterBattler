@@ -87,6 +87,6 @@ public class BattleSceneUIController : MonoBehaviour
     
     private void OnCardRewardSelected(CardRewardSelectedEvent cardRewardEvent)
     {
-        _cardSelectWindow?.Show();
+        _cardSelectWindow?.Show(cardRewardEvent.CardReward);
     }
 }

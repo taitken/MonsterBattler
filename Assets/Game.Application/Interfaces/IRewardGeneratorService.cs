@@ -6,5 +6,6 @@ namespace Game.Application.Interfaces
     public interface IRewardGeneratorService
     {
         IEnumerable<Reward> GenerateBattleRewards();
+        CardReward GenerateCardReward(string rewardId);
     }
 }

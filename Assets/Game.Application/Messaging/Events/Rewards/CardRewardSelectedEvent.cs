@@ -5,11 +5,11 @@ namespace Game.Application.Messaging.Events.Rewards
 {
     public class CardRewardSelectedEvent : IDomainEvent
     {
-        public Reward Reward { get; }
+        public CardReward CardReward { get; }
 
-        public CardRewardSelectedEvent(Reward reward)
+        public CardRewardSelectedEvent(CardReward cardReward)
         {
-            Reward = reward;
+            CardReward = cardReward;
         }
     }
 }
