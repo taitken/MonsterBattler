@@ -1,19 +1,23 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using Game.Domain.Entities.Abilities;
 using Game.Application.Interfaces;
 using Game.Core;
 using System.Threading.Tasks;
+using System;
 
 namespace Game.Presentation.Shared.Views
 {
-    public class CardView : MonoObject<AbilityCard>
+    public class CardView : MonoObject<AbilityCard>, IPointerClickHandler
     {
         [SerializeField] private TextMeshProUGUI _cardTitle;
         [SerializeField] private TextMeshProUGUI _bodyText;
         [SerializeField] private Image _cardArt;
         private ICardArtProvider _spriteProvider;
+        
+        public event Action<CardView> OnCardClicked;
 
         void Awake()
         {
@@ -42,10 +46,44 @@ namespace Game.Presentation.Shared.Views
                 _cardArt.sprite = await _spriteProvider.GetCardArtAsync<Sprite>(model.Name);
         }
 
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            OnCardClicked?.Invoke(this);
+        }
+        
+        public IDisposable SubscribeToClick(Action<CardView> onClicked)
+        {
+            OnCardClicked += onClicked;
+            return new UnsubscribeAction(() => OnCardClicked -= onClicked);
+        }
+
         private void OnDestroy()
         {
             if (_viewRegistry != null && model != null)
                 _viewRegistry.Unregister(model.Id);
+                
+            // Clear all event subscriptions
+            OnCardClicked = null;
+        }
+    }
+    
+    public class UnsubscribeAction : IDisposable
+    {
+        private readonly Action _unsubscribeAction;
+        private bool _disposed = false;
+        
+        public UnsubscribeAction(Action unsubscribeAction)
+        {
+            _unsubscribeAction = unsubscribeAction;
+        }
+        
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _unsubscribeAction?.Invoke();
+                _disposed = true;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
-using Game.Application.Interfaces;
+using Game.Application.DTOs.Rewards;
+using Game.Application.Messaging;
 using Game.Application.Messaging.Commands;
 using Game.Application.Messaging.Events.Rewards;
-using Game.Domain.Entities.Rewards;
 
 namespace Game.Presentation.Scenes.Battle.UI.Windows.RewardsUI
 {

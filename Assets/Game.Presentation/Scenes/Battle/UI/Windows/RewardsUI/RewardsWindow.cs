@@ -1,10 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Game.Application.Interfaces;
-using Game.Core;
-using Game.Domain.Enums;
-using Game.Domain.Structs;
 using Game.Presentation.UI.ButtonUI;
+using Game.Application.DTOs.Rewards;
 
 public class RewardsWindow : MonoBehaviour
 {

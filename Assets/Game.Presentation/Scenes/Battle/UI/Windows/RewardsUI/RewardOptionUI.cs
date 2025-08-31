@@ -1,18 +1,14 @@
 using System;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
-using Game.Application.Messaging.Commands;
-using Game.Application.Messaging.Events.Rewards;
-using Game.Application.Repositories;
 using Game.Core;
-using Game.Domain.Enums;
-using Game.Domain.Entities.Rewards;
 using Game.Presentation.Core.Helpers;
 using Game.Presentation.Scenes.Battle.UI.Windows.RewardsUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Game.Application.DTOs.Rewards;
 
 [RequireComponent(typeof(RectTransform))]
 public class RewardOptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler

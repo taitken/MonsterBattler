@@ -7,5 +7,6 @@ namespace Game.Presentation.Shared.Factories
     public interface ICardViewFactory
     {
         CardView Create(AbilityCard model, Vector3 spawnPoint);
+        CardView Create(AbilityCard model, Vector3 spawnPoint, float scale);
     }
 }

@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Application.Interfaces;
 using Game.Application.IFactories;
+using Game.Application.DTOs.Rewards;
 using Game.Core.Randomness;
+using Game.Domain.Entities.Abilities;
 using Game.Domain.Enums;
-using Game.Domain.Structs;
 
 namespace Game.Application.Services
 {
@@ -12,7 +13,6 @@ namespace Game.Application.Services
     {
         private readonly IRandomService _randomService;
         private readonly IAbilityCardFactory _cardFactory;
-        private readonly Dictionary<string, CardReward> _generatedCardRewards = new();
 
         public RewardGeneratorService(IRandomService randomService, IAbilityCardFactory cardFactory)
         {
@@ -23,23 +23,18 @@ namespace Game.Application.Services
         public IEnumerable<Reward> GenerateBattleRewards()
         {
             var goldAmount = _randomService.Range(10, 31);
-            const int cardAmount = 1;
+            var cardReward = GenerateCardReward();
 
-            return new[]
+            return new List<Reward>()
             {
-                new Reward(ResourceType.Gold, goldAmount, $"{goldAmount} Gold"),
-                new Reward(ResourceType.Card, cardAmount, $"{cardAmount} Card")
+                new GoldReward(goldAmount),
+                cardReward
             };
         }
 
-        public CardReward GenerateCardReward(string rewardId)
-        {
-            // Return existing reward if already generated (for persistence)
-            if (_generatedCardRewards.TryGetValue(rewardId, out var existingReward))
-            {
-                return existingReward;
-            }
 
+        private CardReward GenerateCardReward()
+        {
             // Generate new card choices
             var allCards = _cardFactory.CreateAllCards();
             var cardChoices = allCards
@@ -50,12 +45,8 @@ namespace Game.Application.Services
             var cardReward = new CardReward(
                 amount: 1,
                 displayText: "1 Card",
-                cardChoices: cardChoices.AsReadOnly(),
-                rewardId: rewardId
+                cardChoices: cardChoices.AsReadOnly()
             );
-
-            // Store for persistence
-            _generatedCardRewards[rewardId] = cardReward;
 
             return cardReward;
         }

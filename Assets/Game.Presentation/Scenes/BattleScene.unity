@@ -203,6 +203,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!223 &851206188 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 6515106111454708102, guid: 4865b239780f49e41bbc56a640f61190, type: 3}
+  m_PrefabInstance: {fileID: 8064724990963551118}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1225223106
 GameObject:
   m_ObjectHideFlags: 0
@@ -352,6 +357,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2879973849047397333, guid: cc772659fbd7029489ed6eec1c30b2b7, type: 3}
+      propertyPath: _rootCanvas
+      value: 
+      objectReference: {fileID: 851206188}
     - target: {fileID: 4641669115062645695, guid: cc772659fbd7029489ed6eec1c30b2b7, type: 3}
       propertyPath: m_Name
       value: BattleSceneCoorindator

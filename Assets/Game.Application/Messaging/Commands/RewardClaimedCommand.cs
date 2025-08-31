@@ -1,4 +1,4 @@
-using Game.Domain.Structs;
+using Game.Application.DTOs.Rewards;
 
 namespace Game.Application.Messaging.Commands
 {

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using Game.Domain.Entities;
-using Game.Domain.Enums;
+using Game.Application.DTOs.Rewards;
 using Game.Domain.Messaging;
 using Game.Domain.Structs;
 

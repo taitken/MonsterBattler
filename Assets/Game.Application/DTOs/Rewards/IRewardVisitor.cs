@@ -1,4 +1,4 @@
-namespace Game.Domain.Entities.Rewards
+namespace Game.Application.DTOs.Rewards
 {
     public interface IRewardVisitor
     {

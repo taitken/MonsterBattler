@@ -8,7 +8,8 @@ using Game.Presentation.Shared.Views;
 using Game.Application.Repositories;
 using Game.Presentation.Shared.Factories;
 using System.Collections.Generic;
-using Game.Domain.Structs;
+using System;
+using Game.Application.DTOs.Rewards;
 
 public class CardSelectWindow : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class CardSelectWindow : MonoBehaviour
     private ICardViewFactory _cardViewFactory;
     private CardReward _cardReward;
     private List<CardView> _createdCards = new List<CardView>();
+    private List<IDisposable> _subscriptions = new List<IDisposable>();
     
     void Awake()
     {
@@ -60,29 +62,22 @@ public class CardSelectWindow : MonoBehaviour
     
     private void PopulateCards()
     {
-        // Clear existing cards
+        // Clear existing cards and subscriptions
         ClearCreatedCards();
         
         // Create card views for each card
         for (int i = 0; i < _cardReward.CardChoices.Count; i++)
         {
             var card = _cardReward.CardChoices[i];
-            var spawnPosition = _cardPosition.position + new Vector3(i * 150f, 0, 0); // Space cards horizontally
-            var cardView = _cardViewFactory.Create(card, spawnPosition);
+            var cardView = _cardViewFactory.Create(card, new Vector3(1f, 1f, 0), 1.25f);
             
-            // Set parent to card choice container
+            // Set parent to card choice container  
             cardView.transform.SetParent(_cardChoiceContainer, false);
+            cardView.GetComponent<RectTransform>().localPosition = _cardPosition.localPosition + new Vector3(i * 300f - 300f, 0, 0);
             
-            // Add Button component for selection
-            var button = cardView.GetComponent<Button>();
-            if (button == null)
-            {
-                button = cardView.gameObject.AddComponent<Button>();
-            }
-            
-            // Set up selection handler
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(() => OnCardSelected(cardView));
+            // Subscribe to card click events
+            var subscription = cardView.SubscribeToClick(OnCardSelected);
+            _subscriptions.Add(subscription);
             
             _createdCards.Add(cardView);
         }
@@ -90,6 +85,14 @@ public class CardSelectWindow : MonoBehaviour
     
     private void ClearCreatedCards()
     {
+        // Dispose of all subscriptions
+        foreach (var subscription in _subscriptions)
+        {
+            subscription?.Dispose();
+        }
+        _subscriptions.Clear();
+        
+        // Destroy card GameObjects
         foreach (var cardView in _createdCards)
         {
             if (cardView != null)
@@ -100,11 +103,6 @@ public class CardSelectWindow : MonoBehaviour
         _createdCards.Clear();
     }
     
-    private void SubscribeToCardSelectionEvents()
-    {
-        // This method is now replaced by PopulateCards which creates cards with buttons
-        PopulateCards();
-    }
     
     private async void OnCardSelected(CardView selectedCard)
     {
@@ -142,7 +140,7 @@ public class CardSelectWindow : MonoBehaviour
     
     void OnDestroy()
     {
-        // Clean up created cards
+        // Clean up created cards and subscriptions
         ClearCreatedCards();
     }
 }

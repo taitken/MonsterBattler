@@ -1,6 +1,6 @@
 using Game.Domain.Enums;
 
-namespace Game.Domain.Entities.Rewards
+namespace Game.Application.DTOs.Rewards
 {
     public abstract class Reward
     {
