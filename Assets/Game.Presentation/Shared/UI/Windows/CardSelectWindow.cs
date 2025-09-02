@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Game.Application.Messaging.Commands;
 using Game.Application.Messaging;
+using Game.Presentation.UI.ButtonUI;
 
 namespace Game.Presentation.Shared.UI.Windows
 {
@@ -28,7 +29,8 @@ namespace Game.Presentation.Shared.UI.Windows
         [SerializeField] private Image _monsterPositionRight;
         [SerializeField] private RectTransform _topRightMonsterPosition;
         [SerializeField] private CardSelectWindowAnimator _animator;
-
+        [SerializeField] private ButtonUI _backButton;
+        
         private IPlayerDataRepository _playerDataRepository;
         private IMonsterSpriteProvider _spriteProvider;
         private ICardViewFactory _cardViewFactory;
@@ -39,6 +41,14 @@ namespace Game.Presentation.Shared.UI.Windows
         private int _selectedMonsterIndex = -1;
         private CardView _selectedCard;
         private CardView _selectedMonsterCard;
+        
+        private enum WindowState
+        {
+            CardSelect,
+            MonsterSelect,
+            MonsterCardSelect
+        }
+        private WindowState _currentState = WindowState.CardSelect;
 
         void Awake()
         {
@@ -53,12 +63,24 @@ namespace Game.Presentation.Shared.UI.Windows
             
             // Add click handlers to monster images
             SetupMonsterClickHandlers();
+            
+            // Setup back button
+            if (_backButton != null)
+            {
+                _backButton.AddListener(OnBackButtonClicked);
+            }
         }
 
         public void Show(CardReward cardReward)
         {
             _cardReward = cardReward;
             gameObject.SetActive(true);
+
+            // Reset to initial state
+            _currentState = WindowState.CardSelect;
+            _selectedMonsterIndex = -1;
+            _selectedCard = null;
+            _selectedMonsterCard = null;
 
             // Ensure correct initial state
             _cardChoiceContainer.gameObject.SetActive(true);
@@ -122,6 +144,8 @@ namespace Game.Presentation.Shared.UI.Windows
 
         private async void OnCardSelected(CardView selectedCard)
         {
+            _title.SetText("Select monster");
+            _currentState = WindowState.MonsterSelect;
             // Animate card selection using the animator
             StartCoroutine(AnimateCardSelectionAndShowMonsters(selectedCard));
         }
@@ -194,6 +218,8 @@ namespace Game.Presentation.Shared.UI.Windows
         
         private void OnMonsterClicked(Image selectedMonster, int monsterIndex)
         {
+            _title.SetText("Choose a card to replace");
+            _currentState = WindowState.MonsterCardSelect;
             _selectedMonsterIndex = monsterIndex;
             StartCoroutine(AnimateMonsterSelectionAndShowCards(selectedMonster));
         }
@@ -292,11 +318,57 @@ namespace Game.Presentation.Shared.UI.Windows
             // Hide the window after command is published
             Hide();
         }
+        
+        private void OnBackButtonClicked()
+        {
+            switch (_currentState)
+            {
+                case WindowState.CardSelect:
+                    // First stage - close the window
+                    Hide();
+                    break;
+                    
+                case WindowState.MonsterSelect:
+                    // Go back to card selection
+                    _currentState = WindowState.CardSelect;
+                    _title.SetText("Select a card");
+                    _selectedCard = null;
+                    
+                    // Hide monster select, show card choice
+                    _monsterSelectContainer.gameObject.SetActive(false);
+                    _cardChoiceContainer.gameObject.SetActive(true);
+                    
+                    // Recreate the original card choices
+                    PopulateCards();
+                    break;
+                    
+                case WindowState.MonsterCardSelect:
+                    // Go back to monster selection
+                    _currentState = WindowState.MonsterSelect;
+                    _title.SetText("Select monster");
+                    _selectedMonsterIndex = -1;
+                    
+                    // Clear monster cards and show monster selection again
+                    ClearCreatedCardsExceptSelected();
+                    _cardChoiceContainer.gameObject.SetActive(false);
+                    _monsterSelectContainer.gameObject.SetActive(true);
+                    
+                    // Re-display monsters
+                    StartCoroutine(DisplayCurrentMonstersCoroutine());
+                    break;
+            }
+        }
 
         void OnDestroy()
         {
             // Clean up created cards and subscriptions
             ClearCreatedCards();
+            
+            // Unsubscribe from back button
+            if (_backButton != null)
+            {
+                _backButton.RemoveListener(OnBackButtonClicked);
+            }
         }
     }
 }

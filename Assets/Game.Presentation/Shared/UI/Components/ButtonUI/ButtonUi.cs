@@ -22,7 +22,6 @@ namespace Game.Presentation.UI.ButtonUI
         public CommandEntry[] messages;
         private event Action OnClick;
         // refs
-        private ButtonLabel _currentLabel;
         private IEventBus _eventBus;
         private Button _clickButton;
         private bool _needsRebuild;
@@ -83,7 +82,6 @@ namespace Game.Presentation.UI.ButtonUI
         {
             if (_textObject == null)
             {
-                Debug.LogWarning("ButtonUI: No label assigned.");
                 return;
             }
             _textObject.SetText(text);
