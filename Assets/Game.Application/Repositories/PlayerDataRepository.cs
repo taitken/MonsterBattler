@@ -3,6 +3,7 @@ using Game.Application.IFactories;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
+using Game.Domain.Entities.Abilities;
 
 namespace Game.Application.Repositories
 {
@@ -46,14 +47,11 @@ namespace Game.Application.Repositories
                 InitializeDefaultTeam();
             }
 
-            // Return copies of the monsters to avoid reference issues
+            // Return deep copies of the monsters to avoid reference issues
             var teamCopies = new List<MonsterEntity>();
             foreach (var monster in _playerTeam)
             {
-                var copy = _monsterFactory.Create(monster.Type, BattleTeam.Player);
-                // Preserve the persistent state (current HP, etc.)
-                copy.SetCurrentHP(monster.CurrentHP);
-                teamCopies.Add(copy);
+                teamCopies.Add(new MonsterEntity(monster));
             }
 
             _logger?.Log($"Retrieved player team with {teamCopies.Count} monsters");
@@ -68,15 +66,8 @@ namespace Game.Application.Repositories
                 return;
             }
 
-            _playerTeam.Clear();
-            
-            // Store copies to avoid reference issues
-            foreach (var monster in monsters)
-            {
-                var copy = _monsterFactory.Create(monster.Type, BattleTeam.Player);
-                copy.SetCurrentHP(monster.CurrentHP);
-                _playerTeam.Add(copy);
-            }
+            // Store the actual entities directly
+            _playerTeam = monsters;
 
             _logger?.Log($"Updated player team with {_playerTeam.Count} monsters");
         }

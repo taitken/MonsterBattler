@@ -42,8 +42,33 @@ namespace Game.Domain.Entities
             AttackDamage = attackDamage;
             Type = type;
             MonsterName = monsterName;
+            BattleTeam = battleTeam;
             Runes = runes;
             AbilityDeck = abilityDeck;
+        }
+
+        // Copy constructor for deep copying
+        public MonsterEntity(MonsterEntity other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            // Copy the ID to maintain monster identity
+            Id = other.Id;
+            
+            CurrentHP = other.CurrentHP;
+            MaxHealth = other.MaxHealth;
+            AttackDamage = other.AttackDamage;
+            Type = other.Type;
+            MonsterName = other.MonsterName;
+            BattleTeam = other.BattleTeam;
+            Runes = other.Runes?.ToList(); // Create a new list of runes
+            
+            // Deep copy the deck if it exists
+            AbilityDeck = other.AbilityDeck != null ? new Deck(other.AbilityDeck) : null;
+            
+            // Copy status effects
+            _statusEffects.AddRange(other._statusEffects.ToList());
         }
 
         public int TakeDamage(int amount)
@@ -93,6 +118,11 @@ namespace Game.Domain.Entities
         public void SetCurrentHP(int hp)
         {
             CurrentHP = Math.Clamp(hp, 0, MaxHealth);
+        }
+
+        public void SetAbilityDeck(Deck deck)
+        {
+            AbilityDeck = deck;
         }
 
         public void RestoreToFullHealth()

@@ -28,6 +28,18 @@ namespace Game.Domain.Entities.Abilities
             Effects = effects?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(effects));
             Runes = runes?.ToList();
         }
+
+        // Copy constructor for deep copying
+        public AbilityCard(AbilityCard other) : this(
+            other.Name,
+            other.Description,
+            other.Effects, // AbilityEffect is a struct, so this creates new copies
+            other.Runes?.ToList() // Create a new list of runes
+        )
+        {
+            // Preserve the original ID to maintain card identity
+            Id = other.Id;
+        }
         
         public bool HasEffect(EffectType effectType) => Effects.Any(e => e.Type == effectType);
         

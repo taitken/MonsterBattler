@@ -29,6 +29,28 @@ namespace Game.Domain.Entities.Abilities
             Shuffle();
         }
 
+        // Copy constructor for deep copying
+        public Deck(Deck other, Random random = null)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            _random = random ?? new Random();
+            
+            // Deep copy all cards from both draw and discard piles
+            foreach (var card in other._drawPile)
+            {
+                _drawPile.Add(new AbilityCard(card));
+            }
+            
+            foreach (var card in other._discardPile)
+            {
+                _discardPile.Add(new AbilityCard(card));
+            }
+            
+            // Don't shuffle on copy to preserve the current state
+        }
+
         public void PlayCard(AbilityCard card)
         {
             if (card == null)
@@ -93,6 +115,43 @@ namespace Game.Domain.Entities.Abilities
         }
 
         public bool CanDrawCard() => _drawPile.Count > 0 || _discardPile.Count > 0;
+
+        public void AddCard(AbilityCard card)
+        {
+            if (card == null)
+                throw new ArgumentNullException(nameof(card));
+
+            _drawPile.Add(card);
+            NotifyModelUpdated();
+        }
+
+        public bool RemoveCard(AbilityCard card)
+        {
+            if (card == null)
+                throw new ArgumentNullException(nameof(card));
+
+            // Remove by ID to handle different instances of the same logical card
+            var drawPileCard = _drawPile.FirstOrDefault(c => c.Id == card.Id);
+            bool removed = false;
+            
+            if (drawPileCard != null)
+            {
+                removed = _drawPile.Remove(drawPileCard);
+            }
+            else
+            {
+                var discardPileCard = _discardPile.FirstOrDefault(c => c.Id == card.Id);
+                if (discardPileCard != null)
+                {
+                    removed = _discardPile.Remove(discardPileCard);
+                }
+            }
+
+            if (removed)
+                NotifyModelUpdated();
+
+            return removed;
+        }
 
         private void ReshuffleDiscardIntoDeck()
         {
