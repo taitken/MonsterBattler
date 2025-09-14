@@ -1,6 +1,7 @@
 using Game.Application.Messaging;
 using Game.Domain.Entities.Overworld;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Game.Core;
 using Game.Application.Interfaces;
 
@@ -23,7 +24,6 @@ namespace Game.Presentation.GameObjects.OverworldMap
         private bool _isAccessible = true;
         void Awake()
         {
-            Debug.Log("Room awake");
             originalPosition = transform.position;
             _spriteRenderer = GetComponent<SpriteRenderer>();
             
@@ -54,7 +54,6 @@ namespace Game.Presentation.GameObjects.OverworldMap
 
         protected override void OnModelBound()
         {
-            Debug.Log("Binding Room");
             UpdateAccessibility();
         }
         

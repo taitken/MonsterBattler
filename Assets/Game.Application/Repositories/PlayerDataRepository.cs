@@ -4,6 +4,7 @@ using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Enums;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Entities.Player;
 
 namespace Game.Application.Repositories
 {
@@ -17,7 +18,9 @@ namespace Game.Application.Repositories
         private readonly ILoggerService _logger;
         private List<MonsterEntity> _playerTeam;
         private PlayerResources _playerResources;
+        private BackpackEntity _backpack;
         private int _battlesWon;
+        private bool _teamInitialized;
 
         public PlayerDataRepository(IMonsterEntityFactory monsterFactory, ILoggerService logger)
         {
@@ -31,7 +34,9 @@ namespace Game.Application.Repositories
         {
             _playerTeam = new List<MonsterEntity>();
             _playerResources = new PlayerResources();
+            _backpack = new BackpackEntity();
             _battlesWon = 0;
+            _teamInitialized = false;
             
             InitializeDefaultTeam();
             
@@ -41,7 +46,7 @@ namespace Game.Application.Repositories
         // Team Management (copied from existing PlayerTeamRepository)
         public List<MonsterEntity> GetPlayerTeam()
         {
-            if (_playerTeam.Count == 0)
+            if (_playerTeam.Count == 0 && !_teamInitialized)
             {
                 _logger?.Log("No player team found, initializing default team");
                 InitializeDefaultTeam();
@@ -66,8 +71,10 @@ namespace Game.Application.Repositories
                 return;
             }
 
-            // Store the actual entities directly
-            _playerTeam = monsters;
+            // Clear and copy the monsters to avoid reference issues
+            _playerTeam.Clear();
+            _playerTeam.AddRange(monsters);
+            _teamInitialized = true;
 
             _logger?.Log($"Updated player team with {_playerTeam.Count} monsters");
         }
@@ -90,6 +97,7 @@ namespace Game.Application.Repositories
             _playerTeam.Add(dropletus);
             _playerTeam.Add(shardilo);
 
+            _teamInitialized = true;
             _logger?.Log("Initialized default player team: Ashwick, Dropletus, Shardilo");
         }
 
@@ -109,6 +117,24 @@ namespace Game.Application.Repositories
 
             _playerResources = resources;
             _logger?.Log("Updated player resources");
+        }
+
+        // Backpack Management
+        public BackpackEntity GetBackpack()
+        {
+            return _backpack;
+        }
+
+        public void UpdateBackpack(BackpackEntity backpack)
+        {
+            if (backpack == null)
+            {
+                _logger?.LogError("Cannot update backpack with null backpack");
+                return;
+            }
+
+            _backpack = backpack;
+            _logger?.Log($"Updated backpack with {_backpack.Count} cards");
         }
 
         // Run Statistics

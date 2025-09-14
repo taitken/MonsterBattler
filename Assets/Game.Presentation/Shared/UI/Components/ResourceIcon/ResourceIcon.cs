@@ -31,6 +31,7 @@ public class ResourceIconUI : MonoBehaviour
 
     public void UpdateValue(string newValue)
     {
-        _valueText.SetText(newValue);
+        if (_valueText)
+            _valueText.SetText(newValue);
     }
 }

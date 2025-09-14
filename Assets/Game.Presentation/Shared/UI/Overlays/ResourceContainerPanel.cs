@@ -2,15 +2,20 @@ using Game.Application.Repositories;
 using Game.Core;
 using Game.Domain.Enums;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResourceContainerPanel : MonoBehaviour
 {
+    [Header("Button Icons")]
+    [SerializeField] private GameObject _backpackIcon;
     [Header("Resource Icons")]
     [SerializeField] private ResourceIconUI _goldIcon;
     [SerializeField] private ResourceIconUI _experienceIcon;
     [SerializeField] private ResourceIconUI _healthIcon;
     [SerializeField] private ResourceIconUI _manaIcon;
     [SerializeField] private ResourceIconUI _cardIcon;
+    [Header("Windows")]
+    [SerializeField] private BackpackWindow _backpackWindow;
 
     private IPlayerDataRepository _playerDataRepo;
 
@@ -21,6 +26,9 @@ public class ResourceContainerPanel : MonoBehaviour
         
         // Initialize UI with current values
         InitializeResourceIcons();
+        
+        // Initialize backpack UI
+        InitializeBackpackUI();
     }
 
     void OnDestroy()
@@ -66,6 +74,44 @@ public class ResourceContainerPanel : MonoBehaviour
             case ResourceType.Card:
                 _cardIcon?.UpdateValue(value.ToString());
                 break;
+        }
+    }
+
+    private void InitializeBackpackUI()
+    {
+        // Hide the backpack window by default
+        if (_backpackWindow != null)
+        {
+            _backpackWindow.gameObject.SetActive(false);
+        }
+
+        // Set up the backpack icon click handler
+        if (_backpackIcon != null)
+        {
+            var button = _backpackIcon.GetComponent<Button>();
+            if (button == null)
+            {
+                // If no Button component, add one
+                button = _backpackIcon.AddComponent<Button>();
+            }
+            
+            button.onClick.AddListener(OnBackpackIconClicked);
+        }
+    }
+
+    private void OnBackpackIconClicked()
+    {
+        if (_backpackWindow != null)
+        {
+            bool isCurrentlyActive = _backpackWindow.gameObject.activeSelf;
+            
+            if (!isCurrentlyActive)
+            {
+                // Initialize backpack display before showing
+                _backpackWindow.InitializeBackpackDisplay();
+            }
+            
+            _backpackWindow.gameObject.SetActive(!isCurrentlyActive);
         }
     }
 }

@@ -146,7 +146,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2508518861357113975}
   - component: {fileID: 502975352376451584}
-  - component: {fileID: 6345160237714819807}
   - component: {fileID: -4726123059008778853}
   m_Layer: 0
   m_Name: ResourceIcon
@@ -184,29 +183,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3525084065246110769}
   m_CullTransparentMesh: 1
---- !u!223 &6345160237714819807
-Canvas:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3525084065246110769}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 0
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 25
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
 --- !u!114 &-4726123059008778853
 MonoBehaviour:
   m_ObjectHideFlags: 0

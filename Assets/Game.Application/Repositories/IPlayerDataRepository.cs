@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Game.Domain.Entities;
+using Game.Domain.Entities.Player;
 
 namespace Game.Application.Repositories
 {
@@ -40,6 +41,17 @@ namespace Game.Application.Repositories
         /// Updates the player's resources entity.
         /// </summary>
         void UpdatePlayerResources(PlayerResources resources);
+
+        // Backpack Management
+        /// <summary>
+        /// Gets the player's backpack entity.
+        /// </summary>
+        BackpackEntity GetBackpack();
+        
+        /// <summary>
+        /// Updates the player's backpack entity.
+        /// </summary>
+        void UpdateBackpack(BackpackEntity backpack);
 
         // Run Statistics
         /// <summary>

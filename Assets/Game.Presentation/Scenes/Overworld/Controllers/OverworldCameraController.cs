@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Game.Presentation.Controllers
 {
@@ -39,6 +40,7 @@ namespace Game.Presentation.Controllers
 
         private void HandleMouseInput()
         {
+
             // Start dragging on left mouse button down
             if (Input.GetMouseButtonDown(0))
             {
