@@ -70,34 +70,43 @@ namespace Game.Application.Services
             if (target == null || target.IsDead)
                 return;
 
-            var beforeHP = target.CurrentHP;
-
             switch (effect.Type)
             {
                 case EffectType.Damage:
-                    var amountBlocked = target.TakeDamage(effect.Value);
-                    var damageDealt = beforeHP - target.CurrentHP;
-                    _bus.Publish(new DamageAppliedEvent(caster, target, damageDealt, amountBlocked, effectToken));
-                    _log?.Log($"{caster.MonsterName} deals {damageDealt} damage to {target.MonsterName}");
+                    _bus.Publish(new ResolveDamageCommand(caster, target, effect.Value, effectToken));
                     break;
 
                 case EffectType.Heal:
-                    var healAmount = Math.Min(effect.Value, target.MaxHealth - target.CurrentHP);
-                    target.Heal(healAmount);
-                    _bus.Publish(new DamageAppliedEvent(caster, target, -healAmount, 0, effectToken)); // Negative damage for healing
-                    _log?.Log($"{caster.MonsterName} heals {target.MonsterName} for {healAmount} HP");
+                    _bus.Publish(new ResolveHealCommand(caster, target, effect.Value, effectToken));
                     break;
 
-                case EffectType.Defend:
-                    target.AddStatusEffect(new StatusEffect(effect.Type, effect.Value, effect.Duration, "Defend"));
-                    _bus.Publish(new EffectAppliedEvent(caster, target, effect, effect.Value, effectToken));
-                    _log?.Log($"{target.MonsterName} gains defense from {caster.MonsterName}'s card");
+                case EffectType.Proliferate:
+                    _bus.Publish(new ResolveProliferateCommand(caster, target, effect.Value, effectToken));
                     break;
 
-                // Add other effect types as needed
+                case EffectType.Amplify:
+                    _bus.Publish(new ResolveAmplifyCommand(caster, target, effect.Value, effectToken));
+                    break;
+
+                case EffectType.Block:
+                case EffectType.Burn:
+                case EffectType.Poison:
+                case EffectType.Fortify:
+                case EffectType.Regenerate:
+                case EffectType.Frazzled:
+                case EffectType.Luck:
+                case EffectType.Strength:
+                case EffectType.Backlash:
+                case EffectType.Stunned:
+                    _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, effect.Value, effect.Duration, effectToken));
+                    break;
+
+                case EffectType.AddRune:
+                    _bus.Publish(new ResolveRuneCommand(caster, target, effect.Value, effectToken));
+                    break;
+
                 default:
-                    _log?.LogWarning($"Unhandled effect type: {effect.Type}");
-                    break;
+                    throw new NotSupportedException($"Effect type {effect.Type} not supported");
             }
 
             if (target.IsDead)

@@ -4,11 +4,18 @@ namespace Game.Domain.Enums
     {
         Damage,
         Heal,
-        Defend,
+        Block,
         Burn,
         Poison,
-        Regeneration,
-        Weaken,
-        Strengthen,
+        Fortify,
+        Regenerate,
+        Proliferate,
+        Amplify,
+        Frazzled,
+        Luck,
+        Strength,
+        Backlash,
+        Stunned,
+        AddRune,
     }
 }

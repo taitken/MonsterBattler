@@ -50,11 +50,10 @@ public class EffectIconUI : MonoBehaviour
     {
         return effectType switch
         {
-            EffectType.Defend => _defendImage,
+            EffectType.Block => _defendImage,
             EffectType.Burn => _burnImage,
-            EffectType.Weaken => _weakenImage,
             EffectType.Poison => _poisonImage,
-            _ => null
+            _ => _defendImage
         };
     }
 

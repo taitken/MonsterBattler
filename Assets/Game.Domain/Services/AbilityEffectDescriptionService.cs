@@ -57,34 +57,48 @@ namespace Game.Domain.Services
             return sb.ToString();
         }
 
-        private static string GetActionText(EffectType effectType)
+        public static string GetActionText(EffectType effectType)
         {
             return effectType switch
             {
                 EffectType.Damage => "Deal",
-                EffectType.Heal => "Heal",
-                EffectType.Defend => "Gain",
+                EffectType.Heal => string.Empty,
+                EffectType.Block => "Gain",
                 EffectType.Burn => "Apply",
                 EffectType.Poison => "Apply",
-                EffectType.Regeneration => "Apply",
-                EffectType.Weaken => "Apply",
-                EffectType.Strengthen => "Apply",
+                EffectType.Fortify => "Gain",
+                EffectType.Regenerate => "Gain",
+                EffectType.Proliferate => string.Empty,
+                EffectType.Amplify => string.Empty,
+                EffectType.Frazzled => "Apply",
+                EffectType.Luck => "Gain",
+                EffectType.Strength => "Gain",
+                EffectType.Backlash => "Gain",
+                EffectType.Stunned => "Apply",
+                EffectType.AddRune => "Add",
                 _ => "Apply"
             };
         }
 
-        private static string GetEffectTypeText(EffectType effectType)
+        public static string GetEffectTypeText(EffectType effectType)
         {
             return effectType switch
             {
                 EffectType.Damage => "Damage",
-                EffectType.Heal => string.Empty, // "Heal 5" sounds better than "Heal 5 Heal"
-                EffectType.Defend => "Defense",
+                EffectType.Heal => "Heal", 
+                EffectType.Block => "Defense",
                 EffectType.Burn => "Burn",
                 EffectType.Poison => "Poison",
-                EffectType.Regeneration => "Regeneration",
-                EffectType.Weaken => "Weakness",
-                EffectType.Strengthen => "Strength",
+                EffectType.Fortify => "Fortification",
+                EffectType.Regenerate => "Regeneration",
+                EffectType.Proliferate => "Proliferation",
+                EffectType.Amplify => "Amplify",
+                EffectType.Frazzled => "Frazzle",
+                EffectType.Luck => "Luck",
+                EffectType.Strength => "Strength",
+                EffectType.Backlash => "Backlash",
+                EffectType.Stunned => "Stun",
+                EffectType.AddRune => "Rune",
                 _ => string.Empty
             };
         }

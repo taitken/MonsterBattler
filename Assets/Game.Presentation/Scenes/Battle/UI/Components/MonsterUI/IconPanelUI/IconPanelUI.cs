@@ -69,9 +69,8 @@ public class IconPanelUI : MonoBehaviour
 
     private bool IsSupportedEffectType(EffectType effectType)
     {
-        return effectType == EffectType.Defend ||
+        return effectType == EffectType.Block ||
                effectType == EffectType.Burn ||
-               effectType == EffectType.Weaken ||
                effectType == EffectType.Poison;
     }
 

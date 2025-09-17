@@ -76,7 +76,7 @@ namespace Game.Domain.Entities
             // Apply defend shields first
             var remainingDamage = amount;
             var totalBlocked = 0;
-            var defendEffects = _statusEffects.Where(e => e.Type == EffectType.Defend).ToList();
+            var defendEffects = _statusEffects.Where(e => e.Type == EffectType.Block).ToList();
             
             foreach (var defendEffect in defendEffects)
             {

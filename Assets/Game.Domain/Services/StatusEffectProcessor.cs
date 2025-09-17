@@ -17,7 +17,7 @@ namespace Game.Domain.Services
 
             return effect.Type switch
             {
-                EffectType.Defend => ProcessDefend(effect, target),
+                EffectType.Block => ProcessDefend(effect, target),
                 EffectType.Damage => StatusEffectResult.Failed("Damage should be handled by CardEffectResolver, not StatusEffectProcessor"),
                 EffectType.Heal => StatusEffectResult.Failed("Heal should be handled by CardEffectResolver, not StatusEffectProcessor"),
                 _ => StatusEffectResult.NoEffect($"Effect type {effect.Type} not implemented yet")

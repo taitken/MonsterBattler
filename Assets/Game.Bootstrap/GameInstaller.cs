@@ -2,9 +2,11 @@
 using Assets.Game.Presentation.UiObjects;
 using Game.Application.IFactories;
 using Game.Application.Interfaces;
+using Game.Application.Interfaces.Effects;
 using Game.Application.Messaging;
 using Game.Application.Repositories;
 using Game.Application.Services;
+using Game.Application.Services.Effects;
 using Game.Core;
 using Game.Core.Logger;
 using Game.Core.Randomness;
@@ -86,6 +88,7 @@ namespace Game.Bootstrap
             services.RegisterAsScoped<IBattleService, BattleService>();
             services.RegisterAsScoped<IOverworldService, OverworldService>();
             services.RegisterAsScoped<ICardEffectResolver, CardEffectResolver>();
+            services.RegisterAsScoped<IEffectProcessor, EffectProcessor>();
         }
 
         private void RegisterTransientServices(ServiceContainer services)

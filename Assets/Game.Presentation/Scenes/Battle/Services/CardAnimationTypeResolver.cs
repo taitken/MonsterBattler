@@ -23,7 +23,7 @@ namespace Game.Presentation.Scenes.Battle.Services
                     case EffectType.Heal:
                         return CardAnimationType.None; // Not implemented yet
                     
-                    case EffectType.Defend:
+                    case EffectType.Block:
                         return CardAnimationType.Defend;
                     
                     // Add more cases as needed
