@@ -15,7 +15,7 @@ namespace Game.Domain.Enums
         Luck,
         Strength,
         Backlash,
-        Stunned,
+        Stun,
         AddRune,
     }
 }

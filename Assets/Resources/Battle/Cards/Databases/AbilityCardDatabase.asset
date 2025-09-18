@@ -17,6 +17,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ac227b476d908114e9970f48009a3f5b, type: 2}
   - {fileID: 11400000, guid: 5b4e8ba1917009d4da86a776068172eb, type: 2}
   - {fileID: 11400000, guid: 758540dabe8cd8340893fcfbafdf4b3b, type: 2}
+  - {fileID: 11400000, guid: 0f780e3e2a953f14caaceb42ff136210, type: 2}
+  - {fileID: 11400000, guid: e092f859e987c9348ab9b4a46cbe941e, type: 2}
+  - {fileID: 11400000, guid: d6b28ac17cdc4c6449895483623d72c9, type: 2}
+  - {fileID: 11400000, guid: 5b5a48e4637112a4ea5d56f166dc505a, type: 2}
+  - {fileID: 11400000, guid: fa199cba69e55ef42b30dbf46b08cc56, type: 2}
+  - {fileID: 11400000, guid: eadb6b665f0ba3441aaa56ae309b41af, type: 2}
+  - {fileID: 11400000, guid: b7fe2e7820de8c143ad70519112c36df, type: 2}
   starterDecks:
   - {fileID: 11400000, guid: 86707ede8af564f488a2df312e9f1e6b, type: 2}
   enemyDecks:

@@ -33,6 +33,7 @@ namespace Game.Bootstrap
         [SerializeField] private AbilityCardDatabase abilityCardDatabase;
         [SerializeField] private ResourceIconDatabase resourceIconDatabase;
         [SerializeField] private RuneIconDatabase runeIconDatabase;
+        [SerializeField] private StatusEffectIconDatabase statusEffectIconDatabase;
         
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
@@ -113,6 +114,7 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<ICardArtProvider>(() => new CardArtAdapter(abilityCardDatabase));
             services.RegisterAsSingleton<IResourceIconProvider>(() => new ResourceIconProvider(resourceIconDatabase));
             services.RegisterAsSingleton<IRuneIconProvider>(() => new RuneIconProvider(runeIconDatabase));
+            services.RegisterAsSingleton<IStatusEffectIconProvider>(() => new StatusEffectIconProvider(statusEffectIconDatabase));
         }
 
         void Update()

@@ -69,7 +69,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: -8270840008176036647, guid: 2c9ceb6f834c2af47a35b997c8c632e7, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -90,10 +90,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation::EffectIconUI
   _numberText: {fileID: 1123632028102669229}
-  _defendImage: {fileID: -8270840008176036647, guid: 2c9ceb6f834c2af47a35b997c8c632e7, type: 3}
-  _burnImage: {fileID: -632122146342402490, guid: 14ac0a50f9e443544b200352ca8108c8, type: 3}
-  _weakenImage: {fileID: -8218300611946999808, guid: f91726e12ffecd44cb050dd135fafafb, type: 3}
-  _poisonImage: {fileID: 2033716663667115786, guid: 91906c4ad862782479f7fceb290faff6, type: 3}
 --- !u!1 &8020710825580444520
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,5 +44,14 @@ namespace Game.Domain.Entities.Abilities
             }
             NotifyModelUpdated();
         }
+
+        public void IncreaseValue(int amount)
+        {
+            if (amount > 0)
+            {
+                Value += amount;
+                NotifyModelUpdated();
+            }
+        }
     }
 }

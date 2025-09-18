@@ -25,5 +25,10 @@ namespace Game.Application.Interfaces.Effects
         /// Processes effects that trigger when a new status effect is applied
         /// </summary>
         void ProcessEffectApplied(MonsterEntity target, StatusEffect newEffect);
+
+        /// <summary>
+        /// Processes effects that modify outgoing damage from the caster
+        /// </summary>
+        int ProcessOutgoingDamage(MonsterEntity caster, MonsterEntity target, int baseDamage);
     }
 }

@@ -29,8 +29,13 @@ namespace Game.Application.Services.Effects.Behaviors
             _log?.Log($"{owner.MonsterName} takes {effect.Value} poison damage");
             _bus.Publish(new DamageAppliedEvent(owner, owner, effect.Value, 0, null));
 
-            // Poison persists - doesn't reduce stacks like burn
-            // Duration will naturally decrease through the StatusEffect's ProcessTurn method
+            // Reduce burn stacks by 1
+            effect.ReduceValue(1);
+
+            if (effect.Value <= 0)
+            {
+                _log?.Log($"Burn effect on {owner.MonsterName} has been consumed");
+            }
         }
     }
 }

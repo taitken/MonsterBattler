@@ -2,22 +2,22 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Game.Domain.Enums;
+using Game.Application.Interfaces;
+using Game.Core;
 
 public class EffectIconUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _numberText;
-    [SerializeField] private Sprite _defendImage;
-    [SerializeField] private Sprite _burnImage;
-    [SerializeField] private Sprite _weakenImage;
-    [SerializeField] private Sprite _poisonImage;
 
     private Image _iconImage;
     private EffectType _currentEffectType;
     private int _currentValue;
+    private IStatusEffectIconProvider _iconProvider;
 
     void Awake()
     {
         _iconImage = GetComponent<Image>();
+        _iconProvider = ServiceLocator.Get<IStatusEffectIconProvider>();
     }
 
     public void SetEffect(EffectType effectType, int value)
@@ -25,14 +25,14 @@ public class EffectIconUI : MonoBehaviour
         _currentEffectType = effectType;
         _currentValue = value;
         
-        // Set the appropriate sprite based on effect type
-        Sprite effectSprite = GetSpriteForEffectType(effectType);
-        
+        // Set the appropriate sprite based on effect type using provider service
+        Sprite effectSprite = _iconProvider?.GetEffectSprite(effectType);
+
         if (effectSprite != null)
         {
             _iconImage.sprite = effectSprite;
             gameObject.SetActive(true);
-            
+
             // Update the number text (show value if > 1, otherwise hide)
             if (_numberText != null)
             {
@@ -41,21 +41,11 @@ public class EffectIconUI : MonoBehaviour
         }
         else
         {
-            // Hide the entire icon if effect type is not supported
+            // Hide the entire icon if effect type is not supported by provider
             gameObject.SetActive(false);
         }
     }
 
-    private Sprite GetSpriteForEffectType(EffectType effectType)
-    {
-        return effectType switch
-        {
-            EffectType.Block => _defendImage,
-            EffectType.Burn => _burnImage,
-            EffectType.Poison => _poisonImage,
-            _ => _defendImage
-        };
-    }
 
     public void Hide()
     {

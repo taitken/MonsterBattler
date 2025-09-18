@@ -74,7 +74,7 @@ namespace Game.Domain.Services
                 EffectType.Luck => "Gain",
                 EffectType.Strength => "Gain",
                 EffectType.Backlash => "Gain",
-                EffectType.Stunned => "Apply",
+                EffectType.Stun => "Apply",
                 EffectType.AddRune => "Add",
                 _ => "Apply"
             };
@@ -97,7 +97,7 @@ namespace Game.Domain.Services
                 EffectType.Luck => "Luck",
                 EffectType.Strength => "Strength",
                 EffectType.Backlash => "Backlash",
-                EffectType.Stunned => "Stun",
+                EffectType.Stun => "Stun",
                 EffectType.AddRune => "Rune",
                 _ => string.Empty
             };

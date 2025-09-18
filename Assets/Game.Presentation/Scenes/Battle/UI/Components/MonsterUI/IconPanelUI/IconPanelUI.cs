@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
 using Game.Domain.Enums;
 
@@ -33,7 +32,6 @@ public class IconPanelUI : MonoBehaviour
 
         // Group effects by type and sum their values
         var effectGroups = statusEffects
-            .Where(effect => IsSupportedEffectType(effect.Type))
             .GroupBy(effect => effect.Type)
             .ToDictionary(group => group.Key, group => group.Sum(effect => effect.Value));
 
@@ -65,13 +63,6 @@ public class IconPanelUI : MonoBehaviour
         }
         
         _activeIcons.Clear();
-    }
-
-    private bool IsSupportedEffectType(EffectType effectType)
-    {
-        return effectType == EffectType.Block ||
-               effectType == EffectType.Burn ||
-               effectType == EffectType.Poison;
     }
 
 }

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7ee5bf3b51110b4394b19da9f9a3a60, type: 3}
+  m_Name: StatusEffectIconDatabase
+  m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.StatusEffectIconDatabase
+  effects:
+  - effectType: 2
+    sprite: {fileID: -8270840008176036647, guid: 2c9ceb6f834c2af47a35b997c8c632e7, type: 3}
+  - effectType: 5
+    sprite: {fileID: 7099906781495423697, guid: bb15c1cf3e00ef64d923eb4556f3a607, type: 3}
+  - effectType: 3
+    sprite: {fileID: -632122146342402490, guid: 14ac0a50f9e443544b200352ca8108c8, type: 3}
+  - effectType: 4
+    sprite: {fileID: 1969918237916786025, guid: 91906c4ad862782479f7fceb290faff6, type: 3}
+  - effectType: 6
+    sprite: {fileID: 8703434064602662925, guid: 92ff8ce64f34bab4cafedef6c207a590, type: 3}
+  - effectType: 9
+    sprite: {fileID: 4681599888022358375, guid: b922b43ec106577408148ece4374aab7, type: 3}
+  - effectType: 10
+    sprite: {fileID: 372116115930168411, guid: 0854371ac0b840249ab0d8a417b3d488, type: 3}
+  - effectType: 11
+    sprite: {fileID: 3855951909577515313, guid: 3e43de1102d87e843ac3973742eae6fb, type: 3}
+  - effectType: 12
+    sprite: {fileID: 5458129476782402488, guid: a93296146b990c8448b7c40bff7fe972, type: 3}
+  - effectType: 13
+    sprite: {fileID: 5404633747034473702, guid: 3c30e73c504cb57489551d96474def21, type: 3}

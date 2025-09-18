@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 91906c4ad862782479f7fceb290faff6
+guid: bb15c1cf3e00ef64d923eb4556f3a607
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1969918237916786025
-    second: PoisonIcon_0
-  - first:
-      213: -5710549242920525026
-    second: PoisonIcon_1
+      213: 7099906781495423697
+    second: FortifyIcon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -103,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PoisonIcon_0
+      name: FortifyIcon_0
       rect:
         serializedVersion: 2
         x: 63
-        y: 31
-        width: 466
-        height: 242
+        y: 47
+        width: 386
+        height: 450
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -118,30 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 96de797433e865b10800000000000000
-      internalID: 1969918237916786025
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PoisonIcon_1
-      rect:
-        serializedVersion: 2
-        x: 127
-        y: 207
-        width: 338
-        height: 354
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e13a85728bd00c0b0800000000000000
-      internalID: -5710549242920525026
+      spriteID: 1d2fb61d99fe78260800000000000000
+      internalID: 7099906781495423697
       vertices: []
       indices: 
       edges: []
@@ -160,8 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PoisonIcon_0: 1969918237916786025
-      PoisonIcon_1: -5710549242920525026
+      FortifyIcon_0: 7099906781495423697
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

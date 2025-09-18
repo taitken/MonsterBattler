@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 91906c4ad862782479f7fceb290faff6
+guid: 3c30e73c504cb57489551d96474def21
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1969918237916786025
-    second: PoisonIcon_0
-  - first:
-      213: -5710549242920525026
-    second: PoisonIcon_1
+      213: 5404633747034473702
+    second: StunIcon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -103,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PoisonIcon_0
+      name: StunIcon_0
       rect:
         serializedVersion: 2
-        x: 63
-        y: 31
-        width: 466
-        height: 242
+        x: 31
+        y: 15
+        width: 434
+        height: 466
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -118,30 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 96de797433e865b10800000000000000
-      internalID: 1969918237916786025
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PoisonIcon_1
-      rect:
-        serializedVersion: 2
-        x: 127
-        y: 207
-        width: 338
-        height: 354
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e13a85728bd00c0b0800000000000000
-      internalID: -5710549242920525026
+      spriteID: 6e4041902cd110b40800000000000000
+      internalID: 5404633747034473702
       vertices: []
       indices: 
       edges: []
@@ -160,8 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PoisonIcon_0: 1969918237916786025
-      PoisonIcon_1: -5710549242920525026
+      StunIcon_0: 5404633747034473702
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

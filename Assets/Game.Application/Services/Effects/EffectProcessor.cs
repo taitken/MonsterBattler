@@ -3,6 +3,7 @@ using System.Linq;
 using Game.Application.Interfaces.Effects;
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
+using Game.Application.Services.Effects.Behaviors;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
@@ -108,13 +109,43 @@ namespace Game.Application.Services.Effects
             }
         }
 
+        public int ProcessOutgoingDamage(MonsterEntity caster, MonsterEntity target, int baseDamage)
+        {
+            var modifiedDamage = baseDamage;
+
+            _log?.Log($"Processing outgoing damage: {baseDamage} from {caster.MonsterName} to {target.MonsterName}");
+
+            foreach (var effect in caster.StatusEffects.Where(e => !e.IsExpired).ToList())
+            {
+                if (_behaviors.TryGetValue(effect.Type, out var behavior) &&
+                    behavior is IOnDamageDealtBehavior damageBehavior)
+                {
+                    var newDamage = damageBehavior.ModifyOutgoingDamage(caster, target, modifiedDamage, effect);
+
+                    if (newDamage != modifiedDamage)
+                    {
+                        _log?.Log($"Effect {effect.Type} modified outgoing damage: {modifiedDamage} -> {newDamage}");
+                        modifiedDamage = newDamage;
+                    }
+                }
+            }
+
+            return modifiedDamage;
+        }
+
         private void RegisterBehaviors()
         {
             // Register effect behaviors
-            RegisterBehavior(EffectType.Burn, new Services.Effects.Behaviors.BurnEffectBehavior(_bus, _log));
-            RegisterBehavior(EffectType.Block, new Services.Effects.Behaviors.BlockEffectBehavior(_log));
-            RegisterBehavior(EffectType.Stunned, new Services.Effects.Behaviors.StunEffectBehavior(_log));
-            RegisterBehavior(EffectType.Poison, new Services.Effects.Behaviors.PoisonEffectBehavior(_bus, _log));
+            RegisterBehavior(EffectType.Burn, new BurnEffectBehavior(_bus, _log));
+            RegisterBehavior(EffectType.Block, new BlockEffectBehavior(_log));
+            RegisterBehavior(EffectType.Stun, new StunEffectBehavior(_log));
+            RegisterBehavior(EffectType.Poison, new PoisonEffectBehavior(_bus, _log));
+            RegisterBehavior(EffectType.Fortify, new FortifyEffectBehavior(_log));
+            RegisterBehavior(EffectType.Regenerate, new RegenerateEffectBehavior(_bus, _log));
+            RegisterBehavior(EffectType.Frazzled, new FrazzledEffectBehavior(_log));
+            RegisterBehavior(EffectType.Luck, new LuckEffectBehavior(_log));
+            RegisterBehavior(EffectType.Strength, new StrengthEffectBehavior(_log));
+            RegisterBehavior(EffectType.Backlash, new BacklashEffectBehavior(_bus, _log));
 
             _log?.Log($"EffectProcessor initialized with {_behaviors.Count} effect behaviors");
         }

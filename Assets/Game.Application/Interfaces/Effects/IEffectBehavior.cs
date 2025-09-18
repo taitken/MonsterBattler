@@ -28,4 +28,9 @@ namespace Game.Application.Interfaces.Effects
     {
         CardPlayResult OnCardPlayed(MonsterEntity player, AbilityCard card, StatusEffect effect);
     }
+
+    public interface IOnDamageDealtBehavior : IEffectBehavior
+    {
+        int ModifyOutgoingDamage(MonsterEntity caster, MonsterEntity target, int baseDamage, StatusEffect effect);
+    }
 }

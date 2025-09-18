@@ -97,7 +97,7 @@ namespace Game.Application.Services
                 case EffectType.Luck:
                 case EffectType.Strength:
                 case EffectType.Backlash:
-                case EffectType.Stunned:
+                case EffectType.Stun:
                     _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, effect.Value, effect.Duration, effectToken));
                     break;
 

@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Game.Application.Interfaces;
+using Game.Application.Interfaces.Effects;
 using Game.Application.Messaging;
 using Game.Core.Logger;
 using Game.Core.Randomness;
@@ -34,6 +35,7 @@ namespace Game.Application.Services
         private readonly IOverworldRepository _overworldPersistenceService;
         private readonly ICardEffectResolver _cardEffectResolver;
         private readonly IRewardGeneratorService _rewardGenerator;
+        private readonly IEffectProcessor _effectProcessor;
         private readonly List<MonsterEntity> _player = new();
         private readonly List<MonsterEntity> _enemy = new();
         private readonly Dictionary<MonsterEntity, AbilityCard> _drawnCards = new();
@@ -49,7 +51,8 @@ namespace Game.Application.Services
                              IEnemyEncounterProvider encounterProvider,
                              IOverworldRepository overworldPersistenceService,
                              ICardEffectResolver cardEffectResolver,
-                             IRewardGeneratorService rewardGenerator)
+                             IRewardGeneratorService rewardGenerator,
+                             IEffectProcessor effectProcessor)
         {
             _bus = bus;
             _monsterFactory = monsterFactory;
@@ -62,6 +65,7 @@ namespace Game.Application.Services
             _overworldPersistenceService = overworldPersistenceService;
             _cardEffectResolver = cardEffectResolver;
             _rewardGenerator = rewardGenerator;
+            _effectProcessor = effectProcessor;
             _log.Log("BattleService initialized.");
         }
         public async Task RunBattleAsync(Guid roomId, CancellationToken ct = default)
@@ -219,6 +223,12 @@ namespace Game.Application.Services
                 if (!HasAlive(_enemy)) break;
 
                 await RunTeamTurnAsync(_enemy, _player, BattleTeam.Enemy, ct);
+
+                // Run end of turn effects
+                foreach (var monster in _player.Concat(_enemy))
+                {
+                    _effectProcessor.ProcessTurnEnd(monster);
+                }   
                 
                 // Clear drawn cards at the end of the round
                 _drawnCards.Clear();
