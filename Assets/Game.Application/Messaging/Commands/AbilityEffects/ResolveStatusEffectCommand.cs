@@ -9,17 +9,15 @@ namespace Game.Application.Messaging
         public readonly MonsterEntity Caster;
         public readonly MonsterEntity Target;
         public readonly EffectType Type;
-        public readonly int Value;
-        public readonly int Duration;
+        public readonly int Stacks;
         public readonly BarrierToken? WaitToken;
 
-        public ResolveStatusEffectCommand(MonsterEntity caster, MonsterEntity target, EffectType type, int value, int duration, BarrierToken? waitToken = null)
+        public ResolveStatusEffectCommand(MonsterEntity caster, MonsterEntity target, EffectType stacks, int value, BarrierToken? waitToken = null)
         {
             Caster = caster;
             Target = target;
-            Type = type;
-            Value = value;
-            Duration = duration;
+            Type = stacks;
+            Stacks = value;
             WaitToken = waitToken;
         }
     }

@@ -22,18 +22,19 @@ namespace Game.Application.Services.Effects.Behaviors
 
         public void OnTurnEnd(MonsterEntity owner, StatusEffect effect)
         {
-            if (effect.IsExpired || effect.Value <= 0)
+            _log?.Log($"Applying burn to {owner.MonsterName}.");
+            if (effect.IsExpired || effect.Stacks <= 0)
                 return;
 
-            var damageDealt = owner.TakeDamage(effect.Value);
+            // Route burn damage through EffectProcessor using ResolveDamageCommand
+            _bus.Publish(new ResolveDamageCommand(owner, owner, effect.Stacks));
 
-            _log?.Log($"{owner.MonsterName} takes {effect.Value} burn damage");
-            _bus.Publish(new DamageAppliedEvent(owner, owner, effect.Value, 0, null));
+            _log?.Log($"{owner.MonsterName} takes {effect.Stacks} burn damage");
 
             // Reduce burn stacks by 1
-            effect.ReduceValue(1);
+            effect.ReduceStacks(1);
 
-            if (effect.Value <= 0)
+            if (effect.Stacks <= 0)
             {
                 _log?.Log($"Burn effect on {owner.MonsterName} has been consumed");
             }

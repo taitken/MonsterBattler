@@ -1,5 +1,6 @@
 using Game.Application.Messaging;
 using Game.Application.Messaging.Events.BattleFlow;
+using Game.Application.Interfaces.Effects;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
@@ -14,11 +15,13 @@ namespace Game.Application.Handlers.Effects
     {
         private readonly IEventBus _bus;
         private readonly ILoggerService _log;
+        private readonly IEffectProcessor _effectProcessor;
 
-        public ResolveStatusEffectCommandHandler(IEventBus bus, ILoggerService log)
+        public ResolveStatusEffectCommandHandler(IEventBus bus, ILoggerService log, IEffectProcessor effectProcessor)
         {
             _bus = bus;
             _log = log;
+            _effectProcessor = effectProcessor;
         }
 
         public void Handle(ResolveStatusEffectCommand command)
@@ -27,12 +30,14 @@ namespace Game.Application.Handlers.Effects
                 return;
 
             var effectName = AbilityEffectDescriptionService.GetEffectTypeText(command.Type);
-            var statusEffect = new StatusEffect(command.Type, command.Value, command.Duration, effectName);
+            var statusEffect = new StatusEffect(command.Type, command.Stacks, effectName);
 
             command.Target.AddStatusEffect(statusEffect);
 
-            var effect = new AbilityEffect(command.Type, command.Value, TargetType.Self, command.Duration);
-            _bus.Publish(new EffectAppliedEvent(command.Caster, command.Target, effect, command.Value, command.WaitToken));
+            _effectProcessor.ProcessEffectApplied(command.Target, statusEffect);
+
+            var effect = new AbilityEffect(command.Type, command.Stacks, TargetType.Self);
+            _bus.Publish(new EffectAppliedEvent(command.Caster, command.Target, effect, command.Stacks, command.WaitToken));
 
             LogStatusEffectApplication(command);
         }
@@ -41,9 +46,8 @@ namespace Game.Application.Handlers.Effects
         {
             var actionText = AbilityEffectDescriptionService.GetActionText(command.Type);
             var effectText = AbilityEffectDescriptionService.GetEffectTypeText(command.Type);
-            var durationText = command.Duration > 0 ? $" for {command.Duration} turns" : "";
 
-            _log?.Log($"{command.Caster.MonsterName} {actionText.ToLower()} {command.Value} {effectText} to {command.Target.MonsterName}{durationText}");
+            _log?.Log($"{command.Caster.MonsterName} {actionText.ToLower()} {command.Stacks} {effectText} to {command.Target.MonsterName}");
         }
     }
 }

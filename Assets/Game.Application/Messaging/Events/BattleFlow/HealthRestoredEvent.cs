@@ -4,9 +4,9 @@ using Game.Domain.Messaging;
 
 namespace Game.Application.Messaging.Events.BattleFlow
 {
-    public readonly struct HealingAppliedEvent : IDomainEvent
+    public readonly struct HealthRestoredEvent : IDomainEvent
     {
-        public HealingAppliedEvent(MonsterEntity healer, MonsterEntity target, int amount, BarrierToken? waitToken = null)
+        public HealthRestoredEvent(MonsterEntity healer, MonsterEntity target, int amount, BarrierToken? waitToken = null)
         {
             Healer = healer;
             Target = target;

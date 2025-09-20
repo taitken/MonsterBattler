@@ -6,50 +6,37 @@ namespace Game.Domain.Entities.Abilities
     public class StatusEffect : BaseEntity
     {
         public EffectType Type { get; private set; }
-        public int Value { get; private set; }
-        public int RemainingDuration { get; private set; }
+        public int Stacks { get; private set; }
         public string Name { get; private set; }
         
         public event Action OnExpired;
         
-        public StatusEffect(EffectType type, int value, int duration, string name)
+        public StatusEffect(EffectType type, int stacks, string name)
         {
             Type = type;
-            Value = value;
-            RemainingDuration = duration;
+            Stacks = stacks;
             Name = name;
         }
         
-        public void ProcessTurn()
-        {
-            if (RemainingDuration > 0)
-            {
-                RemainingDuration--;
-                if (RemainingDuration <= 0)
-                {
-                    OnExpired?.Invoke();
-                }
-            }
-        }
         
-        public bool IsExpired => RemainingDuration <= 0;
-        public bool IsPermanent => RemainingDuration < 0;
+        public bool IsExpired => Stacks <= 0;
+        public bool IsPermanent => Stacks < 0;
         
-        public void ReduceValue(int amount)
+        public void ReduceStacks(int amount)
         {
-            Value = Math.Max(0, Value - amount);
-            if (Value <= 0)
+            Stacks = Math.Max(0, Stacks - amount);
+            if (Stacks <= 0)
             {
                 OnExpired?.Invoke();
             }
             NotifyModelUpdated();
         }
 
-        public void IncreaseValue(int amount)
+        public void IncreaseStacks(int amount)
         {
             if (amount > 0)
             {
-                Value += amount;
+                Stacks += amount;
                 NotifyModelUpdated();
             }
         }

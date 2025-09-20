@@ -24,7 +24,6 @@ namespace Game.Domain.Services
             // Get the action verb and format based on effect type
             var actionText = GetActionText(effect.Type);
             var targetText = GetTargetText(effect.TargetType);
-            var durationText = GetDurationText(effect.Duration);
             
             // Format: Action <b>Value</b> Type to <b>Target</b> [for <b>Duration</b> turns]
             sb.Append(actionText);
@@ -44,15 +43,6 @@ namespace Game.Domain.Services
             sb.Append(" to <b>");
             sb.Append(targetText);
             sb.Append("</b>");
-            
-            // Add duration if applicable
-            if (!string.IsNullOrEmpty(durationText))
-            {
-                sb.Append(" for <b>");
-                sb.Append(effect.Duration);
-                sb.Append("</b> ");
-                sb.Append(durationText);
-            }
             
             return sb.ToString();
         }

@@ -27,7 +27,7 @@ namespace Game.Domain.Services
         private static StatusEffectResult ProcessDefend(StatusEffect effect, MonsterEntity target)
         {
             // Defend is a shield that absorbs damage - no immediate effect, just applied when monster is created
-            return StatusEffectResult.Success($"{target.MonsterName} gains {effect.Value} defense (shield)");
+            return StatusEffectResult.Success($"{target.MonsterName} gains {effect.Stacks} defense (shield)");
         }
 
     }

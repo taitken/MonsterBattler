@@ -24,7 +24,6 @@ namespace Game.Application.Handlers.Effects
             if (command.Target.IsDead)
                 return;
 
-            // Process outgoing damage effects (like Strength)
             var modifiedDamage = _effectProcessor.ProcessOutgoingDamage(command.Caster, command.Target, command.Value);
 
             var beforeHP = command.Target.CurrentHP;
@@ -33,6 +32,12 @@ namespace Game.Application.Handlers.Effects
 
             _bus.Publish(new DamageAppliedEvent(command.Caster, command.Target, damageDealt, amountBlocked, command.WaitToken));
             _log?.Log($"{command.Caster.MonsterName} deals {damageDealt} damage to {command.Target.MonsterName}");
+
+            // Check if target died from the damage and publish fainted event
+            if (command.Target.IsDead)
+            {
+                _bus.Publish(new MonsterFaintedEvent(command.Target));
+            }
         }
     }
 }

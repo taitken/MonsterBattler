@@ -16,19 +16,19 @@ namespace Game.Application.Services.Effects.Behaviors
 
         public void OnTurnEnd(MonsterEntity owner, StatusEffect effect)
         {
-            if (effect.IsExpired || effect.Value <= 0)
+            if (effect.IsExpired || effect.Stacks <= 0)
                 return;
 
             // Reduce Luck stacks by 1
-            effect.ReduceValue(1);
+            effect.ReduceStacks(1);
 
-            if (effect.Value <= 0)
+            if (effect.Stacks <= 0)
             {
                 _log?.Log($"Luck effect on {owner.MonsterName} has expired");
             }
             else
             {
-                _log?.Log($"Luck stacks on {owner.MonsterName} reduced by 1 (remaining: {effect.Value})");
+                _log?.Log($"Luck stacks on {owner.MonsterName} reduced by 1 (remaining: {effect.Stacks})");
             }
         }
     }

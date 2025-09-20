@@ -18,16 +18,16 @@ namespace Game.Application.Services.Effects.Behaviors
 
         public DamageModificationResult ModifyDamage(MonsterEntity target, int incomingDamage, MonsterEntity source, StatusEffect effect)
         {
-            if (effect.IsExpired || effect.Value <= 0 || incomingDamage <= 0)
+            if (effect.IsExpired || effect.Stacks <= 0 || incomingDamage <= 0)
                 return DamageModificationResult.NoModification(incomingDamage);
 
-            var damageToBlock = Math.Min(incomingDamage, effect.Value);
+            var damageToBlock = Math.Min(incomingDamage, effect.Stacks);
             var finalDamage = Math.Max(0, incomingDamage - damageToBlock);
 
             _log?.Log($"{target.MonsterName}'s defense blocks {damageToBlock} damage");
 
-            // Reduce block value by the amount used
-            effect.ReduceValue(damageToBlock);
+            // Reduce block Stacks by the amount used
+            effect.ReduceStacks(damageToBlock);
 
             return DamageModificationResult.Blocked(incomingDamage, damageToBlock);
         }

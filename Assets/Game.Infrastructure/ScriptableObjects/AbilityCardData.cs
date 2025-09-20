@@ -30,8 +30,7 @@ namespace Game.Infrastructure.ScriptableObjects
                 abilityEffects.Add(new AbilityEffect(
                     effectData.effectType,
                     effectData.value,
-                    effectData.targetType,
-                    effectData.duration
+                    effectData.targetType
                 ));
             }
 
@@ -50,6 +49,5 @@ namespace Game.Infrastructure.ScriptableObjects
         public EffectType effectType;
         public int value;
         public TargetType targetType;
-        public int duration;
     }
 }

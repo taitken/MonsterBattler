@@ -18,14 +18,14 @@ namespace Game.Application.Services.Effects.Behaviors
         public void OnEffectApplied(MonsterEntity target, StatusEffect appliedEffect, StatusEffect thisEffect)
         {
             // Only modify Block effects
-            if (appliedEffect.Type != EffectType.Block || thisEffect.IsExpired || thisEffect.Value <= 0)
+            if (appliedEffect.Type != EffectType.Block || thisEffect.IsExpired || thisEffect.Stacks <= 0)
                 return;
 
             // Add the current stacks of Fortify to the block amount being applied
-            var bonusBlock = thisEffect.Value;
-            appliedEffect.IncreaseValue(bonusBlock);
+            var bonusBlock = thisEffect.Stacks;
+            appliedEffect.IncreaseStacks(bonusBlock);
 
-            _log?.Log($"{target.MonsterName}'s Fortify ({thisEffect.Value} stacks) increased block by {bonusBlock} (new block: {appliedEffect.Value})");
+            _log?.Log($"{target.MonsterName}'s Fortify ({thisEffect.Stacks} stacks) increased block by {bonusBlock} (new block: {appliedEffect.Stacks})");
         }
     }
 }

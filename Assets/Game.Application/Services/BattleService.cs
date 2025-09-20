@@ -318,14 +318,20 @@ namespace Game.Application.Services
             await _waitBarrier.WaitAsync(new BarrierKey(slotMachineCompletionToken), ct);
         }
 
-        private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target, 
+        private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target,
             List<MonsterEntity> allAllies, List<MonsterEntity> allEnemies, BattleTeam team, CancellationToken ct)
         {
             // Check if attacker has a pre-drawn card
             if (!_drawnCards.TryGetValue(attacker, out var card))
             {
-                _log?.LogWarning($"{attacker.MonsterName} has no pre-drawn card - falling back to basic attack");
-                await ResolveBasicAttack(attacker, target, team, ct);
+                _log?.LogWarning($"{attacker.MonsterName} has no pre-drawn card - skipping turn");
+                return;
+            }
+
+            // Check if effects allow card to be played (e.g., Stun prevention)
+            if (!_effectProcessor.ProcessCardPlayed(attacker, card))
+            {
+                _log?.Log($"{attacker.MonsterName} cannot play {card.Name} due to status effects - skipping turn");
                 return;
             }
 
@@ -344,28 +350,6 @@ namespace Game.Application.Services
 
             // Wait for animation completion
             await _waitBarrier.WaitAsync(new BarrierKey(cardAnimationToken, (int)AttackPhase.End), ct);
-        }
-
-        private async Task ResolveBasicAttack(MonsterEntity attacker, MonsterEntity target, BattleTeam team, CancellationToken ct)
-        {
-            var actionAnimationToken = BarrierToken.New();
-            _bus.Publish(new ActionSelectedEvent(team, attacker, target, actionAnimationToken));
-            await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.Hit), ct);
-
-            // Domain call (no awaits)
-            var beforeHP = target.CurrentHP;
-            var amountBlocked = attacker.Attack(target); // applies damage inside domain
-
-            var afterHP = target.CurrentHP;
-            var damage = beforeHP - afterHP;
-            _bus.Publish(new DamageAppliedEvent(attacker, target, damage, amountBlocked));
-
-            if (target.IsDead)
-            {
-                _bus.Publish(new MonsterFaintedEvent(target));
-            }
-
-            await _waitBarrier.WaitAsync(new BarrierKey(actionAnimationToken, (int)AttackPhase.End), ct);
         }
 
         private BattleOutcome ComputeOutcome(List<MonsterEntity> player, List<MonsterEntity> enemy)

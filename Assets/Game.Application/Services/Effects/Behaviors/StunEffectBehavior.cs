@@ -17,7 +17,7 @@ namespace Game.Application.Services.Effects.Behaviors
 
         public CardPlayResult OnCardPlayed(MonsterEntity player, AbilityCard card, StatusEffect effect)
         {
-            if (effect.IsExpired || effect.Value <= 0)
+            if (effect.IsExpired || effect.Stacks <= 0)
                 return CardPlayResult.Allowed();
 
             _log?.Log($"{player.MonsterName} is stunned and cannot play cards");
@@ -30,9 +30,9 @@ namespace Game.Application.Services.Effects.Behaviors
                 return;
 
             // Reduce stun duration by 1 each turn
-            effect.ReduceValue(1);
+            effect.ReduceStacks(1);
 
-            if (effect.Value <= 0)
+            if (effect.Stacks <= 0)
             {
                 _log?.Log($"{owner.MonsterName} recovers from stun");
             }

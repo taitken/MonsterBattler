@@ -21,6 +21,7 @@ namespace Game.Presentation.VfxControllers
         private IInteractionBarrier _waitBarrier;
         private IDisposable _subActionSelected;
         private IDisposable _subDamageApplied;
+        private IDisposable _subHealthRestored;
         private IDisposable _subEffectApplied;
         private IDisposable _subFainted;
         private IDisposable _subTurnStart;
@@ -28,6 +29,7 @@ namespace Game.Presentation.VfxControllers
         private IDisposable _subBattleEnded;
         private string DAMAGE_COLOUR = "#FF4444";
         private string BLOCK_COLOUR = "#4488FF";
+        private string HEAL_COLOUR = "#44FF44";
 
         void Awake()
         {
@@ -42,6 +44,7 @@ namespace Game.Presentation.VfxControllers
         {
             _subActionSelected = _bus.Subscribe<ActionSelectedEvent>(OnActionSelected);
             _subDamageApplied = _bus.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+            _subHealthRestored = _bus.Subscribe<HealthRestoredEvent>(OnHealthRestored);
             _subEffectApplied = _bus.Subscribe<EffectAppliedEvent>(OnEffectApplied);
             _subFainted = _bus.Subscribe<MonsterFaintedEvent>(OnMonsterFainted);
             _subTurnStart = _bus.Subscribe<TurnStartedEvent>(OnTurnStarted);
@@ -93,6 +96,25 @@ namespace Game.Presentation.VfxControllers
             }
         }
 
+        private void OnHealthRestored(HealthRestoredEvent e)
+        {
+            if (_viewRegistry.TryGet(e.Target.Id, out MonsterView targetView))
+            {
+                Vector3 basePosition = targetView.transform.position + new Vector3(0, 1f, 0);
+
+                if (e.Amount > 0)
+                {
+                    ColorUtility.TryParseHtmlString(HEAL_COLOUR, out Color greenHealColor);
+                    _combatTextFactory.Create(greenHealColor, $"+{e.Amount}", _rootCanvas, basePosition);
+                }
+
+                if (e.WaitToken.HasValue)
+                {
+                    _waitBarrier.SignalAfterDelay(new BarrierKey(e.WaitToken.Value), 0.3f);
+                }
+            }
+        }
+
         private void OnEffectApplied(EffectAppliedEvent e)
         {
             // Signal completion after delay if there's a wait token
@@ -100,7 +122,7 @@ namespace Game.Presentation.VfxControllers
             {
                 _waitBarrier.SignalAfterDelay(new BarrierKey(e.WaitToken.Value), 0.1f);
             }
-            
+
             // TODO: Add visual effects for different effect types (shield icons, etc.)
         }
 
@@ -128,6 +150,7 @@ namespace Game.Presentation.VfxControllers
         {
             _subActionSelected?.Dispose();
             _subDamageApplied?.Dispose();
+            _subHealthRestored?.Dispose();
             _subEffectApplied?.Dispose();
             _subFainted?.Dispose();
             _subTurnStart?.Dispose();

@@ -27,7 +27,7 @@ namespace Game.Application.Handlers.Effects
 
             command.Target.Heal(healAmount);
 
-            _bus.Publish(new DamageAppliedEvent(command.Caster, command.Target, -healAmount, 0, command.WaitToken));
+            _bus.Publish(new HealthRestoredEvent(command.Caster, command.Target, healAmount, command.WaitToken));
             _log?.Log($"{command.Caster.MonsterName} heals {command.Target.MonsterName} for {healAmount} HP");
         }
     }

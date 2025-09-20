@@ -82,10 +82,10 @@ namespace Game.Domain.Entities
             {
                 if (remainingDamage <= 0) break;
                 
-                var blocked = Math.Min(defendEffect.Value, remainingDamage);
+                var blocked = Math.Min(defendEffect.Stacks, remainingDamage);
                 remainingDamage -= blocked;
                 totalBlocked += blocked;
-                defendEffect.ReduceValue(blocked);
+                defendEffect.ReduceStacks(blocked);
             }
             
             // Apply remaining damage to health
@@ -145,10 +145,22 @@ namespace Game.Domain.Entities
         {
             if (statusEffect == null)
                 throw new ArgumentNullException(nameof(statusEffect));
-            
-            _statusEffects.Add(statusEffect);
-            statusEffect.OnExpired += () => RemoveStatusEffect(statusEffect);
-            OnStatusEffectAdded?.Invoke(statusEffect);
+
+            // Check if an effect of this type already exists
+            var existingEffect = _statusEffects.FirstOrDefault(e => e.Type == statusEffect.Type);
+            if (existingEffect != null)
+            {
+                // Combine stacks with existing effect
+                existingEffect.IncreaseStacks(statusEffect.Stacks);
+                OnStatusEffectAdded?.Invoke(existingEffect); // Notify with the updated effect
+            }
+            else
+            {
+                // Add new effect
+                _statusEffects.Add(statusEffect);
+                statusEffect.OnExpired += () => RemoveStatusEffect(statusEffect);
+                OnStatusEffectAdded?.Invoke(statusEffect);
+            }
         }
         
         public void RemoveStatusEffect(StatusEffect statusEffect)
@@ -156,25 +168,6 @@ namespace Game.Domain.Entities
             if (_statusEffects.Remove(statusEffect))
             {
                 OnStatusEffectRemoved?.Invoke(statusEffect);
-            }
-        }
-        
-        public void ProcessStatusEffects()
-        {
-            var expiredEffects = new List<StatusEffect>();
-            
-            foreach (var effect in _statusEffects)
-            {
-                effect.ProcessTurn();
-                if (effect.IsExpired)
-                {
-                    expiredEffects.Add(effect);
-                }
-            }
-            
-            foreach (var expired in expiredEffects)
-            {
-                RemoveStatusEffect(expired);
             }
         }
         

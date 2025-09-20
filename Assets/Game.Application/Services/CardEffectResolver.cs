@@ -98,7 +98,7 @@ namespace Game.Application.Services
                 case EffectType.Strength:
                 case EffectType.Backlash:
                 case EffectType.Stun:
-                    _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, effect.Value, effect.Duration, effectToken));
+                    _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, effect.Value, effectToken));
                     break;
 
                 case EffectType.AddRune:
@@ -109,10 +109,6 @@ namespace Game.Application.Services
                     throw new NotSupportedException($"Effect type {effect.Type} not supported");
             }
 
-            if (target.IsDead)
-            {
-                _bus.Publish(new MonsterFaintedEvent(target));
-            }
         }
 
         public List<MonsterEntity> GetValidTargetsForEffect(AbilityEffect effect, MonsterEntity caster, 
