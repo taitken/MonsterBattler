@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4526250b118c7e34a9756b5a82a53550, type: 3}
-  m_Name: ShardiloStarterDeck
+  m_Name: Dropletus
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.StarterDeckDatabase
-  monsterType: 16
+  monsterType: 13
   cardEntries:
-  - cardData: {fileID: 11400000, guid: 0f780e3e2a953f14caaceb42ff136210, type: 2}
+  - cardData: {fileID: 11400000, guid: 77318b78c9c1b494ba735822ca29027d, type: 2}
     quantity: 1
-  - cardData: {fileID: 11400000, guid: ac227b476d908114e9970f48009a3f5b, type: 2}
+  - cardData: {fileID: 11400000, guid: fa199cba69e55ef42b30dbf46b08cc56, type: 2}
     quantity: 2
-  - cardData: {fileID: 11400000, guid: 5b4e8ba1917009d4da86a776068172eb, type: 2}
-    quantity: 2
+  - cardData: {fileID: 11400000, guid: eadb6b665f0ba3441aaa56ae309b41af, type: 2}
+    quantity: 1
   description: 

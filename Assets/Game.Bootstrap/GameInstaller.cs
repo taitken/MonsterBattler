@@ -72,6 +72,7 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<IOverworldGenerator, RandomOverworldGenerator>();
             services.RegisterAsSingleton<IPlayerDataRepository, PlayerDataRepository>();
             services.RegisterAsSingleton<IPauseService, PauseService>();
+            services.RegisterAsSingleton<IEffectPropertyService, EffectPropertyService>();
 
             // Presentation Services
             services.RegisterAsSingleton<IViewRegistryService, ViewRegistryService>();
