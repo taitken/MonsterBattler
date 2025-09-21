@@ -18,6 +18,6 @@ MonoBehaviour:
     quantity: 1
   - cardData: {fileID: 11400000, guid: e092f859e987c9348ab9b4a46cbe941e, type: 2}
     quantity: 2
-  - cardData: {fileID: 11400000, guid: b7fe2e7820de8c143ad70519112c36df, type: 2}
+  - cardData: {fileID: 11400000, guid: 0509e6a3d19285046aa7b02c515a3f2b, type: 2}
     quantity: 1
   description: 

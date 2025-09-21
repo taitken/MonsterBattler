@@ -34,6 +34,7 @@ namespace Game.Bootstrap
         [SerializeField] private ResourceIconDatabase resourceIconDatabase;
         [SerializeField] private RuneIconDatabase runeIconDatabase;
         [SerializeField] private StatusEffectIconDatabase statusEffectIconDatabase;
+        [SerializeField] private MaterialDatabase materialDatabase;
         
         [Header("Spawnable Game Objects")]
         [SerializeField] private GameObject monsterPrefab;
@@ -116,6 +117,7 @@ namespace Game.Bootstrap
             services.RegisterAsSingleton<IResourceIconProvider>(() => new ResourceIconProvider(resourceIconDatabase));
             services.RegisterAsSingleton<IRuneIconProvider>(() => new RuneIconProvider(runeIconDatabase));
             services.RegisterAsSingleton<IStatusEffectIconProvider>(() => new StatusEffectIconProvider(statusEffectIconDatabase));
+            services.RegisterAsSingleton<IMaterialProvider>(() => new MaterialProvider(materialDatabase));
         }
 
         void Update()

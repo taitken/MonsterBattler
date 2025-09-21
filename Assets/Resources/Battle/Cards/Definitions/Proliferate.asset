@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16eb075e5d2c4854e8283aa0d6e6a981, type: 3}
   m_Name: Proliferate
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.AbilityCardData
-  cardName: The Gym
+  cardName: Enhance!
   description: Deal {{0:Value}} damage to an <b>Enemy</b>
   cardArt: {fileID: -7530385545832523778, guid: 6a5849c08a1be774fba38805df7156a2, type: 3}
   effects:
-  - effectType: 13
+  - effectType: 7
     value: 4
-    targetType: 0
-  runes: 02000000
+    targetType: 4
+  runes: 00000000
   playSound: {fileID: 0}

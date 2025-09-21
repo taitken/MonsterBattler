@@ -104,9 +104,9 @@ namespace Game.Presentation.Spawners
                 case 0:
                     return defaultSpawnPosition;
                 case 1:
-                    return defaultSpawnPosition + new Vector3(-2.5f, -.5f, 0f);
+                    return defaultSpawnPosition + new Vector3(2.5f, .5f, 0f);
                 case 2:
-                    return defaultSpawnPosition + new Vector3(2.4f, -.9f, 0f);
+                    return defaultSpawnPosition + new Vector3(4.9f, -.4f, 0f);
                 default:
                     return defaultSpawnPosition;
             }

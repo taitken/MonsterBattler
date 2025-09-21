@@ -19,5 +19,5 @@ MonoBehaviour:
   - effectType: 13
     value: 4
     targetType: 0
-  runes: 02000000
+  runes: 04000000
   playSound: {fileID: 0}

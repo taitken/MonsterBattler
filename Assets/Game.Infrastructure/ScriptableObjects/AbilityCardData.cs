@@ -30,7 +30,9 @@ namespace Game.Infrastructure.ScriptableObjects
                 abilityEffects.Add(new AbilityEffect(
                     effectData.effectType,
                     effectData.value,
-                    effectData.targetType
+                    effectData.targetType,
+                    effectData.ampByRuneFlag ? effectData.ampRuneType : null,
+                    effectData.ampByRuneFlag ? effectData.ampValue : 0
                 ));
             }
 
@@ -42,12 +44,15 @@ namespace Game.Infrastructure.ScriptableObjects
             );
         }
     }
-    
+
     [System.Serializable]
     public struct AbilityEffectData
     {
         public EffectType effectType;
         public int value;
         public TargetType targetType;
+        public bool ampByRuneFlag;
+        public RuneType ampRuneType;
+        public int ampValue;
     }
 }

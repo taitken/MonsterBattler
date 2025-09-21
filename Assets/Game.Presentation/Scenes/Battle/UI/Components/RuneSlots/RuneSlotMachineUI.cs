@@ -7,6 +7,7 @@ using Game.Core;
 using Game.Application.Interfaces;
 using Game.Domain.Entities.Battle;
 using Game.Domain.Enums;
+using System.Linq;
 
 public class RuneSlotMachineUI : MonoBehaviour
 {
@@ -48,6 +49,7 @@ public class RuneSlotMachineUI : MonoBehaviour
     
     private bool _isSpinning = false;
     private IInteractionBarrier _interactionBarrier;
+    private RuneSlotMachineEntity _currentRuneSlotMachine;
 
     void Start()
     {
@@ -126,14 +128,10 @@ public class RuneSlotMachineUI : MonoBehaviour
 
     private void PositionGroupsInContainer(List<RuneIconGroupUI> groups, Vector3 referencePos)
     {
-        // The reference group should be at index BUFFER_ICONS_COUNT (after the buffer icons)
-        int referenceIndex = BUFFER_ICONS_COUNT;
-        
         for (int i = 0; i < groups.Count; i++)
         {
             Vector3 pos = groups[i].GetComponent<RectTransform>().anchoredPosition;
-            // Position relative to the reference group, with buffer icons extending beyond the normal range
-            float offsetFromReference = (referenceIndex + (TOTAL_GROUPS_PER_CONTAINER - i)) * GROUP_SPACING;
+            float offsetFromReference = (TOTAL_GROUPS_PER_CONTAINER - i) * GROUP_SPACING;
             pos.y = referencePos.y + offsetFromReference;
             groups[i].GetComponent<RectTransform>().anchoredPosition = pos;
         }
@@ -155,9 +153,12 @@ public class RuneSlotMachineUI : MonoBehaviour
         // Wait for all spins to complete
         float totalAnimationTime = _windupDuration + _spinDuration + _settleDuration;
         yield return new WaitForSeconds(totalAnimationTime + (_staggerDelay * 2));
-        
+
         _isSpinning = false;
-        
+
+        // Flash glow for the rune groups that ended up in the center position
+        FlashTargetRuneGroups(targetIndices);
+
         // Signal completion if barrier token was provided
         if (completionToken.HasValue && _interactionBarrier != null)
         {
@@ -212,9 +213,68 @@ public class RuneSlotMachineUI : MonoBehaviour
         yield return container.DOLocalMoveY(finalPos.y, _settleDuration).SetEase(Ease.OutBounce).WaitForCompletion();
     }
 
+    private void FlashTargetRuneGroups(int[] indices)
+    {
+        var targetIndices = indices.Select(i => TOTAL_GROUPS_PER_CONTAINER - 1 - i).ToArray();
+        Debug.Log($"[RuneSlotMachine] FlashTargetRuneGroups called with indices: [{string.Join(", ", targetIndices)}]");
+
+        // Get the rune data to debug what should be showing
+        var allTumblerFaces = GetCurrentTumblerFaces();
+
+        if (targetIndices.Length >= 1 && allTumblerFaces != null && allTumblerFaces.Length > 0)
+        {
+            var selectableGroups = GetSelectableGroups(0);
+            var targetIndex = targetIndices[0];
+
+            if (targetIndex >= 0 && targetIndex < selectableGroups.Count && targetIndex < allTumblerFaces[0].Count)
+            {
+                var targetFace = allTumblerFaces[0][targetIndex];
+                var runeTypes = targetFace.GetRunesForDisplay();
+                Debug.Log($"[RuneSlotMachine] Container 0, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                selectableGroups[targetIndex].FlashGlow();
+            }
+        }
+
+        if (targetIndices.Length >= 2 && allTumblerFaces != null && allTumblerFaces.Length > 1)
+        {
+            var selectableGroups = GetSelectableGroups(1);
+            var targetIndex = targetIndices[1];
+
+            if (targetIndex >= 0 && targetIndex < selectableGroups.Count && targetIndex < allTumblerFaces[1].Count)
+            {
+                var targetFace = allTumblerFaces[1][targetIndex];
+                var runeTypes = targetFace.GetRunesForDisplay();
+                Debug.Log($"[RuneSlotMachine] Container 1, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                selectableGroups[targetIndex].FlashGlow();
+            }
+        }
+
+        if (targetIndices.Length >= 3 && allTumblerFaces != null && allTumblerFaces.Length > 2)
+        {
+            var selectableGroups = GetSelectableGroups(2);
+            var targetIndex = targetIndices[2];
+
+            if (targetIndex >= 0 && targetIndex < selectableGroups.Count && targetIndex < allTumblerFaces[2].Count)
+            {
+                var targetFace = allTumblerFaces[2][targetIndex];
+                var runeTypes = targetFace.GetRunesForDisplay();
+                Debug.Log($"[RuneSlotMachine] Container 2, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                selectableGroups[targetIndex].FlashGlow();
+            }
+        }
+    }
+
+    private List<RuneFace>[] GetCurrentTumblerFaces()
+    {
+        return _currentRuneSlotMachine?.GetAllTumblerFaces();
+    }
+
     public void PopulateWithRuneData(RuneSlotMachineEntity runeSlotMachine)
     {
         if (runeSlotMachine == null) return;
+
+        // Store reference for debugging purposes
+        _currentRuneSlotMachine = runeSlotMachine;
 
         var tumblerFacesData = runeSlotMachine.GetAllTumblerFaces();
         

@@ -36,8 +36,7 @@ namespace Game.Application.Handlers.Effects
 
             _effectProcessor.ProcessEffectApplied(command.Target, statusEffect);
 
-            var effect = new AbilityEffect(command.Type, command.Stacks, TargetType.Self);
-            _bus.Publish(new EffectAppliedEvent(command.Caster, command.Target, effect, command.Stacks, command.WaitToken));
+            _bus.Publish(new EffectAppliedEvent(command.Caster, command.Target, statusEffect, command.Stacks, command.WaitToken));
 
             LogStatusEffectApplication(command);
         }

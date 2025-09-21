@@ -17,5 +17,11 @@ namespace Game.Infrastructure.ScriptableObjects
         {
             return runes.FirstOrDefault(r => r.type == type)?.sprite;
         }
+
+        public Color GetRuneGlowColor(RuneType type)
+        {
+            var runeData = runes.FirstOrDefault(r => r.type == type);
+            return runeData?.glowColor ?? Color.red; // Default to red if not found
+        }
     }
 }

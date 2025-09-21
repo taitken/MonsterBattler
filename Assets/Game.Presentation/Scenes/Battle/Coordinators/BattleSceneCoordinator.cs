@@ -79,7 +79,7 @@ namespace Game.Presentation.Scenes.Battle.Coordinators
             var (cardViews, deckIconPositions) = cardViewManager.CreateCardsForDraw(evt.DrawnCards, _viewRegistry);
             
             // Start animation through the controller with deck icon positions
-            StartCoroutine(cardAnimationController.AnimateCardsDrawn(evt.DrawnCards, cardViews, deckIconPositions, evt.CompletionToken));
+            StartCoroutine(cardAnimationController.AnimateCardsDrawn(cardViews, deckIconPositions, evt.CompletionToken));
         }
 
         private void OnCardPlayed(CardPlayedEvent evt)

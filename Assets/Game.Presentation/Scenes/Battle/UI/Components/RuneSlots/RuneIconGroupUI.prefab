@@ -324,6 +324,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d9e2400f78e2524ea9707e30644ef3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Presentation::RuneIcon
+  _glowSprite: {fileID: 2679472054658661239, guid: cfc594cf0d47e5543adc14dc624ffab9, type: 3}
   _singleRune: {fileID: 2868691168330283358}
   _dobuleRune:
   - {fileID: 5319061642674271295}
@@ -337,6 +338,7 @@ MonoBehaviour:
   - {fileID: 1985184540729387173}
   - {fileID: 5773016416226645867}
   - {fileID: 787790791731062220}
+  _glowScale: 1.2
 --- !u!1 &2761765330109042265
 GameObject:
   m_ObjectHideFlags: 0

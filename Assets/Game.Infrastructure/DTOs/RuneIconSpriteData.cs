@@ -8,5 +8,6 @@ namespace Game.Infrastructure.DTOs
     {
         public RuneType type;
         public Sprite sprite;
+        public Color glowColor = Color.red;
     }
 }

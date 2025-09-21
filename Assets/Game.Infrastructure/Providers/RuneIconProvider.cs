@@ -18,5 +18,10 @@ namespace Game.Infrastructure.Providers
         {
             return _database.GetRuneSprite(runeType);
         }
+
+        public Color GetRuneGlowColor(RuneType runeType)
+        {
+            return _database.GetRuneGlowColor(runeType);
+        }
     }
 }

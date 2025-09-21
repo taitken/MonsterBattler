@@ -217,7 +217,7 @@ namespace Game.Application.Services
                 _log?.Log($"=== TURN {turns} ===");
                 
                 // Draw cards for all monsters at the start of the round
-                await DrawAllCardsForRound(ct);
+                await DrawAllCardsAndSpinTumblersForRound(ct);
                 
                 await RunTeamTurnAsync(_player, _enemy, BattleTeam.Player, ct);
                 if (!HasAlive(_enemy)) break;
@@ -252,6 +252,9 @@ namespace Game.Application.Services
             // You can insert pre‑turn effects here (weather, statuses, etc.)
             var aliveAttackers = GetAlive(attackers);
 
+            // Start all card actions simultaneously with staggered delays
+            var cardActionTasks = new List<Task>();
+
             for (int i = 0; i < aliveAttackers.Count; i++)
             {
                 if (ct.IsCancellationRequested) break;
@@ -266,15 +269,24 @@ namespace Game.Application.Services
                     continue;
                 }
 
-                await ResolveCardAction(attacker, target, attackers, defenders, team, ct);
+                // Calculate staggered delay (0.2 seconds per card)
+                float delaySeconds = i * 0.3f;
 
-                await Task.Yield();
+                // Start the card action with delay
+                var cardTask = ResolveCardActionWithDelay(attacker, target, attackers, defenders, team, delaySeconds, ct);
+                cardActionTasks.Add(cardTask);
+            }
+
+            // Wait for all card actions to complete
+            if (cardActionTasks.Count > 0)
+            {
+                await Task.WhenAll(cardActionTasks);
             }
 
             _bus.Publish(new TurnEndedEvent(team));
         }
 
-        private async Task DrawAllCardsForRound(CancellationToken ct)
+        private async Task DrawAllCardsAndSpinTumblersForRound(CancellationToken ct)
         {
             var allMonsters = GetAlive(_player).Concat(GetAlive(_enemy)).ToList();
             var monstersWithCards = allMonsters.Where(m => m.AbilityDeck != null && m.AbilityDeck.CanDrawCard()).ToList();
@@ -318,6 +330,18 @@ namespace Game.Application.Services
             await _waitBarrier.WaitAsync(new BarrierKey(slotMachineCompletionToken), ct);
         }
 
+        private async Task ResolveCardActionWithDelay(MonsterEntity attacker, MonsterEntity target,
+            List<MonsterEntity> allAllies, List<MonsterEntity> allEnemies, BattleTeam team, float delaySeconds, CancellationToken ct)
+        {
+            // Apply staggered delay before starting the card action
+            if (delaySeconds > 0)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), ct);
+            }
+
+            await ResolveCardAction(attacker, target, allAllies, allEnemies, team, ct);
+        }
+
         private async Task ResolveCardAction(MonsterEntity attacker, MonsterEntity target,
             List<MonsterEntity> allAllies, List<MonsterEntity> allEnemies, BattleTeam team, CancellationToken ct)
         {
@@ -342,8 +366,11 @@ namespace Game.Application.Services
             // Wait for animation hit point
             await _waitBarrier.WaitAsync(new BarrierKey(cardAnimationToken, (int)AttackPhase.Hit), ct);
 
-            // Resolve card effects
-            await _cardEffectResolver.ResolveCardEffectsAsync(card, attacker, target, allEnemies, allAllies, _waitBarrier, ct);
+            // Get current runes from slot machine for effect amplification
+            var currentRunes = _runeSlotMachine?.GetCurrentFaces();
+
+            // Resolve card effects with rune amplification
+            await _cardEffectResolver.ResolveCardEffectsAsync(card, attacker, target, allEnemies, allAllies, _waitBarrier, currentRunes, ct);
 
             // Move the card to discard pile
             attacker.AbilityDeck.PlayCard(card);

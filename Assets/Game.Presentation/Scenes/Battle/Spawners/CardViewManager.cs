@@ -37,7 +37,7 @@ namespace Game.Presentation.Scenes.Battle.Spawners
                 viewRegistry.TryGet(drawnCard.Monster.Id, out MonsterView monsterView);
                 if (monsterView != null)
                 {
-                    uniformCardHeight = monsterView.transform.position.y + 2f;
+                    uniformCardHeight = monsterView.transform.position.y + 2.5f;
                     break;
                 }
             }

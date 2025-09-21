@@ -11,6 +11,7 @@ using Game.Core.Logger;
 using Game.Core.Randomness;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Entities.Battle;
 using Game.Domain.Enums;
 using Game.Domain.Structs;
 
@@ -29,8 +30,8 @@ namespace Game.Application.Services
             _rng = rng;
         }
 
-        public async Task ResolveCardEffectsAsync(AbilityCard card, MonsterEntity caster, MonsterEntity primaryTarget, 
-            List<MonsterEntity> allEnemies, List<MonsterEntity> allAllies, IInteractionBarrier waitBarrier, CancellationToken ct = default)
+        public async Task ResolveCardEffectsAsync(AbilityCard card, MonsterEntity caster, MonsterEntity primaryTarget,
+            List<MonsterEntity> allEnemies, List<MonsterEntity> allAllies, IInteractionBarrier waitBarrier, RuneFace[] currentRunes = null, CancellationToken ct = default)
         {
             if (card == null)
                 throw new ArgumentNullException(nameof(card));
@@ -43,20 +44,20 @@ namespace Game.Application.Services
             {
                 var effect = card.Effects[effectIndex];
                 var targets = GetValidTargetsForEffect(effect, caster, primaryTarget, allEnemies, allAllies);
-                
+
                 // Create barrier token for this effect if there are multiple effects
                 BarrierToken? effectToken = null;
                 if (card.Effects.Count > 1)
                 {
                     effectToken = BarrierToken.New();
                 }
-                
+
                 // Resolve effect for all targets
                 foreach (var target in targets)
                 {
-                    ResolveEffect(effect, caster, target, effectToken);
+                    ResolveEffect(effect, caster, target, currentRunes, effectToken);
                 }
-                
+
                 // Wait for presentation layer to signal completion before next effect
                 if (effectToken.HasValue && effectIndex < card.Effects.Count - 1)
                 {
@@ -65,27 +66,30 @@ namespace Game.Application.Services
             }
         }
 
-        public void ResolveEffect(AbilityEffect effect, MonsterEntity caster, MonsterEntity target, BarrierToken? effectToken = null)
+        public void ResolveEffect(AbilityEffect effect, MonsterEntity caster, MonsterEntity target, RuneFace[] currentRunes = null, BarrierToken? effectToken = null)
         {
             if (target == null || target.IsDead)
                 return;
 
+            // Apply rune amplification to effect value
+            int amplifiedValue = ApplyRuneAmplification(effect, currentRunes);
+
             switch (effect.Type)
             {
                 case EffectType.Damage:
-                    _bus.Publish(new ResolveDamageCommand(caster, target, effect.Value, EffectType.Damage, effectToken));
+                    _bus.Publish(new ResolveDamageCommand(caster, target, amplifiedValue, EffectType.Damage, effectToken));
                     break;
 
                 case EffectType.Heal:
-                    _bus.Publish(new ResolveHealCommand(caster, target, effect.Value, effectToken));
+                    _bus.Publish(new ResolveHealCommand(caster, target, amplifiedValue, effectToken));
                     break;
 
                 case EffectType.Proliferate:
-                    _bus.Publish(new ResolveProliferateCommand(caster, target, effect.Value, effectToken));
+                    _bus.Publish(new ResolveProliferateCommand(caster, target, amplifiedValue, effectToken));
                     break;
 
                 case EffectType.Amplify:
-                    _bus.Publish(new ResolveAmplifyCommand(caster, target, effect.Value, effectToken));
+                    _bus.Publish(new ResolveAmplifyCommand(caster, target, amplifiedValue, effectToken));
                     break;
 
                 case EffectType.Block:
@@ -98,11 +102,11 @@ namespace Game.Application.Services
                 case EffectType.Strength:
                 case EffectType.Backlash:
                 case EffectType.Stun:
-                    _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, effect.Value, effectToken));
+                    _bus.Publish(new ResolveStatusEffectCommand(caster, target, effect.Type, amplifiedValue, effectToken));
                     break;
 
                 case EffectType.AddRune:
-                    _bus.Publish(new ResolveRuneCommand(caster, target, effect.Value, effectToken));
+                    _bus.Publish(new ResolveRuneCommand(caster, target, amplifiedValue, effectToken));
                     break;
 
                 default:
@@ -111,7 +115,7 @@ namespace Game.Application.Services
 
         }
 
-        public List<MonsterEntity> GetValidTargetsForEffect(AbilityEffect effect, MonsterEntity caster, 
+        public List<MonsterEntity> GetValidTargetsForEffect(AbilityEffect effect, MonsterEntity caster,
             MonsterEntity primaryTarget, List<MonsterEntity> allEnemies, List<MonsterEntity> allAllies)
         {
             var targets = new List<MonsterEntity>();
@@ -153,6 +157,38 @@ namespace Game.Application.Services
             }
 
             return targets;
+        }
+
+        private int ApplyRuneAmplification(AbilityEffect effect, RuneFace[] currentRunes)
+        {
+            // If no amplification is configured for this effect, return original value
+            if (!effect.AmplifyRuneType.HasValue || !effect.AmplifyAmount.HasValue)
+                return effect.Value;
+
+            // If no current runes, return original value
+            if (currentRunes == null || currentRunes.Length == 0)
+                return effect.Value;
+
+            // Count matching runes across all three tumbler positions
+            var allCurrentRunes = new List<RuneType>();
+            foreach (var runeFace in currentRunes)
+            {
+                allCurrentRunes.AddRange(runeFace.GetRunesForDisplay());
+            }
+
+            // Count how many runes match the amplification type
+            int matchingRunes = allCurrentRunes.Count(r => r == effect.AmplifyRuneType.Value);
+
+            // Calculate amplified value
+            int amplifiedValue = effect.Value + (matchingRunes * effect.AmplifyAmount.Value);
+
+            // Log amplification for debugging
+            if (matchingRunes > 0)
+            {
+                _log?.Log($"Rune amplification: {effect.Type} {effect.Value} -> {amplifiedValue} (+{matchingRunes * effect.AmplifyAmount.Value} from {matchingRunes} {effect.AmplifyRuneType.Value} runes)");
+            }
+
+            return amplifiedValue;
         }
     }
 }

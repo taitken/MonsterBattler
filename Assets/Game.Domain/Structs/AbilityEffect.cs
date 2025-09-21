@@ -7,12 +7,16 @@ namespace Game.Domain.Structs
         public EffectType Type { get; }
         public int Value { get; }
         public TargetType TargetType { get; }
-        
-        public AbilityEffect(EffectType type, int value, TargetType targetType)
+        public RuneType? AmplifyRuneType { get; }
+        public int? AmplifyAmount { get; }
+
+        public AbilityEffect(EffectType type, int value, TargetType targetType, RuneType? amplifyRuneType, int? amplifyAmount)
         {
             Type = type;
             Value = value;
             TargetType = targetType;
+            AmplifyRuneType = amplifyRuneType;
+            AmplifyAmount = amplifyAmount;  
         }
         
     }
