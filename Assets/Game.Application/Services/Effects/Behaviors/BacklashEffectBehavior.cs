@@ -5,10 +5,11 @@ using Game.Application.Messaging.Events.BattleFlow;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 
 namespace Game.Application.Services.Effects.Behaviors
 {
-    public class BacklashEffectBehavior : IOnDamageTakenBehavior
+    public class BacklashEffectBehavior : IAfterDamageTakenBehavior
     {
         private readonly IEventBus _bus;
         private readonly ILoggerService _log;
@@ -19,19 +20,15 @@ namespace Game.Application.Services.Effects.Behaviors
             _log = log;
         }
 
-        public DamageModificationResult ModifyDamage(MonsterEntity target, int incomingDamage, MonsterEntity source, StatusEffect effect)
+        public void OnAfterDamageTaken(MonsterEntity target, int damageTaken, MonsterEntity source, StatusEffect effect, EffectType damageTypeSource)
         {
-            if (effect.IsExpired || effect.Stacks <= 0 || incomingDamage <= 0 || source == target)
-                return DamageModificationResult.NoModification(incomingDamage);
+            if (effect.IsExpired || effect.Stacks <= 0 || damageTaken <= 0 || source == target || damageTypeSource != EffectType.Damage)
+                return;
 
-            // Deal backlash damage equal to stacks back to the attacker via EffectProcessor
             var backlashDamage = effect.Stacks;
-            _bus.Publish(new ResolveDamageCommand(target, source, backlashDamage));
+            _bus.Publish(new ResolveDamageCommand(target, source, backlashDamage, EffectType.Backlash));
 
             _log?.Log($"{target.MonsterName}'s Backlash ({effect.Stacks} stacks) deals {backlashDamage} damage to {source.MonsterName}");
-
-            // Don't modify the original incoming damage
-            return DamageModificationResult.NoModification(incomingDamage);
         }
     }
 }

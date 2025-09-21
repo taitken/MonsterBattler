@@ -1,6 +1,7 @@
 using Game.Application.DTOs.Effects;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 
 namespace Game.Application.Interfaces.Effects
 {
@@ -32,5 +33,10 @@ namespace Game.Application.Interfaces.Effects
     public interface IOnDamageDealtBehavior : IEffectBehavior
     {
         int ModifyOutgoingDamage(MonsterEntity caster, MonsterEntity target, int baseDamage, StatusEffect effect);
+    }
+
+    public interface IAfterDamageTakenBehavior : IEffectBehavior
+    {
+        void OnAfterDamageTaken(MonsterEntity target, int damageTaken, MonsterEntity source, StatusEffect effect, EffectType damageTypeSource);
     }
 }

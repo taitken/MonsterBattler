@@ -1,6 +1,7 @@
 using Game.Application.DTOs.Effects;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 
 namespace Game.Application.Interfaces.Effects
 {
@@ -30,5 +31,10 @@ namespace Game.Application.Interfaces.Effects
         /// Processes effects that modify outgoing damage from the caster
         /// </summary>
         int ProcessOutgoingDamage(MonsterEntity caster, MonsterEntity target, int baseDamage);
+
+        /// <summary>
+        /// Processes effects that trigger after damage has been taken by a monster
+        /// </summary>
+        void ProcessAfterDamageTaken(MonsterEntity target, int damageTaken, MonsterEntity source, EffectType damageTypeSource);
     }
 }

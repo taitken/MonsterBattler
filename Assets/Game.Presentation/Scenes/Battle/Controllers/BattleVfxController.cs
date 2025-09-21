@@ -8,6 +8,7 @@ namespace Game.Presentation.VfxControllers
     using Game.Application.Messaging;
     using Game.Application.Messaging.Events.BattleFlow;
     using Game.Core;
+    using Game.Domain.Enums;
     using Game.Presentation.Core.Interfaces;
     using Game.Presentation.Shared.Views;
     using UnityEngine;
@@ -28,6 +29,7 @@ namespace Game.Presentation.VfxControllers
         private IDisposable _subTurnEnd;
         private IDisposable _subBattleEnded;
         private string DAMAGE_COLOUR = "#FF4444";
+        private string POISON_DAMAGE_COLOUR = "#228B22";
         private string BLOCK_COLOUR = "#4488FF";
         private string HEAL_COLOUR = "#44FF44";
 
@@ -39,7 +41,7 @@ namespace Game.Presentation.VfxControllers
             _waitBarrier = ServiceLocator.Get<IInteractionBarrier>();
             _rootCanvas = GetComponentInParent<RectTransform>();
         }
-
+    
         void OnEnable()
         {
             _subActionSelected = _bus.Subscribe<ActionSelectedEvent>(OnActionSelected);
@@ -69,11 +71,11 @@ namespace Game.Presentation.VfxControllers
             if (_viewRegistry.TryGet(e.Target.Id, out MonsterView targetView))
             {
                 Vector3 basePosition = targetView.transform.position + new Vector3(0, 1f, 0);
-                
+
                 if (e.Amount > 0)
                 {
-                    ColorUtility.TryParseHtmlString(DAMAGE_COLOUR, out Color redDamageColor);
-                    _combatTextFactory.Create(redDamageColor, $"{e.Amount}", _rootCanvas, basePosition);
+                    Color damageColor = GetDamageTextColor(e.DamageSourceType);
+                    _combatTextFactory.Create(damageColor, $"{e.Amount}", _rootCanvas, basePosition);
                 }
                 
                 if (e.AmountBlocked > 0)
@@ -144,6 +146,13 @@ namespace Game.Presentation.VfxControllers
         {
             // Optional: clear tints/banners
             // UiTurnBanner.Hide();
+        }
+
+        private Color GetDamageTextColor(EffectType damageSourceType)
+        {
+            string colorString = damageSourceType == EffectType.Poison ? POISON_DAMAGE_COLOUR : DAMAGE_COLOUR;
+            ColorUtility.TryParseHtmlString(colorString, out Color color);
+            return color;
         }
 
         void OnDisable()

@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4526250b118c7e34a9756b5a82a53550, type: 3}
   m_Name: AshwickStarterDeck
   m_EditorClassIdentifier: Game.Infrastructure::Game.Infrastructure.ScriptableObjects.StarterDeckDatabase
-  monsterType: 16
+  monsterType: 14
   cardEntries:
   - cardData: {fileID: 11400000, guid: 77318b78c9c1b494ba735822ca29027d, type: 2}
     quantity: 1
-  - cardData: {fileID: 11400000, guid: ac227b476d908114e9970f48009a3f5b, type: 2}
+  - cardData: {fileID: 11400000, guid: e092f859e987c9348ab9b4a46cbe941e, type: 2}
     quantity: 2
-  - cardData: {fileID: 11400000, guid: 5b4e8ba1917009d4da86a776068172eb, type: 2}
-    quantity: 2
+  - cardData: {fileID: 11400000, guid: b7fe2e7820de8c143ad70519112c36df, type: 2}
+    quantity: 1
   description: 

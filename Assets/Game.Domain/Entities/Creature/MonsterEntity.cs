@@ -55,7 +55,7 @@ namespace Game.Domain.Entities
 
             // Copy the ID to maintain monster identity
             Id = other.Id;
-            
+
             CurrentHP = other.CurrentHP;
             MaxHealth = other.MaxHealth;
             AttackDamage = other.AttackDamage;
@@ -63,12 +63,11 @@ namespace Game.Domain.Entities
             MonsterName = other.MonsterName;
             BattleTeam = other.BattleTeam;
             Runes = other.Runes?.ToList(); // Create a new list of runes
-            
+
             // Deep copy the deck if it exists
             AbilityDeck = other.AbilityDeck != null ? new Deck(other.AbilityDeck) : null;
-            
-            // Copy status effects
-            _statusEffects.AddRange(other._statusEffects.ToList());
+
+            // Don't copy status effects - they should not persist between battles
         }
 
         public int TakeDamage(int amount)
@@ -176,5 +175,16 @@ namespace Game.Domain.Entities
         
         public IEnumerable<StatusEffect> GetStatusEffectsOfType(EffectType effectType) =>
             _statusEffects.Where(e => e.Type == effectType);
+
+        public void ClearStatusEffects()
+        {
+            var effectsToRemove = _statusEffects.ToList();
+            _statusEffects.Clear();
+
+            foreach (var effect in effectsToRemove)
+            {
+                OnStatusEffectRemoved?.Invoke(effect);
+            }
+        }
     }
 }

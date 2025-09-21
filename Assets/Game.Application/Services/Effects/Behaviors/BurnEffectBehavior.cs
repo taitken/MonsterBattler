@@ -6,6 +6,7 @@ using Game.Application.Messaging.Events.BattleFlow;
 using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
+using Game.Domain.Enums;
 
 namespace Game.Application.Services.Effects.Behaviors
 {
@@ -27,7 +28,7 @@ namespace Game.Application.Services.Effects.Behaviors
                 return;
 
             // Route burn damage through EffectProcessor using ResolveDamageCommand
-            _bus.Publish(new ResolveDamageCommand(owner, owner, effect.Stacks));
+            _bus.Publish(new ResolveDamageCommand(owner, owner,effect.Stacks, EffectType.Burn ));
 
             _log?.Log($"{owner.MonsterName} takes {effect.Stacks} burn damage");
 

@@ -73,7 +73,7 @@ namespace Game.Application.Services
             switch (effect.Type)
             {
                 case EffectType.Damage:
-                    _bus.Publish(new ResolveDamageCommand(caster, target, effect.Value, effectToken));
+                    _bus.Publish(new ResolveDamageCommand(caster, target, effect.Value, EffectType.Damage, effectToken));
                     break;
 
                 case EffectType.Heal:

@@ -26,5 +26,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b7fe2e7820de8c143ad70519112c36df, type: 2}
   starterDecks:
   - {fileID: 11400000, guid: 86707ede8af564f488a2df312e9f1e6b, type: 2}
+  - {fileID: 11400000, guid: 188e770b06061ff4aa0d2f975a203634, type: 2}
   enemyDecks:
   - {fileID: 11400000, guid: baeff82f3d6e63d4ab23d4fc817ded43, type: 2}

@@ -133,6 +133,21 @@ namespace Game.Application.Services.Effects
             return modifiedDamage;
         }
 
+        public void ProcessAfterDamageTaken(MonsterEntity target, int damageTaken, MonsterEntity source, EffectType damageTypeSource)
+        {
+            _log?.Log($"Processing after damage taken: {damageTaken} damage to {target.MonsterName}");
+
+            foreach (var effect in target.StatusEffects.Where(e => !e.IsExpired).ToList())
+            {
+                if (_behaviors.TryGetValue(effect.Type, out var behavior) &&
+                    behavior is IAfterDamageTakenBehavior afterDamageBehavior)
+                {
+                    _log?.Log($"Triggering after damage behavior for effect: {effect.Type}");
+                    afterDamageBehavior.OnAfterDamageTaken(target, damageTaken, source, effect, damageTypeSource);
+                }
+            }
+        }
+
         private void RegisterBehaviors()
         {
             // Register effect behaviors
