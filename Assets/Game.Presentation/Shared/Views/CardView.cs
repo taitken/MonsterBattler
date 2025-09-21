@@ -7,6 +7,11 @@ using Game.Application.Interfaces;
 using Game.Core;
 using System.Threading.Tasks;
 using System;
+using Game.Presentation.Services;
+using Game.Application.Messaging.Events.BattleFlow;
+using Game.Domain.Enums;
+using System.Collections.Generic;
+using Game.Application.Messaging;
 
 namespace Game.Presentation.Shared.Views
 {
@@ -16,12 +21,17 @@ namespace Game.Presentation.Shared.Views
         [SerializeField] private TextMeshProUGUI _bodyText;
         [SerializeField] private Image _cardArt;
         private ICardArtProvider _spriteProvider;
-        
+        private IEventBus _eventBus;
+        private IDisposable _runeFlashSubscription;
+        private IReadOnlyList<RuneType> _currentFlashingRunes;
+
         public event Action<CardView> OnCardClicked;
 
         void Awake()
         {
             _spriteProvider = ServiceLocator.Get<ICardArtProvider>();
+            _eventBus = ServiceLocator.Get<IEventBus>();
+            _runeFlashSubscription = _eventBus.Subscribe<RuneFlashEvent>(OnRuneFlash);
         }
 
         protected override async void OnModelBound()
@@ -40,7 +50,11 @@ namespace Game.Presentation.Shared.Views
                 _cardTitle.text = model.Name;
 
             if (_bodyText != null)
-                _bodyText.text = model.GeneratedDescription;
+            {
+                _bodyText.richText = true;
+                _bodyText.color = Color.black;
+                _bodyText.text = AbilityEffectDescriptionService.GenerateDescription(model.Effects, _currentFlashingRunes);
+            }
 
             if (_cardArt != null)
                 _cardArt.sprite = await _spriteProvider.GetCardArtAsync<Sprite>(model.Name);
@@ -49,6 +63,17 @@ namespace Game.Presentation.Shared.Views
         public void OnPointerClick(PointerEventData eventData)
         {
             OnCardClicked?.Invoke(this);
+        }
+
+        private void OnRuneFlash(RuneFlashEvent runeFlashEvent)
+        {
+            _currentFlashingRunes = runeFlashEvent.FlashingRunes;
+
+            // Update card description immediately to show amplified values
+            if (model != null)
+            {
+                _ = UpdateCardVisuals();
+            }
         }
         
         public IDisposable SubscribeToClick(Action<CardView> onClicked)
@@ -61,8 +86,9 @@ namespace Game.Presentation.Shared.Views
         {
             if (_viewRegistry != null && model != null)
                 _viewRegistry.Unregister(model.Id);
-                
-            // Clear all event subscriptions
+
+            // Dispose of event subscriptions
+            _runeFlashSubscription?.Dispose();
             OnCardClicked = null;
         }
     }

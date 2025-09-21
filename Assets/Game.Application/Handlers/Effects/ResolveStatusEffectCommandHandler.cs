@@ -5,7 +5,6 @@ using Game.Core.Logger;
 using Game.Domain.Entities;
 using Game.Domain.Entities.Abilities;
 using Game.Domain.Enums;
-using Game.Domain.Services;
 using Game.Domain.Structs;
 using System.Linq;
 
@@ -29,8 +28,7 @@ namespace Game.Application.Handlers.Effects
             if (command.Target.IsDead)
                 return;
 
-            var effectName = AbilityEffectDescriptionService.GetEffectTypeText(command.Type);
-            var statusEffect = new StatusEffect(command.Type, command.Stacks, effectName);
+            var statusEffect = new StatusEffect(command.Type, command.Stacks);
 
             command.Target.AddStatusEffect(statusEffect);
 
@@ -43,10 +41,7 @@ namespace Game.Application.Handlers.Effects
 
         private void LogStatusEffectApplication(ResolveStatusEffectCommand command)
         {
-            var actionText = AbilityEffectDescriptionService.GetActionText(command.Type);
-            var effectText = AbilityEffectDescriptionService.GetEffectTypeText(command.Type);
-
-            _log?.Log($"{command.Caster.MonsterName} {actionText.ToLower()} {command.Stacks} {effectText} to {command.Target.MonsterName}");
+            _log?.Log($"{command.Caster.MonsterName} {command.Stacks} to {command.Target.MonsterName}");
         }
     }
 }

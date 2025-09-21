@@ -55,6 +55,9 @@ namespace Game.Bootstrap
             RegisterFactories(_services);
             RegisterDatabases(_services);
 
+            // Initialize static services
+            AbilityEffectDescriptionService.Initialize(_services.Resolve<IRuneIconProvider>());
+
             _eventRunner = new EventBusRunner();
         }
 

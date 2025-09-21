@@ -19,5 +19,8 @@ MonoBehaviour:
   - effectType: 3
     value: 4
     targetType: 1
+    ampByRuneFlag: 0
+    ampRuneType: 0
+    ampValue: 0
   runes: 00000000
   playSound: {fileID: 0}

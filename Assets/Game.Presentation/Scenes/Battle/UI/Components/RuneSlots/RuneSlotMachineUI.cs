@@ -8,6 +8,8 @@ using Game.Application.Interfaces;
 using Game.Domain.Entities.Battle;
 using Game.Domain.Enums;
 using System.Linq;
+using Game.Application.Messaging.Events.BattleFlow;
+using Game.Application.Messaging;
 
 public class RuneSlotMachineUI : MonoBehaviour
 {
@@ -49,11 +51,13 @@ public class RuneSlotMachineUI : MonoBehaviour
     
     private bool _isSpinning = false;
     private IInteractionBarrier _interactionBarrier;
+    private IEventBus _eventBus;
     private RuneSlotMachineEntity _currentRuneSlotMachine;
 
     void Start()
     {
         _interactionBarrier = ServiceLocator.Get<IInteractionBarrier>();
+        _eventBus = ServiceLocator.Get<IEventBus>();
         InitializeSlotMachine();
     }
 
@@ -218,6 +222,9 @@ public class RuneSlotMachineUI : MonoBehaviour
         var targetIndices = indices.Select(i => TOTAL_GROUPS_PER_CONTAINER - 1 - i).ToArray();
         Debug.Log($"[RuneSlotMachine] FlashTargetRuneGroups called with indices: [{string.Join(", ", targetIndices)}]");
 
+        // Collect all flashing rune types
+        var flashingRunes = new List<RuneType>();
+
         // Get the rune data to debug what should be showing
         var allTumblerFaces = GetCurrentTumblerFaces();
 
@@ -231,6 +238,7 @@ public class RuneSlotMachineUI : MonoBehaviour
                 var targetFace = allTumblerFaces[0][targetIndex];
                 var runeTypes = targetFace.GetRunesForDisplay();
                 Debug.Log($"[RuneSlotMachine] Container 0, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                flashingRunes.AddRange(runeTypes);
                 selectableGroups[targetIndex].FlashGlow();
             }
         }
@@ -245,6 +253,7 @@ public class RuneSlotMachineUI : MonoBehaviour
                 var targetFace = allTumblerFaces[1][targetIndex];
                 var runeTypes = targetFace.GetRunesForDisplay();
                 Debug.Log($"[RuneSlotMachine] Container 1, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                flashingRunes.AddRange(runeTypes);
                 selectableGroups[targetIndex].FlashGlow();
             }
         }
@@ -259,8 +268,15 @@ public class RuneSlotMachineUI : MonoBehaviour
                 var targetFace = allTumblerFaces[2][targetIndex];
                 var runeTypes = targetFace.GetRunesForDisplay();
                 Debug.Log($"[RuneSlotMachine] Container 2, Index {targetIndex}: Expected runes [{string.Join(", ", runeTypes)}]");
+                flashingRunes.AddRange(runeTypes);
                 selectableGroups[targetIndex].FlashGlow();
             }
+        }
+
+        // Publish the rune flash event with all collected rune types
+        if (flashingRunes.Count > 0)
+        {
+            _eventBus.Publish(new RuneFlashEvent(flashingRunes));
         }
     }
 

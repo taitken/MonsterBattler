@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Game.Application.DTOs;
 using Game.Application.Interfaces;
 using Game.Application.Messaging;
-using Game.Application.Messaging.Events.BattleFlow;
 using Game.Core.Logger;
 using Game.Core.Randomness;
 using Game.Domain.Entities;

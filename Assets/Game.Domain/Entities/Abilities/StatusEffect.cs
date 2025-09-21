@@ -7,15 +7,13 @@ namespace Game.Domain.Entities.Abilities
     {
         public EffectType Type { get; private set; }
         public int Stacks { get; private set; }
-        public string Name { get; private set; }
         
         public event Action OnExpired;
         
-        public StatusEffect(EffectType type, int stacks, string name)
+        public StatusEffect(EffectType type, int stacks)
         {
             Type = type;
             Stacks = stacks;
-            Name = name;
         }
         
         
