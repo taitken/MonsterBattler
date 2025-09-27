@@ -131,8 +131,6 @@ public class BackpackWindow : MonoBehaviour
         if (monster.AbilityDeck == null) return;
 
         var deckCards = monster.AbilityDeck.AllCards;
-        float cardSpacing = 140f; // Spacing between cards
-        float offsetX = 150f; // Distance from monster icon
 
         // Limit cards displayed to avoid extending past screen center
         int maxCards = Mathf.Min(deckCards.Count, 5);
@@ -283,13 +281,21 @@ public class BackpackWindow : MonoBehaviour
         // Find existing monster deck cards
         var existingMonsterCards = _cardPositions.Where(kvp => kvp.Value.containerType == ContainerType.MonsterDeck).ToList();
 
-        // Remove cards that shouldn't exist anymore
+        // Handle cards that are no longer in monster decks
         foreach (var kvp in existingMonsterCards)
         {
             if (!expectedCards.ContainsKey(kvp.Key))
             {
-                // Card should be removed
-                RemoveCardView(kvp.Key);
+                // Check if this card moved to backpack (don't remove if it did)
+                var backpack = _playerDataRepository.GetBackpack();
+                var cardMovedToBackpack = backpack.Cards.Any(c => c.Id == kvp.Key);
+
+                if (!cardMovedToBackpack)
+                {
+                    // Card was truly removed, not just moved
+                    RemoveCardView(kvp.Key);
+                }
+                // If it moved to backpack, leave it for RefreshBackpackCards to handle
             }
         }
 
@@ -302,15 +308,12 @@ public class BackpackWindow : MonoBehaviour
 
             if (_cardPositions.TryGetValue(cardId, out var existingData))
             {
-                // Card exists, animate to new position if needed
+                // Card exists somewhere, animate to monster deck position
                 var cardView = existingData.view;
                 var currentPos = cardView.GetComponent<RectTransform>().localPosition;
 
-                if (Vector3.Distance(currentPos, targetPosition) > 1f)
-                {
-                    Debug.Log($"Moving existing monster card {cardView.name} from {currentPos} to {targetPosition}");
-                    AnimateCardToPosition(cardView, targetPosition);
-                }
+                Debug.Log($"Moving card {cardView.name} from {existingData.containerType} at {currentPos} to MonsterDeck at {targetPosition}");
+                AnimateCardToPosition(cardView, targetPosition);
 
                 // Update tracking data
                 _cardPositions[cardId] = (cardView, ContainerType.MonsterDeck, monsterIndex, cardIndex);
@@ -332,18 +335,34 @@ public class BackpackWindow : MonoBehaviour
     private void RefreshBackpackCards(BackpackEntity backpack)
     {
         var backpackCards = backpack.Cards;
+        var playerTeam = _playerDataRepository.GetPlayerTeam();
 
         // Find existing backpack cards
         var existingBackpackCards = _cardPositions.Where(kvp => kvp.Value.containerType == ContainerType.Backpack).ToList();
 
-        // Remove cards that shouldn't exist anymore
+        // Handle cards that are no longer in backpack
         foreach (var kvp in existingBackpackCards)
         {
             var cardId = kvp.Key;
             if (!backpackCards.Any(c => c.Id == cardId))
             {
-                // Card should be removed
-                RemoveCardView(cardId);
+                // Check if this card moved to a monster deck (don't remove if it did)
+                var cardMovedToMonsterDeck = false;
+                foreach (var monster in playerTeam)
+                {
+                    if (monster.AbilityDeck?.AllCards.Any(c => c.Id == cardId) == true)
+                    {
+                        cardMovedToMonsterDeck = true;
+                        break;
+                    }
+                }
+
+                if (!cardMovedToMonsterDeck)
+                {
+                    // Card was truly removed, not just moved
+                    RemoveCardView(cardId);
+                }
+                // If it moved to monster deck, leave it for RefreshMonsterDeckCards to handle
             }
         }
 
@@ -355,15 +374,12 @@ public class BackpackWindow : MonoBehaviour
 
             if (_cardPositions.TryGetValue(card.Id, out var existingData))
             {
-                // Card exists, animate to new position if needed
+                // Card exists somewhere, animate to backpack position
                 var cardView = existingData.view;
                 var currentPos = cardView.GetComponent<RectTransform>().localPosition;
 
-                if (Vector3.Distance(currentPos, targetPosition) > 1f)
-                {
-                    Debug.Log($"Moving existing backpack card {cardView.name} from {currentPos} to {targetPosition}");
-                    AnimateCardToPosition(cardView, targetPosition);
-                }
+                Debug.Log($"Moving card {cardView.name} from {existingData.containerType} at {currentPos} to Backpack at {targetPosition}");
+                AnimateCardToPosition(cardView, targetPosition);
 
                 // Update tracking data
                 _cardPositions[card.Id] = (cardView, ContainerType.Backpack, 0, i);
