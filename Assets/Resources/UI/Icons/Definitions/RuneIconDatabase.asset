@@ -15,16 +15,16 @@ MonoBehaviour:
   runes:
   - type: 0
     sprite: {fileID: 1038117704174374415, guid: c18b18795c99f9b4c8f84455a5466266, type: 3}
-    glowColor: {r: 0.8584906, g: 0.125534, b: 0.125534, a: 1}
+    glowColor: {r: 0.5849056, g: 0, b: 0, a: 1}
   - type: 1
     sprite: {fileID: 3646607987773183987, guid: 7a7bb58ed3c483b488047182cc7bbfe1, type: 3}
-    glowColor: {r: 0, g: 0.49969387, b: 1, a: 1}
+    glowColor: {r: 0, g: 0.27721053, b: 0.5566038, a: 1}
   - type: 2
     sprite: {fileID: -876860263887415114, guid: 3bb6516855bdfb243ba318610bba7732, type: 3}
-    glowColor: {r: 0.6037736, g: 0.46031457, b: 0.27055892, a: 1}
+    glowColor: {r: 0.5471698, g: 0.30899, b: 0, a: 1}
   - type: 3
     sprite: {fileID: 3853910404117482550, guid: 396a1e01bc62d64479f214afb8685b38, type: 3}
-    glowColor: {r: 0.04605731, g: 0.6509434, b: 0.15833429, a: 1}
+    glowColor: {r: 0, g: 0.4433962, b: 0.080617525, a: 1}
   - type: 4
     sprite: {fileID: 6054499806433000952, guid: 446a00cbad6134f40b97fd79c1a1e3b2, type: 3}
     glowColor: {r: 0.5849056, g: 0.57111067, b: 0.57111067, a: 1}

@@ -181,9 +181,6 @@ namespace Game.Presentation.Services
             var color = _runeIconProvider.GetRuneGlowColor(runeType);
             var colorHex = ColorUtility.ToHtmlStringRGB(color);
 
-            // Debug logging
-            Debug.Log($"Rune {runeType}: Color={color}, Hex=#{colorHex}");
-
             var symbol = runeType switch
             {
                 RuneType.Fire => "♦",      // Fire: diamond
