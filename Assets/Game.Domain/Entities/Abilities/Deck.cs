@@ -133,7 +133,7 @@ namespace Game.Domain.Entities.Abilities
             // Remove by ID to handle different instances of the same logical card
             var drawPileCard = _drawPile.FirstOrDefault(c => c.Id == card.Id);
             bool removed = false;
-            
+
             if (drawPileCard != null)
             {
                 removed = _drawPile.Remove(drawPileCard);
@@ -151,6 +151,41 @@ namespace Game.Domain.Entities.Abilities
                 NotifyModelUpdated();
 
             return removed;
+        }
+
+        public bool TryInsertCardAt(int index, AbilityCard card)
+        {
+            if (card == null)
+                throw new ArgumentNullException(nameof(card));
+
+            // Only insert into draw pile (we don't manage discard pile ordering externally)
+            if (index < 0 || index > _drawPile.Count)
+                return false;
+
+            _drawPile.Insert(index, card);
+            NotifyModelUpdated();
+            return true;
+        }
+
+        public bool TrySwapCards(int index1, int index2)
+        {
+            // Swap within draw pile only
+            if (index1 < 0 || index1 >= _drawPile.Count || index2 < 0 || index2 >= _drawPile.Count)
+                return false;
+
+            (_drawPile[index1], _drawPile[index2]) = (_drawPile[index2], _drawPile[index1]);
+            NotifyModelUpdated();
+            return true;
+        }
+
+        public int GetCardIndex(AbilityCard card)
+        {
+            if (card == null)
+                return -1;
+
+            // Only search in draw pile (AllCards includes both piles)
+            var allCards = AllCards.ToList();
+            return allCards.FindIndex(c => c.Id == card.Id);
         }
 
         private void ReshuffleDiscardIntoDeck()

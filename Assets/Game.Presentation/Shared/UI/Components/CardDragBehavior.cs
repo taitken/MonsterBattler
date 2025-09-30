@@ -85,8 +85,8 @@ namespace Game.Presentation.Shared.UI.Components
             _canvasGroup.blocksRaycasts = true;
 
             // Check if we dropped on a valid target
-            var dropTarget = GetDropTarget(eventData);
-            bool validDrop = _backpackWindow.OnCardDropped(_cardView, _originType, dropTarget);
+            var (dropTarget, emptySlotIndex) = GetDropTarget(eventData);
+            bool validDrop = _backpackWindow.OnCardDropped(_cardView, _originType, dropTarget, emptySlotIndex);
 
             if (!validDrop)
             {
@@ -125,7 +125,7 @@ namespace Game.Presentation.Shared.UI.Components
             _canvasGroup.alpha = NORMAL_ALPHA;
         }
 
-        private CardView GetDropTarget(PointerEventData eventData)
+        private (CardView cardView, int emptySlotIndex) GetDropTarget(PointerEventData eventData)
         {
             // Raycast to find what we're hovering over
             var results = new System.Collections.Generic.List<RaycastResult>();
@@ -133,38 +133,77 @@ namespace Game.Presentation.Shared.UI.Components
 
             Debug.Log($"Raycast found {results.Count} results at position {eventData.position}");
 
+            CardView foundCardView = null;
+            int foundSlotIndex = -1;
+
             foreach (var result in results)
             {
                 Debug.Log($"Raycast hit: {result.gameObject.name} with components: {string.Join(", ", result.gameObject.GetComponents<Component>().Select(c => c.GetType().Name))}");
 
-                // Look for CardView component directly
-                var cardView = result.gameObject.GetComponent<CardView>();
-                if (cardView != null)
+                // Check for backpack slot positions (only for backpack cards, not monster deck cards)
+                // Monster deck cards can only swap with other cards to maintain constant deck size
+                if (_originType == CardOriginType.Backpack && result.gameObject.name.StartsWith("BackPos"))
                 {
-                    // Make sure it's not the card we're dragging
-                    var cardDragBehavior = result.gameObject.GetComponent<CardDragBehavior>();
-                    if (cardDragBehavior != null && cardDragBehavior != this)
+                    // Extract slot index from name (e.g., "BackPos1" -> 0)
+                    var slotName = result.gameObject.name;
+                    if (slotName.Length > "BackPos".Length)
                     {
-                        Debug.Log($"Found valid drop target: {cardView.name}");
-                        return cardView;
+                        var indexStr = slotName.Substring("BackPos".Length);
+                        if (int.TryParse(indexStr, out int slotNumber))
+                        {
+                            foundSlotIndex = slotNumber - 1; // Convert to 0-based index
+                            Debug.Log($"Found backpack slot marker: {foundSlotIndex}");
+                        }
                     }
                 }
 
-                // Also check parent objects for CardView (in case we hit a child element)
-                var parentCardView = result.gameObject.GetComponentInParent<CardView>();
-                if (parentCardView != null)
+                // Look for CardView component directly
+                if (foundCardView == null)
                 {
-                    var parentDragBehavior = parentCardView.GetComponent<CardDragBehavior>();
-                    if (parentDragBehavior != null && parentDragBehavior != this)
+                    var cardView = result.gameObject.GetComponent<CardView>();
+                    if (cardView != null)
                     {
-                        Debug.Log($"Found valid drop target in parent: {parentCardView.name}");
-                        return parentCardView;
+                        // Make sure it's not the card we're dragging
+                        var cardDragBehavior = result.gameObject.GetComponent<CardDragBehavior>();
+                        if (cardDragBehavior != null && cardDragBehavior != this)
+                        {
+                            Debug.Log($"Found card at drop location: {cardView.name}");
+                            foundCardView = cardView;
+                        }
+                    }
+                    else
+                    {
+                        // Also check parent objects for CardView (in case we hit a child element)
+                        var parentCardView = result.gameObject.GetComponentInParent<CardView>();
+                        if (parentCardView != null)
+                        {
+                            var parentDragBehavior = parentCardView.GetComponent<CardDragBehavior>();
+                            if (parentDragBehavior != null && parentDragBehavior != this)
+                            {
+                                Debug.Log($"Found card in parent at drop location: {parentCardView.name}");
+                                foundCardView = parentCardView;
+                            }
+                        }
                     }
                 }
             }
 
+            // Determine what to return based on what we found
+            if (foundCardView != null)
+            {
+                // Found a card - return it for swapping (slot index doesn't matter)
+                Debug.Log($"Returning card for swap: {foundCardView.name}");
+                return (foundCardView, -1);
+            }
+            else if (foundSlotIndex >= 0)
+            {
+                // Found slot marker but no card - this is an empty slot
+                Debug.Log($"Returning empty slot: {foundSlotIndex}");
+                return (null, foundSlotIndex);
+            }
+
             Debug.Log("No valid drop target found");
-            return null;
+            return (null, -1);
         }
 
         public void ReturnToOriginalPosition()

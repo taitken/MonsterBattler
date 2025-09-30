@@ -159,31 +159,36 @@ public class BackpackWindow : MonoBehaviour
     private void DisplayBackpackItems()
     {
         var backpack = _playerDataRepository.GetBackpack();
-        var backpackCards = backpack.Cards;
         var backpackPositions = new RectTransform[]
         {
             _backpackPosition1, _backpackPosition2, _backpackPosition3,
             _backpackPosition4, _backpackPosition5
         };
 
-        for (int i = 0; i < backpackCards.Count && i < backpackPositions.Length; i++)
+        // Iterate through all 5 slots
+        for (int i = 0; i < backpackPositions.Length; i++)
         {
-            var card = backpackCards[i];
-            var cardView = _cardViewFactory.Create(card, Vector3.one, CARD_SCALE);
+            var card = backpack.GetCardAt(i);
 
-            cardView.transform.SetParent(transform, false);
+            // Only create card view if slot is occupied
+            if (card != null)
+            {
+                var cardView = _cardViewFactory.Create(card, Vector3.one, CARD_SCALE);
 
-            // Calculate position using helper method
-            Vector3 cardPosition = CalculateBackpackCardPosition(i);
-            cardView.GetComponent<RectTransform>().localPosition = cardPosition;
+                cardView.transform.SetParent(transform, false);
 
-            // Track this card's position
-            _cardPositions[card.Id] = (cardView, ContainerType.Backpack, 0, i); // monsterIndex = 0 for backpack
+                // Calculate position using helper method
+                Vector3 cardPosition = CalculateBackpackCardPosition(i);
+                cardView.GetComponent<RectTransform>().localPosition = cardPosition;
 
-            // Add drag behavior to backpack cards
-            AddDragBehaviorToCard(cardView, CardOriginType.Backpack);
+                // Track this card's position
+                _cardPositions[card.Id] = (cardView, ContainerType.Backpack, 0, i);
 
-            _createdCards.Add(cardView);
+                // Add drag behavior to backpack cards
+                AddDragBehaviorToCard(cardView, CardOriginType.Backpack);
+
+                _createdCards.Add(cardView);
+            }
         }
     }
 
@@ -202,8 +207,15 @@ public class BackpackWindow : MonoBehaviour
     }
 
     // Called by CardDragBehavior when card is dropped
-    public bool OnCardDropped(CardView draggedCard, CardOriginType draggedOriginType, CardView targetCard)
+    public bool OnCardDropped(CardView draggedCard, CardOriginType draggedOriginType, CardView targetCard, int targetSlotIndex = -1)
     {
+        // Handle empty slot drops
+        if (targetCard == null && targetSlotIndex >= 0)
+        {
+            Debug.Log($"Dropped on empty slot {targetSlotIndex}");
+            return HandleEmptySlotDrop(draggedCard, draggedOriginType, targetSlotIndex);
+        }
+
         if (targetCard == null)
         {
             Debug.Log("Dropped on empty space - invalid drop");
@@ -219,21 +231,47 @@ public class BackpackWindow : MonoBehaviour
 
         var targetOriginType = targetDragBehavior.GetOriginType();
 
-        // Validate swap rules: monster deck cards can only swap with backpack cards and vice versa
-        bool validSwap = (draggedOriginType == CardOriginType.MonsterDeck && targetOriginType == CardOriginType.Backpack) ||
-                        (draggedOriginType == CardOriginType.Backpack && targetOriginType == CardOriginType.MonsterDeck);
-
-        if (!validSwap)
-        {
-            Debug.Log($"Invalid swap: {draggedOriginType} -> {targetOriginType}");
-            return false;
-        }
+        // Allow all swaps: Backpack <-> Backpack, MonsterDeck <-> MonsterDeck, and cross-type swaps
+        Debug.Log($"Valid swap: {draggedOriginType} <-> {targetOriginType}");
 
         // Publish card swap command using the origin types directly
         var swapCommand = new CardSwapCommand(draggedCard.model.Id, draggedOriginType, targetCard.model.Id, targetOriginType);
         Debug.Log($"Publishing CardSwapCommand: {swapCommand.Card1Id} ({swapCommand.Card1Location}) <-> {swapCommand.Card2Id} ({swapCommand.Card2Location})");
         _eventBus.Publish(swapCommand);
         Debug.Log("CardSwapCommand published");
+
+        return true;
+    }
+
+    private bool HandleEmptySlotDrop(CardView draggedCard, CardOriginType draggedOriginType, int targetSlotIndex)
+    {
+        // Monster deck cards cannot be moved to empty slots (deck size must remain constant)
+        if (draggedOriginType == CardOriginType.MonsterDeck)
+        {
+            Debug.Log("Monster deck cards cannot be moved to empty slots - they can only swap with other cards");
+            return false;
+        }
+
+        // Only backpack cards can be moved to empty backpack slots
+        if (draggedOriginType != CardOriginType.Backpack)
+        {
+            Debug.Log("Only backpack cards can be moved to empty backpack slots");
+            return false;
+        }
+
+        // Verify the target slot is actually empty
+        var backpack = _playerDataRepository.GetBackpack();
+        if (!backpack.IsSlotEmpty(targetSlotIndex))
+        {
+            Debug.Log($"Target slot {targetSlotIndex} is not empty");
+            return false;
+        }
+
+        // Publish card move command - with slot-based system, target index is exactly the slot index
+        var moveCommand = new CardMoveCommand(draggedCard.model.Id, draggedOriginType, CardOriginType.Backpack, targetSlotIndex);
+        Debug.Log($"Publishing CardMoveCommand: {moveCommand.CardId} from {moveCommand.SourceLocation} to {moveCommand.TargetLocation}[{moveCommand.TargetIndex}]");
+        _eventBus.Publish(moveCommand);
+        Debug.Log("CardMoveCommand published");
 
         return true;
     }
@@ -288,7 +326,7 @@ public class BackpackWindow : MonoBehaviour
             {
                 // Check if this card moved to backpack (don't remove if it did)
                 var backpack = _playerDataRepository.GetBackpack();
-                var cardMovedToBackpack = backpack.Cards.Any(c => c.Id == kvp.Key);
+                var cardMovedToBackpack = backpack.Cards.Any(c => c != null && c.Id == kvp.Key);
 
                 if (!cardMovedToBackpack)
                 {
@@ -334,7 +372,6 @@ public class BackpackWindow : MonoBehaviour
 
     private void RefreshBackpackCards(BackpackEntity backpack)
     {
-        var backpackCards = backpack.Cards;
         var playerTeam = _playerDataRepository.GetPlayerTeam();
 
         // Find existing backpack cards
@@ -344,7 +381,20 @@ public class BackpackWindow : MonoBehaviour
         foreach (var kvp in existingBackpackCards)
         {
             var cardId = kvp.Key;
-            if (!backpackCards.Any(c => c.Id == cardId))
+            bool cardStillInBackpack = false;
+
+            // Check all 5 slots
+            for (int i = 0; i < 5; i++)
+            {
+                var slotCard = backpack.GetCardAt(i);
+                if (slotCard?.Id == cardId)
+                {
+                    cardStillInBackpack = true;
+                    break;
+                }
+            }
+
+            if (!cardStillInBackpack)
             {
                 // Check if this card moved to a monster deck (don't remove if it did)
                 var cardMovedToMonsterDeck = false;
@@ -366,34 +416,37 @@ public class BackpackWindow : MonoBehaviour
             }
         }
 
-        // Update or create backpack cards
-        for (int i = 0; i < backpackCards.Count && i < 5; i++)
+        // Update or create backpack cards for all 5 slots
+        for (int slotIndex = 0; slotIndex < 5; slotIndex++)
         {
-            var card = backpackCards[i];
-            var targetPosition = CalculateBackpackCardPosition(i);
+            var card = backpack.GetCardAt(slotIndex);
+            var targetPosition = CalculateBackpackCardPosition(slotIndex);
 
-            if (_cardPositions.TryGetValue(card.Id, out var existingData))
+            if (card != null)
             {
-                // Card exists somewhere, animate to backpack position
-                var cardView = existingData.view;
-                var currentPos = cardView.GetComponent<RectTransform>().localPosition;
-
-                Debug.Log($"Moving card {cardView.name} from {existingData.containerType} at {currentPos} to Backpack at {targetPosition}");
-                AnimateCardToPosition(cardView, targetPosition);
-
-                // Update tracking data
-                _cardPositions[card.Id] = (cardView, ContainerType.Backpack, 0, i);
-
-                // Update drag behavior origin type
-                if (_cardDragBehaviors.TryGetValue(cardView, out var dragBehavior))
+                if (_cardPositions.TryGetValue(card.Id, out var existingData))
                 {
-                    dragBehavior.SetOriginType(CardOriginType.Backpack);
+                    // Card exists somewhere, animate to backpack position
+                    var cardView = existingData.view;
+                    var currentPos = cardView.GetComponent<RectTransform>().localPosition;
+
+                    Debug.Log($"Moving card {cardView.name} from {existingData.containerType} at {currentPos} to Backpack slot {slotIndex} at {targetPosition}");
+                    AnimateCardToPosition(cardView, targetPosition);
+
+                    // Update tracking data
+                    _cardPositions[card.Id] = (cardView, ContainerType.Backpack, 0, slotIndex);
+
+                    // Update drag behavior origin type
+                    if (_cardDragBehaviors.TryGetValue(cardView, out var dragBehavior))
+                    {
+                        dragBehavior.SetOriginType(CardOriginType.Backpack);
+                    }
                 }
-            }
-            else
-            {
-                // Card doesn't exist, create it
-                CreateBackpackCard(card, targetPosition, i);
+                else
+                {
+                    // Card doesn't exist, create it
+                    CreateBackpackCard(card, targetPosition, slotIndex);
+                }
             }
         }
     }
@@ -494,17 +547,6 @@ public class BackpackWindow : MonoBehaviour
         if (backpackIndex >= backpackPositions.Length) return Vector3.zero;
         return backpackPositions[backpackIndex].localPosition;
     }
-
-    private Vector3 GetCardPosition(ContainerType containerType, int monsterIndex, int cardIndex)
-    {
-        return containerType switch
-        {
-            ContainerType.MonsterDeck => CalculateMonsterCardPosition(monsterIndex, cardIndex),
-            ContainerType.Backpack => CalculateBackpackCardPosition(cardIndex), // monsterIndex unused for backpack
-            _ => Vector3.zero
-        };
-    }
-
     
     private void ClearCreatedElements()
     {

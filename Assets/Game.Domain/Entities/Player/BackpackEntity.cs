@@ -7,14 +7,14 @@ namespace Game.Domain.Entities.Player
 {
     public class BackpackEntity : BaseEntity
     {
-        private readonly List<AbilityCard> _cards;
+        private readonly AbilityCard[] _slots;
         private const int MaxCapacity = 5;
 
-        public IReadOnlyList<AbilityCard> Cards => _cards.AsReadOnly();
-        public int Count => _cards.Count;
-        public int RemainingCapacity => MaxCapacity - _cards.Count;
-        public bool IsFull => _cards.Count >= MaxCapacity;
-        public bool IsEmpty => _cards.Count == 0;
+        public IReadOnlyList<AbilityCard> Cards => System.Array.AsReadOnly(_slots);
+        public int Count => _slots.Count(c => c != null);
+        public int RemainingCapacity => MaxCapacity - Count;
+        public bool IsFull => Count >= MaxCapacity;
+        public bool IsEmpty => Count == 0;
 
         public event Action<AbilityCard> OnCardAdded;
         public event Action<AbilityCard> OnCardRemoved;
@@ -22,18 +22,19 @@ namespace Game.Domain.Entities.Player
 
         public BackpackEntity()
         {
-            _cards = new List<AbilityCard>();
+            _slots = new AbilityCard[MaxCapacity];
         }
 
         public BackpackEntity(IEnumerable<AbilityCard> initialCards)
         {
-            _cards = new List<AbilityCard>();
-            
+            _slots = new AbilityCard[MaxCapacity];
+
             if (initialCards != null)
             {
+                int index = 0;
                 foreach (var card in initialCards.Take(MaxCapacity))
                 {
-                    _cards.Add(card);
+                    _slots[index++] = card;
                 }
             }
         }
@@ -49,10 +50,19 @@ namespace Game.Domain.Entities.Player
                 return false;
             }
 
-            _cards.Add(card);
-            OnCardAdded?.Invoke(card);
-            NotifyModelUpdated();
-            return true;
+            // Find first empty slot
+            for (int i = 0; i < MaxCapacity; i++)
+            {
+                if (_slots[i] == null)
+                {
+                    _slots[i] = card;
+                    OnCardAdded?.Invoke(card);
+                    NotifyModelUpdated();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool TryRemoveCard(AbilityCard card)
@@ -60,22 +70,30 @@ namespace Game.Domain.Entities.Player
             if (card == null)
                 return false;
 
-            var removed = _cards.Remove(card);
-            if (removed)
+            for (int i = 0; i < MaxCapacity; i++)
             {
-                OnCardRemoved?.Invoke(card);
-                NotifyModelUpdated();
+                if (_slots[i]?.Id == card.Id)
+                {
+                    _slots[i] = null;
+                    OnCardRemoved?.Invoke(card);
+                    NotifyModelUpdated();
+                    return true;
+                }
             }
-            return removed;
+
+            return false;
         }
 
         public bool TryRemoveCardAt(int index)
         {
-            if (index < 0 || index >= _cards.Count)
+            if (index < 0 || index >= MaxCapacity)
                 return false;
 
-            var card = _cards[index];
-            _cards.RemoveAt(index);
+            var card = _slots[index];
+            if (card == null)
+                return false;
+
+            _slots[index] = null;
             OnCardRemoved?.Invoke(card);
             NotifyModelUpdated();
             return true;
@@ -83,33 +101,114 @@ namespace Game.Domain.Entities.Player
 
         public AbilityCard GetCardAt(int index)
         {
-            if (index < 0 || index >= _cards.Count)
+            if (index < 0 || index >= MaxCapacity)
                 return null;
 
-            return _cards[index];
+            return _slots[index];
         }
 
         public bool HasCard(AbilityCard card)
         {
-            return card != null && _cards.Contains(card);
+            if (card == null)
+                return false;
+
+            for (int i = 0; i < MaxCapacity; i++)
+            {
+                if (_slots[i]?.Id == card.Id)
+                    return true;
+            }
+
+            return false;
         }
 
         public void Clear()
         {
-            var cardsToRemove = _cards.ToList();
-            _cards.Clear();
-            
+            var cardsToRemove = _slots.Where(c => c != null).ToList();
+
+            for (int i = 0; i < MaxCapacity; i++)
+            {
+                _slots[i] = null;
+            }
+
             foreach (var card in cardsToRemove)
             {
                 OnCardRemoved?.Invoke(card);
             }
-            
+
             NotifyModelUpdated();
         }
 
         public bool CanAddCard()
         {
             return !IsFull;
+        }
+
+        public bool TryInsertCardAt(int index, AbilityCard card)
+        {
+            if (card == null)
+                throw new ArgumentNullException(nameof(card));
+
+            if (index < 0 || index >= MaxCapacity)
+                return false;
+
+            // Check if slot is already occupied
+            if (_slots[index] != null)
+                return false;
+
+            _slots[index] = card;
+            OnCardAdded?.Invoke(card);
+            NotifyModelUpdated();
+            return true;
+        }
+
+        public bool TrySwapCards(int index1, int index2)
+        {
+            if (index1 < 0 || index1 >= MaxCapacity || index2 < 0 || index2 >= MaxCapacity)
+                return false;
+
+            (_slots[index1], _slots[index2]) = (_slots[index2], _slots[index1]);
+            NotifyModelUpdated();
+            return true;
+        }
+
+        public int GetCardIndex(AbilityCard card)
+        {
+            if (card == null)
+                return -1;
+
+            for (int i = 0; i < MaxCapacity; i++)
+            {
+                if (_slots[i]?.Id == card.Id)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public bool TrySetCardAt(int index, AbilityCard card)
+        {
+            if (index < 0 || index >= MaxCapacity)
+                return false;
+
+            var oldCard = _slots[index];
+            _slots[index] = card;
+
+            if (oldCard != null)
+                OnCardRemoved?.Invoke(oldCard);
+
+            if (card != null)
+                OnCardAdded?.Invoke(card);
+
+            NotifyModelUpdated();
+            return true;
+        }
+
+        public bool IsSlotEmpty(int index)
+        {
+            if (index < 0 || index >= MaxCapacity)
+                return false;
+
+            return _slots[index] == null;
         }
     }
 }
